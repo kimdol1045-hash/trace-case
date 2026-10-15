@@ -15,6 +15,7 @@ from tc_backend.infrastructure.object_storage import (
     MalwareScannerUnavailable,
     MimeContentMismatch,
     MimeTypeNotAllowed,
+    ObjectStorageTransportError,
     S3CompatibleObjectStorage,
     ScanResult,
     ScanVerdict,
@@ -236,6 +237,31 @@ def test_list_objects_parses_s3_v2_page(monkeypatch: pytest.MonkeyPatch) -> None
     assert page.items[0].size_bytes == 4
     assert page.next_cursor == "next"
     assert observed == ["CLASS_A_LIST"]
+
+
+def test_list_objects_rejects_xml_entities(monkeypatch: pytest.MonkeyPatch) -> None:
+    response = httpx.Response(
+        200,
+        content=(
+            b'<!DOCTYPE x [<!ENTITY injected "quarantine/forged">]>'
+            b"<ListBucketResult><IsTruncated>false</IsTruncated>"
+            b"<Contents><Key>&injected;</Key><LastModified>2026-08-24T05:00:00Z</LastModified>"
+            b"<Size>4</Size></Contents></ListBucketResult>"
+        ),
+    )
+
+    monkeypatch.setattr(httpx, "request", lambda *args, **kwargs: response)
+    adapter = S3CompatibleObjectStorage(
+        endpoint_url="http://minio:9000",
+        browser_endpoint_url=None,
+        bucket="tc-attachments",
+        region="us-east-1",
+        access_key_id="tc-local",
+        secret_access_key="local-secret-key",
+    )
+
+    with pytest.raises(ObjectStorageTransportError, match="object list response was invalid"):
+        adapter.list_objects(prefix="quarantine/", limit=10)
 
 
 def test_bucket_lifecycle_and_inventory_are_provider_neutral(

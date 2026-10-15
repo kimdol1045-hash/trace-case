@@ -405,7 +405,8 @@ def authoritative_ledger_digest(session: Session) -> str:
     for table_name in AUTHORITATIVE_LEDGER_TABLES:
         digest.update(table_name.encode("utf-8"))
         statement = text(
-            f'SELECT to_jsonb(source_row)::text FROM "{table_name}" AS source_row '
+            # The identifier comes only from the module-level immutable allowlist above.
+            f'SELECT to_jsonb(source_row)::text FROM "{table_name}" AS source_row '  # nosec B608
             "ORDER BY to_jsonb(source_row)::text"
         )
         for row_json in session.scalars(statement):

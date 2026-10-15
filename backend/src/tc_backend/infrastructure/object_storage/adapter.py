@@ -11,10 +11,12 @@ import hmac
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Protocol
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
-from xml.etree import ElementTree
 
 import httpx
+from defusedxml import ElementTree
+from defusedxml.common import DefusedXmlException
 
 from tc_backend.infrastructure.object_storage.errors import (
     ObjectNotFound,
@@ -172,7 +174,7 @@ class S3CompatibleObjectStorage:
             )
             token = root.findtext("{*}NextContinuationToken")
             truncated = root.findtext("{*}IsTruncated") == "true"
-        except (ElementTree.ParseError, TypeError, ValueError) as error:
+        except (DefusedXmlException, ElementTree.ParseError, TypeError, ValueError) as error:
             raise ObjectStorageTransportError("object list response was invalid") from error
         return StoredObjectPage(items=items, next_cursor=token if truncated else None)
 
@@ -193,7 +195,7 @@ class S3CompatibleObjectStorage:
                     for bucket in root.findall("{*}Buckets/{*}Bucket")
                 )
             )
-        except (ElementTree.ParseError, TypeError, ValueError) as error:
+        except (DefusedXmlException, ElementTree.ParseError, TypeError, ValueError) as error:
             raise ObjectStorageTransportError(
                 "bucket list response was invalid"
             ) from error
@@ -361,7 +363,11 @@ def _seconds(value: int):
     return timedelta(seconds=value)
 
 
-def _required_xml_text(element: ElementTree.Element, path: str) -> str:
+class _XmlElement(Protocol):
+    def findtext(self, path: str) -> str | None: ...
+
+
+def _required_xml_text(element: _XmlElement, path: str) -> str:
     value = element.findtext(path)
     if value is None or not value:
         raise ValueError(f"object list item omitted {path}")

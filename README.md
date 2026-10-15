@@ -11,6 +11,11 @@ Trace Case는 Jira·Zephyr의 익숙한 업무 흐름을 바탕으로 만든 단
 - 자동 생성 provider는 기본 비활성화이며 수동 생성이 기본 흐름
 - 운영 배포는 사내망 또는 VPN을 전제로 설계
 
+> [!WARNING]
+> 현재 저장소는 기능 구현과 로컬 격리 검증 단계입니다. 앱 자체 로그인·권한 기능이 없으므로
+> 인터넷에 그대로 공개하면 안 됩니다. 실제 팀 사용 전에는 아래의 보안·운영 미완료 항목을
+> 닫고 사내망 또는 VPN 안에서 배포해야 합니다.
+
 ![Trace Case 테스트 라이브러리](./docs/phase-a/screenshots/test-library-1280x900.jpg)
 
 ## 핵심 기능
@@ -158,6 +163,72 @@ GitHub Actions는 다음 두 job을 실행합니다.
 - `migration`: PostgreSQL 16 + pgvector migration, repository·동시성 검사
 
 브랜치 보호를 적용할 때 두 job을 required status check로 지정해야 합니다.
+
+## 보안 검토 상태
+
+2026-10-15 공개 저장소 전환 시점에 추적 파일과 현재 잠금 버전을 다시 검사했습니다.
+
+| 검사 영역 | 현재 결과 | 남은 주의사항 |
+|---|---|---|
+| 저장소 비밀정보 | 현재 `main` 이력에서 실제 CSV, 사내 URL, 개인 로컬 경로와 확인된 credential을 제거했습니다. 추적 파일의 휴리스틱 탐지 결과는 합성 보안 테스트 문자열, 해시, 로컬 전용 예제 값으로 확인했습니다. | GitHub Secret Scanning과 Push Protection이 아직 꺼져 있습니다. 프로토타입에서 사용한 R2·Slack·모델 credential은 실제 배포 전에 전부 폐기·재발급해야 합니다. |
+| JavaScript 운영 의존성 | `react-router-dom`을 보안 수정 버전 `7.18.4`로 올렸고 `pnpm audit --prod` 결과 알려진 취약점 0건입니다. | Dependabot security update가 아직 꺼져 있으므로 지속적인 자동 갱신은 구성되지 않았습니다. |
+| Python 잠금 의존성 | FastAPI·Starlette·multidict·urllib3·pytest를 수정 버전으로 올렸고 `pip-audit -r backend/requirements.lock` 결과 알려진 취약점 0건입니다. | 새 advisory가 발표될 수 있으므로 CI 정기 검사가 필요합니다. |
+| 운영 Python 코드 정적 분석 | API·Worker·공통 backend의 Bandit 검사에서 Medium·High 0건입니다. S3 XML 응답은 `defusedxml`로 변경해 entity expansion을 거부합니다. | `assert`, 고정 allowlist subprocess 같은 Low 휴리스틱 경고는 운영 전 재검토 대상입니다. |
+| 애플리케이션 접근 제어 | 외부 연동은 기본 비활성화이고 Slack 서명 검증, private object storage, 파일 크기·MIME·SHA·악성코드 fail-closed 경계를 구현했습니다. | 앱 로그인·RBAC가 없습니다. 실제 방화벽·VPN·TLS와 최소 공개 Slack ingress 검증 전에는 외부 배포가 안전하지 않습니다. |
+| 컨테이너 공급망 | 주요 개발 인프라 이미지는 버전을 고정했고 일부 검증 harness는 digest 또는 사전 승인 image ID를 요구합니다. | 개발 Compose와 CI의 모든 이미지가 digest로 고정된 것은 아니며 SBOM·컨테이너 CVE 검사가 CI에 없습니다. |
+| GitHub 저장소 보호 | 공개 이력은 민감 원본을 제외한 단일 정리 커밋에서 시작하고 CI 두 개가 통과합니다. | `main` branch protection, required checks, Secret Scanning, Push Protection과 Dependabot security update가 아직 비활성화 상태입니다. |
+
+보안 검사 결과는 해당 날짜의 알려진 advisory와 정적 분석 범위에 대한 결과이며 무결점 또는
+운영 보안 승인을 의미하지 않습니다. 운영 배포 전에는 최소한 다음 검사를 다시 실행해야 합니다.
+
+```bash
+pnpm audit --prod --audit-level low
+pip-audit -r backend/requirements.lock
+bandit -r backend/src apps/api/src apps/worker/src
+pnpm check
+```
+
+`pip-audit`과 `bandit`은 저장소 의존성에 포함하지 않은 별도 보안 검사 도구입니다. 격리된 도구
+환경에서 실행하세요.
+
+## 현재 완성도와 남은 개발
+
+로컬 코드·계약·격리 UAT가 통과한 것과 실제 조직·외부 서비스·운영 환경에서 검증을 마친 것은
+다릅니다. 아래 항목이 모두 완료되기 전까지 이 프로젝트는 production-ready로 간주하지 않습니다.
+
+| Phase | 구현 상태 | 완료되지 않은 핵심 항목 |
+|---|---|---|
+| A · 관리툴 | 핵심 화면, 원장, 사이클 실행, 이슈, 첨부 기능과 로컬 회귀 구현 | 실제 브라우저에서 하나의 선택으로 다중 파일 업로드→다운로드→삭제 수동 확인 |
+| B · 실제 QA 리허설 | CSV 이관 표본과 API UAT 구현 | QA 담당자 사용성 검증, blocker·major 수정, 기능 동결 승인 |
+| C · Slack 수집 | 수집·서명·revision·재시도 코드와 합성 fixture 구현 | 실제 Slack App 설치, allowlist 채널 자동 수집, thread 수정·삭제·재전송 live 검증, 익명화 실표본 10개 이상 |
+| D · 온톨로지 검색 | PostgreSQL 원장, typed graph, pgvector, LightRAG와 합성 retrieval 평가 구현 | 실제 Slack 결정·기존 케이스·실패 실행·이슈를 사용한 검색 품질 평가와 기준 확정 |
+| E · 자동 생성 | 수동·자동 generation 계약, Worker, 비교·적용·suggestion·재시도·품질 gate 구현 | 실제 Generation API endpoint·인증·비용·quota 확정, 검토된 실 일감 golden sample, live provider 품질 인증 |
+| F · 운영 배포 | reverse proxy·관측성·복구·부하·migration·브라우저 UAT의 로컬 disposable harness 구현 | 실제 사내망/VPN·TLS 배포, secret rotation, staging, Cloudflare R2 복구/CORS, 운영 부하·alert·backup/restore, 실제 QA 승인과 초기 관찰 |
+
+### 외부 배포 전에 반드시 완료
+
+- [ ] UI와 일반 API를 사내망/VPN으로 제한하고, Slack ingress만 TLS가 적용된 최소 경로로 공개한다.
+- [ ] 앱 자체 인증이 필요한 배포 범위라면 Google Workspace SSO 또는 동등한 인증과 역할 권한을 구현한다.
+- [ ] 프로토타입에서 사용한 R2·Slack·모델 credential을 폐기하고 secret manager에서 최소 권한으로 재발급한다.
+- [ ] GitHub `main` 보호, required CI, Secret Scanning, Push Protection과 Dependabot security update를 활성화한다.
+- [ ] 배포 컨테이너 이미지를 digest로 고정하고 SBOM 생성·이미지 CVE 검사를 CI release gate에 연결한다.
+- [ ] 실제 Cloudflare R2 bucket의 exact HTTPS CORS와 다중 첨부 upload→preview/download→delete를 물리 브라우저에서 검증한다.
+- [ ] 별도 staging에서 PostgreSQL backup/restore, R2 object 복구, migration rollback/roll-forward와 LightRAG reindex/fallback을 시험한다.
+- [ ] 실제 트래픽 가정의 multi-process 부하·soak test, 자원 한계, alert receiver 전달·확인과 운영 RTO/RPO를 검증한다.
+- [ ] 실제 QA 담당자가 사용 가이드만으로 핵심 흐름을 수행하고 blocker·major가 없음을 승인한다.
+- [ ] production 배포와 초기 관찰 기간을 완료하고 운영 책임자에게 runbook과 복구 절차를 인계한다.
+
+### 기능·품질 후속 개발
+
+- [ ] 실제 Slack workspace의 root/thread revision과 결정 번복·충돌을 자동 수집해 익명화 golden sample을 구축한다.
+- [ ] 실제 QA 히스토리로 hybrid retrieval 품질과 자동 생성 품질 기준을 확정한다.
+- [ ] 테스트케이스 파일 가져오기·내보내기와 CI/CD 자동화 테스트 결과 연동을 구현한다.
+- [ ] 저장 검색 view, 고급 리포트, 요구사항 coverage와 릴리스 품질 지표를 구현한다.
+- [ ] AI 회귀 범위 추천과 기존 테스트케이스 재사용을 구현한다.
+- [ ] 조직이 확대되면 로그인·RBAC·복수 프로젝트 구조를 재설계한다.
+
+세부 태스크와 완료 근거는 [페이즈·스프린트·태스크 로드맵](./docs/test-management-roadmap.md)에
+기록되어 있습니다.
 
 ## 외부 연동과 운영
 
