@@ -1,0 +1,311 @@
+{
+  "fixtureKind": "DATASET",
+  "fixtureId": "golden_retrieval_v1",
+  "synthetic": true,
+  "description": "Anonymized lifecycle and revision-link retrieval examples derived from the Sprint 6 contract shapes.",
+  "privacy": {
+    "containsProductionData": false,
+    "containsPersonNames": false,
+    "containsJiraUrls": false
+  },
+  "documents": [
+    {
+      "nodeId": "knowledge_reset_expiry_5",
+      "nodeType": "DECISION",
+      "label": "Reset code expiry",
+      "content": "Reset verification codes expire after five minutes.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_reset_expiry_rev2"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_reset_policy",
+        "sourceRevisionId": "revision_reset_policy_2"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_reset_policy",
+          "sourceRevisionId": "revision_reset_policy_2"
+        },
+        "label": "Synthetic reset policy revision 2",
+        "uri": null,
+        "excerpt": "Reset verification codes expire after five minutes."
+      },
+      "embedding": [1.0, 0.0, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_reset_case",
+      "nodeType": "TEST_CASE",
+      "label": "Expired reset code case",
+      "content": "Verify that a reset code is rejected after five minutes.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_reset_case_v4"],
+      "source": {
+        "sourceType": "TEST_CASE_VERSION",
+        "sourceEntityId": "case_reset_expiry",
+        "sourceRevisionId": "case_version_reset_4"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "TEST_CASE_VERSION",
+          "sourceEntityId": "case_reset_expiry",
+          "sourceRevisionId": "case_version_reset_4"
+        },
+        "label": "Synthetic reset case version 4",
+        "uri": null,
+        "excerpt": "Verify that a reset code is rejected after five minutes."
+      },
+      "embedding": [0.96, 0.0, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_reset_expiry_10",
+      "nodeType": "DECISION",
+      "label": "Prior reset code expiry",
+      "content": "Reset verification codes expire after ten minutes.",
+      "status": "SUPERSEDED",
+      "evidenceIds": ["evidence_reset_expiry_rev1"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_reset_policy",
+        "sourceRevisionId": "revision_reset_policy_1"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_reset_policy",
+          "sourceRevisionId": "revision_reset_policy_1"
+        },
+        "label": "Synthetic reset policy revision 1",
+        "uri": null,
+        "excerpt": "Reset verification codes expire after ten minutes."
+      },
+      "embedding": [0.99, 0.0, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_reset_open_question",
+      "nodeType": "OPEN_QUESTION",
+      "label": "Reset delivery ambiguity",
+      "content": "It is unresolved whether delayed delivery extends reset code expiry.",
+      "status": "AMBIGUOUS",
+      "evidenceIds": ["evidence_reset_question_rev1"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_reset_question",
+        "sourceRevisionId": "revision_reset_question_1"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_reset_question",
+          "sourceRevisionId": "revision_reset_question_1"
+        },
+        "label": "Synthetic reset question revision 1",
+        "uri": null,
+        "excerpt": "It is unresolved whether delayed delivery extends reset code expiry."
+      },
+      "embedding": [0.88, 0.0, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_session_timeout_15",
+      "nodeType": "DECISION",
+      "label": "Session timeout",
+      "content": "An inactive session expires after fifteen minutes.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_session_timeout_rev2"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_session_policy",
+        "sourceRevisionId": "revision_session_policy_2"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_session_policy",
+          "sourceRevisionId": "revision_session_policy_2"
+        },
+        "label": "Synthetic session policy revision 2",
+        "uri": null,
+        "excerpt": "An inactive session expires after fifteen minutes."
+      },
+      "embedding": [0.0, 1.0, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_session_case",
+      "nodeType": "TEST_CASE",
+      "label": "Idle session expiry case",
+      "content": "Verify expiry after fifteen minutes without activity.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_session_case_v2"],
+      "source": {
+        "sourceType": "TEST_CASE_VERSION",
+        "sourceEntityId": "case_session_timeout",
+        "sourceRevisionId": "case_version_session_2"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "TEST_CASE_VERSION",
+          "sourceEntityId": "case_session_timeout",
+          "sourceRevisionId": "case_version_session_2"
+        },
+        "label": "Synthetic session case version 2",
+        "uri": null,
+        "excerpt": "Verify expiry after fifteen minutes without activity."
+      },
+      "embedding": [0.0, 0.95, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_session_timeout_30",
+      "nodeType": "DECISION",
+      "label": "Prior session timeout",
+      "content": "An inactive session expires after thirty minutes.",
+      "status": "SUPERSEDED",
+      "evidenceIds": ["evidence_session_timeout_rev1"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_session_policy",
+        "sourceRevisionId": "revision_session_policy_1"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_session_policy",
+          "sourceRevisionId": "revision_session_policy_1"
+        },
+        "label": "Synthetic session policy revision 1",
+        "uri": null,
+        "excerpt": "An inactive session expires after thirty minutes."
+      },
+      "embedding": [0.0, 0.99, 0.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_csv_admin_only",
+      "nodeType": "CONSTRAINT",
+      "label": "Export role restriction",
+      "content": "Only administrators can export the account list.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_csv_role_rev1"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_export_policy",
+        "sourceRevisionId": "revision_export_policy_1"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_export_policy",
+          "sourceRevisionId": "revision_export_policy_1"
+        },
+        "label": "Synthetic export policy revision 1",
+        "uri": null,
+        "excerpt": "Only administrators can export the account list."
+      },
+      "embedding": [0.0, 0.0, 1.0, 0.0]
+    },
+    {
+      "nodeId": "knowledge_csv_format",
+      "nodeType": "DECISION",
+      "label": "Export file format",
+      "content": "The exported account list uses UTF-8 CSV with a header row.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_csv_format_rev2"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_export_format",
+        "sourceRevisionId": "revision_export_format_2"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_export_format",
+          "sourceRevisionId": "revision_export_format_2"
+        },
+        "label": "Synthetic export format revision 2",
+        "uri": null,
+        "excerpt": "The exported account list uses UTF-8 CSV with a header row."
+      },
+      "embedding": [0.0, 0.0, 0.94, 0.0]
+    },
+    {
+      "nodeId": "knowledge_login_lock_5",
+      "nodeType": "DECISION",
+      "label": "Login failure lock threshold",
+      "content": "Lock an account after five failed login attempts.",
+      "status": "ACTIVE",
+      "evidenceIds": ["evidence_login_lock_rev2"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_login_lock",
+        "sourceRevisionId": "revision_login_lock_2"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_login_lock",
+          "sourceRevisionId": "revision_login_lock_2"
+        },
+        "label": "Synthetic login lock revision 2",
+        "uri": null,
+        "excerpt": "Lock an account after five failed login attempts."
+      },
+      "embedding": [0.0, 0.0, 0.0, 1.0]
+    },
+    {
+      "nodeId": "knowledge_login_lock_3",
+      "nodeType": "DECISION",
+      "label": "Prior login failure threshold",
+      "content": "Lock an account after three failed login attempts.",
+      "status": "RETRACTED",
+      "evidenceIds": ["evidence_login_lock_rev1"],
+      "source": {
+        "sourceType": "SLACK_MESSAGE_REVISION",
+        "sourceEntityId": "message_login_lock",
+        "sourceRevisionId": "revision_login_lock_1"
+      },
+      "citation": {
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_login_lock",
+          "sourceRevisionId": "revision_login_lock_1"
+        },
+        "label": "Synthetic login lock revision 1",
+        "uri": null,
+        "excerpt": "Lock an account after three failed login attempts."
+      },
+      "embedding": [0.0, 0.0, 0.0, 0.99]
+    }
+  ],
+  "queries": [
+    {
+      "queryId": "query_reset_expiry",
+      "text": "reset code five minute expiry",
+      "statuses": ["ACTIVE"],
+      "embedding": [1.0, 0.0, 0.0, 0.0],
+      "relevantNodeIds": ["knowledge_reset_expiry_5", "knowledge_reset_case"],
+      "lightRagCandidateNodeIds": ["knowledge_reset_expiry_5", "knowledge_reset_expiry_10"]
+    },
+    {
+      "queryId": "query_session_timeout",
+      "text": "inactive session fifteen minute timeout",
+      "statuses": ["ACTIVE"],
+      "embedding": [0.0, 1.0, 0.0, 0.0],
+      "relevantNodeIds": ["knowledge_session_timeout_15", "knowledge_session_case"],
+      "lightRagCandidateNodeIds": ["knowledge_session_timeout_15", "knowledge_session_timeout_30"]
+    },
+    {
+      "queryId": "query_csv_export",
+      "text": "account list CSV export policy",
+      "statuses": ["ACTIVE"],
+      "embedding": [0.0, 0.0, 1.0, 0.0],
+      "relevantNodeIds": ["knowledge_csv_admin_only", "knowledge_csv_format"],
+      "lightRagCandidateNodeIds": ["knowledge_csv_format"]
+    },
+    {
+      "queryId": "query_login_lock",
+      "text": "failed login lock threshold",
+      "statuses": ["ACTIVE"],
+      "embedding": [0.0, 0.0, 0.0, 1.0],
+      "relevantNodeIds": ["knowledge_login_lock_5"],
+      "lightRagCandidateNodeIds": ["knowledge_login_lock_5", "knowledge_login_lock_3"]
+    }
+  ]
+}

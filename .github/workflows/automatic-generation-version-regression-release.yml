@@ -1,0 +1,95 @@
+name: Automatic generation version regression release
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-candidate:
+    name: Synthetic T09 contract candidate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.lock
+      - run: pnpm install --frozen-lockfile
+      - run: |
+          python -m pip install -r backend/requirements.lock
+          python -m pip install --no-deps -e backend -e apps/api -e apps/worker
+      - name: Evaluate synthetic candidate (never activate)
+        run: |
+          test ! -e artifacts
+          mkdir artifacts
+          snapshot=evals/fixtures/automatic-generation-version-regression/synthetic-comparison-input-v1.json
+          digest=$(sha256sum "$snapshot" | cut -d ' ' -f 1)
+          pnpm generation:version-regression:eval --snapshot "$snapshot" --profile candidate \
+            --expected-snapshot-sha256 "$digest" \
+            --json-output artifacts/version-regression.json \
+            --junit-output artifacts/version-regression.junit.xml \
+            --markdown-output artifacts/version-regression.md
+          report_digest=$(sha256sum artifacts/version-regression.json | cut -d ' ' -f 1)
+          pnpm generation:version-regression:eval \
+            --validate-report artifacts/version-regression.json \
+            --expected-sha256 "$report_digest"
+          python -c 'import json; r=json.load(open("artifacts/version-regression.json")); assert r["synthetic"] and not r["approvalEligible"] and r["candidateDisposition"] == "CONTRACT_ONLY"'
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: automatic-generation-version-regression-synthetic
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30
+
+  protected-operational-release:
+    name: Protected operational baseline release
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, x64, generation-quality-release]
+    environment: automatic-generation-version-regression-release
+    env:
+      APPROVED_REGRESSION_PATH: ${{ vars.APPROVED_REGRESSION_PATH }}
+      APPROVED_REGRESSION_SHA256: ${{ secrets.APPROVED_REGRESSION_SHA256 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Require protected manifest digest and immutable snapshot
+        run: |
+          test -n "$APPROVED_REGRESSION_PATH"
+          test -n "$APPROVED_REGRESSION_SHA256"
+          case "$APPROVED_REGRESSION_SHA256" in (*[!0-9a-f]*|'') exit 2;; esac
+          test "${#APPROVED_REGRESSION_SHA256}" -eq 64
+          test -f "$APPROVED_REGRESSION_PATH"
+          test ! -L "$APPROVED_REGRESSION_PATH"
+          printf '%s  %s\n' "$APPROVED_REGRESSION_SHA256" "$APPROVED_REGRESSION_PATH" | sha256sum -c -
+      - name: Evaluate offline and preserve release evidence
+        run: |
+          command -v node
+          command -v pnpm
+          test ! -e artifacts
+          mkdir artifacts
+          cp "$APPROVED_REGRESSION_PATH" artifacts/approved-regression.json
+          pnpm generation:version-regression:eval --snapshot artifacts/approved-regression.json \
+            --profile production_approval --expected-snapshot-sha256 "$APPROVED_REGRESSION_SHA256" \
+            --json-output artifacts/version-regression.json \
+            --junit-output artifacts/version-regression.junit.xml \
+            --markdown-output artifacts/version-regression.md
+          report_digest=$(sha256sum artifacts/version-regression.json | cut -d ' ' -f 1)
+          pnpm generation:version-regression:eval \
+            --validate-report artifacts/version-regression.json \
+            --expected-sha256 "$report_digest"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: automatic-generation-version-regression-operational
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 400

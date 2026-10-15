@@ -1,0 +1,17 @@
+.DS_Store
+.env
+# Local QA source exports can contain internal work items and personal data.
+/*.csv
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+node_modules/
+**/node_modules/
+**/dist/
+coverage/
+*.log
+.local-backups/

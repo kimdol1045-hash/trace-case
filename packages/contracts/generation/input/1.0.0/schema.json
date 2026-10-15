@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/input/1.0.0/schema.json",
+  "title": "Generation API input 1.0.0",
+  "description": "Provider-neutral, immutable generation context assembled by the trusted QA adapter. Every context section is explicit even when its array is empty.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "inputSchemaVersion",
+    "requestedOutputSchemaVersion",
+    "requestId",
+    "createdAt",
+    "slackWorkItem",
+    "activeKnowledge",
+    "existingCases",
+    "failedOrBlockedExecutions",
+    "openIssues",
+    "extraSources",
+    "categoryCandidates",
+    "generationPolicy"
+  ],
+  "properties": {
+    "inputSchemaVersion": {
+      "const": "1.0.0",
+      "description": "Exact input contract version. Providers must not infer compatibility from a version range."
+    },
+    "requestedOutputSchemaVersion": {
+      "const": "1.0.0",
+      "description": "Exact output contract version the provider must echo as outputSchemaVersion."
+    },
+    "requestId": {
+      "$ref": "#/$defs/Identifier",
+      "description": "Trusted adapter request identifier used for transport correlation only; it is not returned in generation content."
+    },
+    "createdAt": {"type": "string", "format": "date-time"},
+    "slackWorkItem": {"$ref": "#/$defs/SlackWorkItem"},
+    "activeKnowledge": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/ActiveKnowledgeItem"}
+    },
+    "existingCases": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/ExistingCase"}
+    },
+    "failedOrBlockedExecutions": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/FailedOrBlockedExecution"}
+    },
+    "openIssues": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/OpenIssue"}
+    },
+    "extraSources": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/ExtraSource"},
+      "description": "Only sources explicitly supplied by a user for this generation request are allowed."
+    },
+    "categoryCandidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/CategoryCandidate"},
+      "description": "Trusted existing QA-board categories. The provider may select an ID from this list but cannot create one."
+    },
+    "generationPolicy": {"$ref": "#/$defs/GenerationPolicy"}
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "CategoryIdentifier": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^folder_[A-Za-z0-9_-]+$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "ShortString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "NullableNonBlankString": {
+      "oneOf": [
+        {"$ref": "#/$defs/NonBlankString"},
+        {"type": "null"}
+      ]
+    },
+    "SlackWorkItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workItemId",
+        "evidenceNodeId",
+        "sourceVersion",
+        "sourceRevisionIds",
+        "permalink",
+        "developmentItem",
+        "requestedMenu",
+        "featureDescription",
+        "requestDetails",
+        "missingFields",
+        "openQuestions"
+      ],
+      "properties": {
+        "workItemId": {"$ref": "#/$defs/Identifier"},
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "sourceRevisionIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "permalink": {"type": "string", "format": "uri", "maxLength": 2048},
+        "developmentItem": {"$ref": "#/$defs/NullableNonBlankString"},
+        "requestedMenu": {"$ref": "#/$defs/NullableNonBlankString"},
+        "featureDescription": {"$ref": "#/$defs/NullableNonBlankString"},
+        "requestDetails": {"$ref": "#/$defs/NullableNonBlankString"},
+        "missingFields": {
+          "type": "array",
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {"$ref": "../../../state-enums.schema.json#/$defs/SlackWorkItemField"}
+        },
+        "openQuestions": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/ShortString"}
+        }
+      },
+      "description": "Structured Slack root/thread snapshot. IDs, revisions and permalink come from the trusted Slack ledger."
+    },
+    "ActiveKnowledgeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "nodeType",
+        "status",
+        "content",
+        "validFrom",
+        "validTo",
+        "evidenceSourceRevisionIds",
+        "rank",
+        "selectionReason"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {"type": "string", "enum": ["REQUIREMENT", "DECISION", "CONSTRAINT"]},
+        "status": {"const": "ACTIVE"},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "validFrom": {"type": "string", "format": "date-time"},
+        "validTo": {"type": "null"},
+        "evidenceSourceRevisionIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "rank": {"type": "integer", "minimum": 1},
+        "selectionReason": {"$ref": "#/$defs/ShortString"}
+      },
+      "description": "Only currently valid ACTIVE requirements, decisions and constraints may enter confirmed generation context."
+    },
+    "ExistingCaseStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action", "expectedResult"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NullableNonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResult": {"$ref": "#/$defs/NullableNonBlankString"}
+      }
+    },
+    "ExistingCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "testCaseId",
+        "testCaseVersionId",
+        "caseKey",
+        "status",
+        "summary",
+        "precondition",
+        "steps",
+        "expectedResultMode",
+        "caseExpectedResult",
+        "priority",
+        "labels",
+        "rank",
+        "selectionReason"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "testCaseId": {"$ref": "#/$defs/Identifier"},
+        "testCaseVersionId": {"$ref": "#/$defs/Identifier"},
+        "caseKey": {"type": "string", "minLength": 3, "maxLength": 64, "pattern": "^[A-Z][A-Z0-9]*-[0-9]+$"},
+        "status": {"const": "ACTIVE"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "precondition": {"$ref": "#/$defs/NullableNonBlankString"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/ExistingCaseStep"}
+        },
+        "expectedResultMode": {"$ref": "../../../state-enums.schema.json#/$defs/ExpectedResultMode"},
+        "caseExpectedResult": {"$ref": "#/$defs/NullableNonBlankString"},
+        "priority": {"$ref": "../../../state-enums.schema.json#/$defs/Priority"},
+        "labels": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}
+        },
+        "rank": {"type": "integer", "minimum": 1},
+        "selectionReason": {"$ref": "#/$defs/ShortString"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"expectedResultMode": {"const": "CASE"}},
+            "required": ["expectedResultMode"]
+          },
+          "then": {"properties": {"caseExpectedResult": {"$ref": "#/$defs/NonBlankString"}}},
+          "else": {
+            "properties": {
+              "caseExpectedResult": {"type": "null"},
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {"expectedResult": {"$ref": "#/$defs/NonBlankString"}}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FailedOrBlockedExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "executionAttemptId",
+        "testCaseVersionId",
+        "status",
+        "platform",
+        "actualResult",
+        "occurredAt",
+        "linkedIssueIds",
+        "rank",
+        "selectionReason"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "executionAttemptId": {"$ref": "#/$defs/Identifier"},
+        "testCaseVersionId": {"$ref": "#/$defs/Identifier"},
+        "status": {"type": "string", "enum": ["FAIL", "BLOCKED"]},
+        "platform": {"$ref": "../../../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "actualResult": {"$ref": "#/$defs/NonBlankString"},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "linkedIssueIds": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "rank": {"type": "integer", "minimum": 1},
+        "selectionReason": {"$ref": "#/$defs/ShortString"}
+      }
+    },
+    "OpenIssue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "issueId",
+        "issueKey",
+        "status",
+        "severity",
+        "summary",
+        "expectedResult",
+        "actualResult",
+        "linkedExecutionAttemptIds",
+        "updatedAt",
+        "rank",
+        "selectionReason"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "issueId": {"$ref": "#/$defs/Identifier"},
+        "issueKey": {"type": "string", "minLength": 3, "maxLength": 64, "pattern": "^[A-Z][A-Z0-9]*-[0-9]+$"},
+        "status": {"type": "string", "enum": ["OPEN", "IN_PROGRESS", "REOPENED"]},
+        "severity": {"$ref": "../../../state-enums.schema.json#/$defs/IssueSeverity"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "actualResult": {"$ref": "#/$defs/NonBlankString"},
+        "linkedExecutionAttemptIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "rank": {"type": "integer", "minimum": 1},
+        "selectionReason": {"$ref": "#/$defs/ShortString"}
+      }
+    },
+    "ExtraSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "evidenceNodeId",
+        "sourceType",
+        "title",
+        "content",
+        "uri",
+        "contentHash",
+        "providedByUser"
+      ],
+      "properties": {
+        "sourceId": {"$ref": "#/$defs/Identifier"},
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "sourceType": {"type": "string", "enum": ["PRODUCT_SPEC", "DESIGN", "CODE_CHANGE", "OTHER"]},
+        "title": {"$ref": "#/$defs/ShortString"},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "uri": {
+          "oneOf": [
+            {"type": "string", "format": "uri-reference", "maxLength": 2048},
+            {"type": "null"}
+          ]
+        },
+        "contentHash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "providedByUser": {"const": true}
+      }
+    },
+    "CategoryCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["categoryId", "label", "score", "selectionReason"],
+      "properties": {
+        "categoryId": {"$ref": "#/$defs/CategoryIdentifier"},
+        "label": {"$ref": "#/$defs/ShortString"},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "selectionReason": {"$ref": "#/$defs/ShortString"}
+      }
+    },
+    "GenerationBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batchId", "featureGroup", "batchNumber", "isFinalBatch"],
+      "properties": {
+        "batchId": {"$ref": "#/$defs/Identifier"},
+        "featureGroup": {"$ref": "#/$defs/ShortString"},
+        "batchNumber": {"type": "integer", "minimum": 1},
+        "isFinalBatch": {"type": "boolean"}
+      }
+    },
+    "GenerationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyVersion",
+        "batch",
+        "minimumCaseCount",
+        "maximumCaseCount",
+        "expectedResultMode",
+        "prioritizeHappyPath",
+        "includeApplicableCrud",
+        "allowUnsupportedEdgeCases",
+        "requireEvidenceReferences",
+        "unknownFactHandling",
+        "sensitiveDataHandling",
+        "language"
+      ],
+      "properties": {
+        "policyVersion": {"$ref": "#/$defs/Identifier"},
+        "batch": {"$ref": "#/$defs/GenerationBatch"},
+        "minimumCaseCount": {"const": 5},
+        "maximumCaseCount": {"const": 10},
+        "expectedResultMode": {"const": "CASE"},
+        "prioritizeHappyPath": {"const": true},
+        "includeApplicableCrud": {"const": true},
+        "allowUnsupportedEdgeCases": {"const": false},
+        "requireEvidenceReferences": {"const": true},
+        "unknownFactHandling": {"const": "OPEN_QUESTION"},
+        "sensitiveDataHandling": {"const": "REDACT"},
+        "language": {"type": "string", "minLength": 2, "maxLength": 35, "pattern": "^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$"}
+      },
+      "description": "Canonical team policy inherited from the Slack/n8n migration boundary; provider-specific model or sampling controls are intentionally absent."
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "cleanupAuthorizedOnlyAfterThisReceiptVerification": true,
+  "contractDigest": {
+    "sha256": "1be2eebdefb88b90713f73cd719ac5130517f4d91e575d95964e77277d4c9739",
+    "version": "tc.canonical-json.sha256.v1"
+  },
+  "errorClass": "CheckViolation",
+  "mode": "LOCAL_MINIO_DISPOSABLE_FAILED_CLOSED",
+  "productionOperations": "NOT_RUN",
+  "provider": "MINIO",
+  "resources": {
+    "dumpCreated": false,
+    "manifestCreated": false,
+    "recoveryBucketCreated": false,
+    "recoveryDatabaseCreated": false,
+    "recoveryEvidenceCreated": false,
+    "sourceBucket": "tc-phase-f-pf-sf1-t08-wave7-e29f6c4b-source-disposable",
+    "sourceDatabase": {
+      "comment": "tc-phase-f-object-storage-recovery:v1:pf-sf1-t08-wave7-e29f6c4b:source:test-disposable",
+      "name": "tc_phase_f_pf_sf1_t08_wave7_e29f6c4b_source_test_disposable"
+    },
+    "tempDirectory": {
+      "identity": {
+        "device": 16777231,
+        "inode": 95942337,
+        "modeOctal": "0700"
+      },
+      "path": "/private/tmp/pf-sf1-t08-wave7-e29f6c4b-temp"
+    }
+  },
+  "schemaVersion": "tc.phase-f.object-storage-recovery-failure.v1",
+  "sourceBucketInventory": {
+    "count": 12,
+    "digest": {
+      "sha256": "23c6584c82b2f8ca0f83ba5de4877650f56304e2070b01f08f6c4a4a7d8881ee",
+      "version": "tc.s3-compatible-inventory.v1"
+    },
+    "entries": [
+      {
+        "mimeType": "application/json",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/application-json/01.json",
+        "sha256": "740a53f24462ef5b6561ce133b1acfc751d13134508b58dfe96858626ec43037",
+        "sizeBytes": 85
+      },
+      {
+        "mimeType": "application/json",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/application-json/02.json",
+        "sha256": "05113c09a10008206cb8cdf33b73e6c33964e8d305e8c7d6fd542fe095b3f147",
+        "sizeBytes": 85
+      },
+      {
+        "mimeType": "image/png",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/image-png/01.png",
+        "sha256": "bb842981d0d1a3f3df430014b1e2142844f8ed882a73854228d5bc7c602c5aaf",
+        "sizeBytes": 126
+      },
+      {
+        "mimeType": "image/png",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/image-png/02.png",
+        "sha256": "c52d76cdc976d251000d825cd59b7592d88b07300767a0b5f9081b01784c40da",
+        "sizeBytes": 126
+      },
+      {
+        "mimeType": "text/plain",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/text-plain/01.txt",
+        "sha256": "aa5421ecc7a2c3aed956f1161481e509399a13d2b8f4dde363f2edcd100cb53b",
+        "sizeBytes": 59
+      },
+      {
+        "mimeType": "text/plain",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/execution-attempt/text-plain/02.txt",
+        "sha256": "005621cef71198927770a0ec5a75a4d56d0b22720f5611483bbb233d80b84a86",
+        "sizeBytes": 59
+      },
+      {
+        "mimeType": "application/json",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/application-json/01.json",
+        "sha256": "bea22243eb8feeb4027e8973cf3b99f9c0de9080f6be3466a47c3fc12497f034",
+        "sizeBytes": 73
+      },
+      {
+        "mimeType": "application/json",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/application-json/02.json",
+        "sha256": "1ef1a6b7a54443a2e351fddd71a1185ddacaaf9b395c4077071095ea1a61a84c",
+        "sizeBytes": 73
+      },
+      {
+        "mimeType": "image/png",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/image-png/01.png",
+        "sha256": "c4ce9e9c8083475cb382cd79dcb00e2fded5e3fadacc71c476f65ee69d39058f",
+        "sizeBytes": 114
+      },
+      {
+        "mimeType": "image/png",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/image-png/02.png",
+        "sha256": "95f0dd4ecf6024b3d0bf6825123e5cd5fcc5499fa038bf07bab417cc6d7708dc",
+        "sizeBytes": 114
+      },
+      {
+        "mimeType": "text/plain",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/text-plain/01.txt",
+        "sha256": "cb793325863fa702fe07c2078fe6beb4a8883019161fd66b02577d53b452f121",
+        "sizeBytes": 47
+      },
+      {
+        "mimeType": "text/plain",
+        "objectKey": "pf-sf1-t08-wave7/e29f6c4b/objects/issue/text-plain/02.txt",
+        "sha256": "87ecbfdf85866367b7f6b6603fc3bf1cb541c996e0f9e82195b8337eef1c9050",
+        "sizeBytes": 47
+      }
+    ],
+    "pageLimit": 3,
+    "pages": 5,
+    "version": "tc.s3-compatible-inventory.v1"
+  },
+  "stage": "execution-attempt-start-transition",
+  "task": "PF-SF1-T08"
+}

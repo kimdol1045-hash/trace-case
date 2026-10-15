@@ -1,0 +1,11 @@
+Phase B UAT evidence
+
+Source work item: WORK-6651
+Test case: 결제 금액 계산 + 배송비
+Scenario: 배송지 선택 전/후로 배송비가 올바르게 재계산되는지 확인
+Source result: 확인불가
+Reason: 국가 단위로 변경되나 일본 마켓만 제공하여 확인 불가
+
+Expected follow-up:
+- 국가가 다른 배송지를 선택할 수 있는 QA 환경을 제공한다.
+- 배송지 변경 전후의 배송비와 최종 결제 금액을 비교한다.

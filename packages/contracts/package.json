@@ -1,0 +1,39 @@
+{
+  "name": "@tc/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas/core-api-payloads": "./core-api-payloads.schema.json",
+    "./schemas/state-enums": "./state-enums.schema.json",
+    "./schemas/sprint-1/error-contract": "./sprint-1/error-contract.schema.json",
+    "./schemas/sprint-2/test-case-api": "./sprint-2/test-case-api.schema.json",
+    "./schemas/sprint-2/error-contract": "./sprint-2/error-contract.schema.json",
+    "./schemas/sprint-3/cycle-execution-api": "./sprint-3/cycle-execution-api.schema.json",
+    "./schemas/sprint-3/error-contract": "./sprint-3/error-contract.schema.json",
+    "./schemas/sprint-4/issue-api": "./sprint-4/issue-api.schema.json",
+    "./schemas/sprint-4/object-storage-api": "./sprint-4/object-storage-api.schema.json",
+    "./schemas/sprint-4/reporting-api": "./sprint-4/reporting-api.schema.json",
+    "./schemas/sprint-4/error-contract": "./sprint-4/error-contract.schema.json",
+    "./schemas/sprint-5/slack-event-api": "./sprint-5/slack-event-api.schema.json",
+    "./schemas/sprint-5/slack-resources-api": "./sprint-5/slack-resources-api.schema.json",
+    "./schemas/sprint-5/error-contract": "./sprint-5/error-contract.schema.json",
+    "./schemas/sprint-6/knowledge-api": "./sprint-6/knowledge-api.schema.json",
+    "./schemas/sprint-6/slack-bundle-extraction": "./sprint-6/slack-bundle-extraction.schema.json",
+    "./schemas/generation/apply/1.0.0": "./generation/apply/1.0.0/schema.json",
+    "./schemas/generation/comparison/1.0.0": "./generation/comparison/1.0.0/schema.json",
+    "./schemas/generation/reconstruction/1.0.0": "./generation/reconstruction/1.0.0/schema.json",
+    "./schemas/generation/suggestion/1.0.0": "./generation/suggestion/1.0.0/schema.json",
+    "./schemas/generation/slack-reply/1.0.0": "./generation/slack-reply/1.0.0/schema.json",
+    "./schemas/generation/retry-history/1.0.0": "./generation/retry-history/1.0.0/schema.json",
+    "./schemas/generation/quality-gate/1.0.0": "./generation/quality-gate/1.0.0/schema.json",
+    "./schemas/generation/quality-review/2.0.0": "./generation/quality-review/2.0.0/schema.json",
+    "./schemas/generation/job-api/1.0.0": "./generation/job-api/1.0.0/schema.json",
+    "./schemas/review-candidate/1.0.0": "./review-candidate/1.0.0/schema.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json",
+    "test:unit": "vitest run"
+  }
+}

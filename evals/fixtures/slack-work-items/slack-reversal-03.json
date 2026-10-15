@@ -1,0 +1,65 @@
+{
+  "fixtureId": "slack-reversal-03",
+  "synthetic": true,
+  "category": "REVERSAL",
+  "description": "즉시 영구 삭제 요구를 30일 soft delete로 변경한 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787223600.000009",
+      "messageRevisionId": "rev_r03_root",
+      "authorId": "U_SYN_016",
+      "body": "개발건: 저장 주소 삭제\n요청 메뉴: 회원 > 계정관리 > 주소록\n기능 설명: 사용자가 저장 주소를 삭제한다.\n요청내용: 삭제 즉시 데이터를 영구 제거한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787223600000009",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787223660.000009",
+        "messageRevisionId": "rev_r03_reply_01",
+        "authorId": "U_SYN_017",
+        "body": "영구 제거는 취소합니다. 최종 결정은 soft delete 후 30일 보관이며 그 기간에는 복원 가능입니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787223660000009",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "저장 주소 삭제",
+      "requestedMenu": "회원 > 계정관리 > 주소록",
+      "featureDescription": "사용자가 저장 주소를 삭제한다.",
+      "requestDetails": "삭제한 주소는 soft delete로 처리하고 30일간 복원 가능하게 보관한다.",
+      "missingFields": [],
+      "confidence": 0.99,
+      "sourceMessageRevisions": ["rev_r03_root", "rev_r03_reply_01"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_r03_hard",
+        "nodeType": "DECISION",
+        "content": "삭제 즉시 주소 데이터를 영구 제거한다.",
+        "status": "SUPERSEDED",
+        "evidenceSourceMessageRevisions": ["rev_r03_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "thread에서 영구 제거 결정을 취소했다."
+      },
+      {
+        "knowledgeId": "knowledge_r03_soft",
+        "nodeType": "DECISION",
+        "content": "삭제한 주소는 soft delete로 30일 보관하고 그 기간에는 복원할 수 있다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_r03_reply_01"],
+        "supersedesKnowledgeIds": ["knowledge_r03_hard"],
+        "reason": "대체 정책을 최종 결정으로 명시했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_r03_soft"],
+      "excludedKnowledgeIds": ["knowledge_r03_hard"],
+      "openQuestions": []
+    }
+  }
+}

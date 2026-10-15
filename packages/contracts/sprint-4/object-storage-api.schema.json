@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-4/object-storage-api.schema.json",
+  "title": "Sprint 4 private object-storage attachment API payloads",
+  "description": "Strict public contracts for private R2/MinIO uploads, fail-closed quarantine, proxy reads, integrity jobs, restore sampling, observations and legacy-row migration inventory.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "AttachmentId": {
+      "type": "string",
+      "pattern": "^attachment_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "IssueId": {"$ref": "issue-api.schema.json#/$defs/IssueId"},
+    "ExecutionAttemptId": {"$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/ExecutionAttemptId"},
+    "Sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "SafeFilename": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[^/\\\\\\u0000-\\u001F]+$",
+      "not": {"enum": [".", ".."]},
+      "description": "A normalized basename only; separators, dot segments, NUL, control/format characters, drive prefixes and names over 255 UTF-8 bytes are rejected by the API."
+    },
+    "AttachmentMimeType": {
+      "type": "string",
+      "enum": [
+        "application/json",
+        "application/pdf",
+        "application/zip",
+        "application/gzip",
+        "image/gif",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "text/csv",
+        "text/markdown",
+        "text/plain",
+        "video/mp4",
+        "video/webm"
+      ]
+    },
+    "AttachmentByteSize": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 52428800,
+      "description": "The hard maximum is 50 MiB and deployments may configure a smaller limit."
+    },
+    "IssueAttachmentOwner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "issueId"],
+      "properties": {"type": {"const": "ISSUE"}, "issueId": {"$ref": "#/$defs/IssueId"}}
+    },
+    "ExecutionAttemptAttachmentOwner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "executionAttemptId"],
+      "properties": {
+        "type": {"const": "EXECUTION_ATTEMPT"},
+        "executionAttemptId": {"$ref": "#/$defs/ExecutionAttemptId"}
+      }
+    },
+    "AttachmentOwner": {
+      "oneOf": [
+        {"$ref": "#/$defs/IssueAttachmentOwner"},
+        {"$ref": "#/$defs/ExecutionAttemptAttachmentOwner"}
+      ]
+    },
+    "AttachmentUploadSessionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "filename", "declaredMimeType", "declaredSizeBytes", "clientSha256"],
+      "properties": {
+        "idempotencyKey": {"type": "string", "minLength": 8, "maxLength": 255, "pattern": "\\S"},
+        "filename": {"$ref": "#/$defs/SafeFilename"},
+        "declaredMimeType": {"$ref": "#/$defs/AttachmentMimeType"},
+        "declaredSizeBytes": {"$ref": "#/$defs/AttachmentByteSize"},
+        "clientSha256": {"$ref": "#/$defs/Sha256"}
+      }
+    },
+    "AttachmentUploadSessionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uploadToken", "objectKey", "upload", "maxSizeBytes"],
+      "properties": {
+        "uploadToken": {"type": "string", "minLength": 32, "pattern": "\\S"},
+        "objectKey": {"type": "string", "pattern": "^quarantine/attachments/", "maxLength": 1024},
+        "upload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "headers", "expiresAt"],
+          "properties": {
+            "url": {"type": "string", "format": "uri"},
+            "headers": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["content-type", "x-amz-meta-sha256"],
+              "properties": {
+                "content-type": {"$ref": "#/$defs/AttachmentMimeType"},
+                "x-amz-meta-sha256": {"$ref": "#/$defs/Sha256"}
+              }
+            },
+            "expiresAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        "maxSizeBytes": {"type": "integer", "minimum": 1}
+      },
+      "description": "The URL is short-lived and method/header bound; it must never be logged or persisted."
+    },
+    "CompleteAttachmentUploadRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "uploadToken"],
+      "properties": {
+        "idempotencyKey": {"type": "string", "minLength": 8, "maxLength": 255, "pattern": "\\S"},
+        "uploadToken": {"type": "string", "minLength": 32, "pattern": "\\S"}
+      }
+    },
+    "AttachmentResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "owner", "filename", "mimeType", "sizeBytes", "sha256", "storageProvider", "scanStatus", "privacy", "downloadTransport", "proxyPath", "resourceVersion", "uploadedAt", "deletedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/AttachmentId"},
+        "owner": {"$ref": "#/$defs/AttachmentOwner"},
+        "filename": {"$ref": "#/$defs/SafeFilename"},
+        "mimeType": {"$ref": "#/$defs/AttachmentMimeType"},
+        "sizeBytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/Sha256"},
+        "storageProvider": {"type": "string", "enum": ["R2", "GOOGLE_DRIVE"]},
+        "scanStatus": {"type": "string", "enum": ["CLEAN", "LEGACY_MIGRATION_REQUIRED", "ERROR"]},
+        "privacy": {"const": "PRIVATE"},
+        "downloadTransport": {"const": "BACKEND_PROXY"},
+        "proxyPath": {"type": "string", "pattern": "^/api/attachments/[^/]+/content$"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "uploadedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}
+      },
+      "description": "Ordinary resources expose no provider object URL or legacy provider file ID."
+    },
+    "QuotaWarning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "thresholdPercent", "message"],
+      "properties": {
+        "level": {"type": "string", "enum": ["NONE", "WARNING_70", "WARNING_85", "WARNING_95", "EXCEEDED"]},
+        "thresholdPercent": {"oneOf": [{"type": "integer", "enum": [70, 85, 95, 100]}, {"type": "null"}]},
+        "message": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
+      }
+    },
+    "StorageUsageObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storageBytes", "classARequests", "classBRequests", "storageBudgetBytes", "classARequestBudget", "classBRequestBudget", "warning", "estimatedMonthlyCostUsd", "estimateQuality", "observedSince"],
+      "properties": {
+        "storageBytes": {"type": "integer", "minimum": 0},
+        "classARequests": {"type": "integer", "minimum": 0},
+        "classBRequests": {"type": "integer", "minimum": 0},
+        "storageBudgetBytes": {"type": "integer", "minimum": 1},
+        "classARequestBudget": {"type": "integer", "minimum": 1},
+        "classBRequestBudget": {"type": "integer", "minimum": 1},
+        "warning": {"$ref": "#/$defs/QuotaWarning"},
+        "estimatedMonthlyCostUsd": {"type": "number", "minimum": 0},
+        "estimateQuality": {"const": "PROCESS_LOCAL_CONFIGURED_ESTIMATE"},
+        "observedSince": {"type": "string", "format": "date-time"}
+      },
+      "description": "Thresholds are inclusive at 70%, 85%, 95%, and 100%; request counters reset with the API process and require provider analytics comparison."
+    },
+    "ObjectStorageStatusResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "provider", "bucket", "maxFileBytes", "uploadTransport", "downloadTransport", "privacy", "scanPolicy", "legacyRowPolicy", "legacyRowCount"],
+      "properties": {
+        "status": {"type": "string", "enum": ["READY", "SETUP_REQUIRED"]},
+        "provider": {"type": "string", "enum": ["R2", "MINIO"]},
+        "bucket": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "maxFileBytes": {"type": "integer", "minimum": 1},
+        "uploadTransport": {"const": "PRESIGNED_PUT"},
+        "downloadTransport": {"const": "BACKEND_PROXY"},
+        "privacy": {"const": "PRIVATE"},
+        "scanPolicy": {"const": "FAIL_CLOSED_CLAMAV"},
+        "legacyRowPolicy": {"const": "MIGRATION_REQUIRED"},
+        "legacyRowCount": {"type": "integer", "minimum": 0}
+      }
+    },
+    "OrphanReconcileRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "dryRun", "olderThan"],
+      "properties": {
+        "idempotencyKey": {"type": "string", "minLength": 8, "maxLength": 255},
+        "dryRun": {"type": "boolean"},
+        "olderThan": {"type": "string", "format": "date-time"},
+        "cursor": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 1024}, {"type": "null"}]},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 1000}
+      }
+    },
+    "MetadataIntegrityRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dryRun"],
+      "properties": {
+        "dryRun": {"type": "boolean"},
+        "cursor": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 1024}, {"type": "null"}]},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 1000}
+      }
+    },
+    "RestoreSampleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampleSize", "maxBytesPerObject"],
+      "properties": {
+        "sampleSize": {"type": "integer", "minimum": 1, "maximum": 100},
+        "maxBytesPerObject": {"type": "integer", "minimum": 1, "maximum": 52428800}
+      }
+    },
+    "LegacyAttachmentInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "total", "items", "nextCursor"],
+      "properties": {
+        "policy": {"const": "MIGRATION_REQUIRED"},
+        "total": {"type": "integer", "minimum": 0},
+        "nextCursor": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 1024}, {"type": "null"}]},
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attachmentId", "owner", "filename", "mimeType", "sizeBytes", "sha256", "migrationState"],
+            "properties": {
+              "attachmentId": {"$ref": "#/$defs/AttachmentId"},
+              "owner": {"$ref": "#/$defs/AttachmentOwner"},
+              "filename": {"$ref": "#/$defs/SafeFilename"},
+              "mimeType": {"$ref": "#/$defs/AttachmentMimeType"},
+              "sizeBytes": {"type": "integer", "minimum": 0},
+              "sha256": {"$ref": "#/$defs/Sha256"},
+              "migrationState": {"const": "MIGRATION_REQUIRED"}
+            }
+          }
+        }
+      },
+      "description": "Compatibility inventory intentionally omits the legacy provider file ID and grants no content operation."
+    }
+  }
+}

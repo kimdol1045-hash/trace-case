@@ -1,0 +1,18 @@
+{
+  "name": "@tc/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json --output src/schema.gen.ts",
+    "typecheck": "tsc --project tsconfig.json",
+    "test:unit": "vitest run"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.9.1"
+  }
+}
+

@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-4/error-contract.schema.json",
+  "title": "Sprint 4 issue, object storage, attachment and report API error contract",
+  "description": "Strict typed errors for issue eligibility and immutable snapshots, attachment validation and private proxy enforcement, malware scanning, legacy migration, filters, cursors, idempotency and optimistic concurrency.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "IssueId": {"$ref": "issue-api.schema.json#/$defs/IssueId"},
+    "AttachmentId": {"$ref": "object-storage-api.schema.json#/$defs/AttachmentId"},
+    "ExecutionAttemptId": {"$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/ExecutionAttemptId"},
+    "ValidationError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/ValidationError"},
+    "ResourceNotFoundError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"},
+    "VersionConflictError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/VersionConflictError"},
+    "IdempotencyConflictError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"},
+    "KeyAllocationError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/KeyAllocationError"},
+    "CursorInvalidError": {"$ref": "../sprint-2/error-contract.schema.json#/$defs/CursorInvalidError"},
+    "IssueAttemptEligibilityError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ISSUE_CREATION_ATTEMPT_NOT_ELIGIBLE"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attemptId", "actualStatus", "eligibleStatuses"],
+              "properties": {
+                "attemptId": {"$ref": "#/$defs/ExecutionAttemptId"},
+                "actualStatus": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"},
+                "eligibleStatuses": {
+                  "type": "array",
+                  "prefixItems": [{"const": "FAIL"}, {"const": "BLOCKED"}],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Automatic issue creation is allowed only from terminal FAIL or BLOCKED attempts; UNEXECUTED and PASS are rejected."
+    },
+    "IssueStateTransitionError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ISSUE_STATE_TRANSITION_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["issueId", "currentStatus", "requestedStatus", "allowedTransitions"],
+              "properties": {
+                "issueId": {"$ref": "#/$defs/IssueId"},
+                "currentStatus": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"},
+                "requestedStatus": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"},
+                "allowedTransitions": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"}}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IssueSnapshotImmutableError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ISSUE_SNAPSHOT_IMMUTABLE"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["issueId", "attemptedFields"],
+              "properties": {
+                "issueId": {"$ref": "#/$defs/IssueId"},
+                "attemptedFields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": ["origin", "reproductionSnapshot", "reproductionSnapshot.pinnedVersionId", "reproductionSnapshot.summary", "reproductionSnapshot.actualResult"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IssueLinkConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"type": "string", "enum": ["ISSUE_LINK_DUPLICATE", "ISSUE_LINK_NOT_FOUND", "ISSUE_LINK_SOURCE_MISMATCH"]},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["issueId", "targetType", "targetId"],
+              "properties": {
+                "issueId": {"$ref": "#/$defs/IssueId"},
+                "targetType": {"type": "string", "enum": ["TEST_CASE", "CYCLE_ITEM", "EXECUTION_ATTEMPT"]},
+                "targetId": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AttachmentFilenameError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_FILENAME_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["filename", "rule"],
+              "properties": {
+                "filename": {"type": "string", "maxLength": 2048},
+                "rule": {"type": "string", "enum": ["BASENAME_ONLY", "NO_DOT_SEGMENTS", "NO_CONTROL_CHARACTERS", "MAX_255_CHARACTERS"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AttachmentMimeError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_MIME_NOT_ALLOWED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["declaredMimeType", "detectedMimeType"],
+              "properties": {
+                "declaredMimeType": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"},
+                "detectedMimeType": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"}, {"type": "null"}]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AttachmentSizeError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_SIZE_LIMIT_EXCEEDED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["actualBytes", "maximumBytes"],
+              "properties": {
+                "actualBytes": {"type": "integer", "minimum": 104857601},
+                "maximumBytes": {"const": 104857600}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "MalwareDetectedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_MALWARE_DETECTED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["filename", "signature", "quarantined"],
+              "properties": {
+                "filename": {"$ref": "object-storage-api.schema.json#/$defs/SafeFilename"},
+                "signature": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"}, {"type": "null"}]},
+                "quarantined": {"const": true}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "MalwareScanUnavailableError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_SCAN_UNAVAILABLE"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["policy", "retryable"],
+              "properties": {
+                "policy": {"const": "FAIL_CLOSED"},
+                "retryable": {"const": true}
+              }
+            }
+          }
+        }
+      ],
+      "description": "MVP fails closed: scanner unavailability rejects completion and no readable attachment metadata is committed."
+    },
+    "AttachmentPrivateProxyRequiredError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ATTACHMENT_PRIVATE_PROXY_REQUIRED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attachmentId", "requestedTransport", "allowedTransport"],
+              "properties": {
+                "attachmentId": {"$ref": "#/$defs/AttachmentId"},
+                "requestedTransport": {"type": "string", "enum": ["PUBLIC_URL", "OBJECT_REDIRECT", "SIGNED_URL"]},
+                "allowedTransport": {"const": "BACKEND_PROXY"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AttachmentUnavailableError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"type": "string", "enum": ["ATTACHMENT_DELETED", "ATTACHMENT_CONTENT_UNAVAILABLE", "ATTACHMENT_CHECKSUM_MISMATCH"]},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attachmentId", "downloadAvailable"],
+              "properties": {
+                "attachmentId": {"$ref": "#/$defs/AttachmentId"},
+                "downloadAvailable": {"type": "boolean"},
+                "expectedSha256": {"$ref": "object-storage-api.schema.json#/$defs/Sha256"},
+                "actualSha256": {"$ref": "object-storage-api.schema.json#/$defs/Sha256"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "LegacyAttachmentMigrationRequiredError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "LEGACY_ATTACHMENT_MIGRATION_REQUIRED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attachmentId", "migrationRequired"],
+              "properties": {
+                "attachmentId": {"$ref": "#/$defs/AttachmentId"},
+                "migrationRequired": {"const": true}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ReportFilterError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "REPORT_FILTER_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["field", "reason"],
+              "properties": {
+                "field": {"type": "string", "enum": ["cycleIds", "cycleStatuses", "platforms", "executionStatuses", "issueSeverities", "issueStatuses", "from", "to"]},
+                "reason": {"type": "string", "enum": ["UNKNOWN_ID", "EMPTY_FILTER", "INVALID_VALUE", "INVALID_RANGE"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IssueRestoreConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ISSUE_RESTORE_CONFLICT"},
+            "details": {"type": "object", "additionalProperties": false, "maxProperties": 0}
+          }
+        }
+      ]
+    },
+    "ErrorResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/ValidationError"},
+        {"$ref": "#/$defs/ResourceNotFoundError"},
+        {"$ref": "#/$defs/VersionConflictError"},
+        {"$ref": "#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/KeyAllocationError"},
+        {"$ref": "#/$defs/CursorInvalidError"},
+        {"$ref": "#/$defs/IssueAttemptEligibilityError"},
+        {"$ref": "#/$defs/IssueStateTransitionError"},
+        {"$ref": "#/$defs/IssueSnapshotImmutableError"},
+        {"$ref": "#/$defs/IssueLinkConflictError"},
+        {"$ref": "#/$defs/AttachmentFilenameError"},
+        {"$ref": "#/$defs/AttachmentMimeError"},
+        {"$ref": "#/$defs/AttachmentSizeError"},
+        {"$ref": "#/$defs/MalwareDetectedError"},
+        {"$ref": "#/$defs/MalwareScanUnavailableError"},
+        {"$ref": "#/$defs/AttachmentPrivateProxyRequiredError"},
+        {"$ref": "#/$defs/AttachmentUnavailableError"},
+        {"$ref": "#/$defs/LegacyAttachmentMigrationRequiredError"},
+        {"$ref": "#/$defs/ReportFilterError"},
+        {"$ref": "#/$defs/IssueRestoreConflictError"},
+        {"$ref": "../sprint-2/error-contract.schema.json#/$defs/PermanentDeleteConflictError"}
+      ]
+    }
+  }
+}

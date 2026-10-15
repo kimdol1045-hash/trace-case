@@ -1,0 +1,693 @@
+{
+  "artifactKind": "AUTOMATIC_GENERATION_QUALITY_EVALUATION_INPUT",
+  "contractVersion": "automatic-generation-quality-gate/1.0.0",
+  "profile": "CANDIDATE",
+  "dataset": {
+    "datasetId": "synthetic_generation_quality_v1",
+    "kind": "SYNTHETIC_FIXTURE",
+    "synthetic": true,
+    "description": "Deterministic credential-free contract fixture; never operational certification evidence.",
+    "review": {
+      "status": "UNREVIEWED",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "labelSetId": null,
+      "reviewProtocolVersion": null,
+      "approvalId": null,
+      "reviewAuthorityDigest": null,
+      "approvalArtifactDigest": null
+    },
+    "declaredCounts": {
+      "generationRoots": 1,
+      "generationJobs": 1,
+      "generationResults": 1,
+      "generatedCases": 5,
+      "generatedSteps": 5,
+      "evidenceReferences": 10
+    },
+    "classificationDistribution": {
+      "GROUNDED_ACTIVE": 1,
+      "SUPERSEDED_TRAP": 0,
+      "RETRACTED_TRAP": 0,
+      "DELETED_TRAP": 0,
+      "REJECTED_TRAP": 0,
+      "UNAVAILABLE_TRAP": 0,
+      "UNRESOLVED_CONFLICT": 0,
+      "DECISION_CANDIDATE": 0,
+      "EXACT_DUPLICATE_TRAP": 0,
+      "SEMANTIC_DUPLICATE_TRAP": 0,
+      "CATEGORY_COLLISION_TRAP": 0,
+      "PARENT_COLLISION_TRAP": 0,
+      "CASE_ORDERING": 0,
+      "BLANK_OR_INVALID_RESULT": 0,
+      "APPLY_PROVENANCE": 0,
+      "SUGGESTION_PROVENANCE": 0
+    },
+    "datasetFingerprint": "sha256:45d83c2187a46d78342d6a0fa01425c0d4e0921689d6fff8d271f74f9ed79d49",
+    "snapshotFingerprint": "sha256:791a4841dfa4ad4279f9ca8cbc7283bcf8a28d357d2ab405744fde2ecd75b8a7",
+    "privacy": {
+      "containsRawSourceText": false,
+      "containsProductionData": false,
+      "secretsScan": "CLEAN",
+      "piiScan": "CLEAN",
+      "redactionPolicyVersion": "redaction-v1"
+    }
+  },
+  "capture": {
+    "capturedAt": "2026-08-28T00:00:00Z",
+    "releaseCandidateAt": "2026-08-28T00:00:00Z",
+    "maxSnapshotAgeSeconds": 604800,
+    "environment": "synthetic",
+    "sourceSnapshotId": "source_snapshot_synthetic_001",
+    "sourceSnapshotFingerprint": "sha256:1f855baab23f82bee834f809c879ed2a3490714e1252e239b14f0a253459c9f0",
+    "captureRevision": "fixture-revision-1",
+    "offlineReplay": true,
+    "networkAccess": "DISABLED",
+    "providerCallsDuringEvaluation": 0,
+    "slackCallsDuringEvaluation": 0,
+    "degraded": false
+  },
+  "liveGate": {
+    "status": "NOT_RUN",
+    "liveRunId": null,
+    "environment": null,
+    "providerCredentialed": false,
+    "providerCallObserved": false,
+    "approvedBy": null,
+    "approvedAt": null,
+    "capturedSnapshotFingerprint": null
+  },
+  "versionPins": {
+    "generationPolicyVersion": "generation-policy-v1",
+    "generationPolicyDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "promptVersion": "prompt-v1",
+    "promptDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "providerId": "deterministic-fixture-provider",
+    "modelId": "fixture-model",
+    "modelRevision": "fixture-model-revision-1",
+    "embeddingProviderId": "deterministic-fixture-embedding",
+    "embeddingModelId": "fixture-embedding-model",
+    "embeddingRevision": "fixture-embedding-revision-1",
+    "embeddingDimensions": 4,
+    "semanticDuplicateThreshold": 0.85,
+    "semanticDuplicateAlgorithmVersion": "cosine-cluster-v1",
+    "semanticDuplicatePolicyDigest": "sha256:30a172e871708bd39bc535bdf45a0c43e8f3d35bfa1037ace795f99d155c861b",
+    "exactDuplicateAlgorithmVersion": "generation-exact-content-v1",
+    "inputSchemaVersion": "1.0.0",
+    "outputSchemaVersion": "1.0.0",
+    "suggestionSchemaVersion": "1.0.0",
+    "qualityGateSchemaVersion": "automatic-generation-quality-gate/1.0.0",
+    "ontologySchemaVersion": "ontology-v1"
+  },
+  "thresholds": {
+    "evidenceCoverage": 1,
+    "retiredKnowledgeMisuseCount": 0,
+    "duplicateCount": 0,
+    "unresolvedAuthorityCount": 0,
+    "provenanceFailureCount": 0,
+    "invalidOrBlankResultCount": 0,
+    "orderingFailureCount": 0
+  },
+  "reportOutputs": {
+    "json": "artifacts/automatic-generation-quality.json",
+    "junit": "artifacts/automatic-generation-quality.junit.xml",
+    "markdown": "artifacts/automatic-generation-quality.md"
+  },
+  "referenceInventory": {
+    "existingCases": [],
+    "categories": [
+      {
+        "referenceId": "category_existing_001",
+        "activeAtSeal": true,
+        "canonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    ],
+    "parents": [
+      {
+        "referenceId": "parent_existing_001",
+        "activeAtSeal": true,
+        "canonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    ]
+  },
+  "generationRoots": [
+    {
+      "generationRootId": "generation_root_001",
+      "workspaceId": "workspace_synthetic_001",
+      "slackWorkItemId": "slack_work_item_001",
+      "sourceVersion": 1,
+      "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "sealedSourceTime": "2026-08-28T00:00:00Z",
+      "primaryClassification": "GROUNDED_ACTIVE",
+      "contextSeal": {
+        "contextSnapshotId": "generation_context_001",
+        "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "sealedAt": "2026-08-28T00:00:00Z",
+        "entries": [
+          {
+            "contextEntryId": "context_entry_active_001",
+            "knowledgeNodeId": "knowledge_node_active_001",
+            "source": {
+              "sourceType": "SLACK_MESSAGE_REVISION",
+              "sourceEntityId": "slack_message_001",
+              "sourceRevisionId": "slack_revision_001",
+              "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+            },
+            "approvedEvidenceExcerptHashes": [
+              "sha256:7700000000000000000000000000000000000000000000000000000000000001",
+              "sha256:7700000000000000000000000000000000000000000000000000000000000002",
+              "sha256:7700000000000000000000000000000000000000000000000000000000000003",
+              "sha256:7700000000000000000000000000000000000000000000000000000000000004",
+              "sha256:7700000000000000000000000000000000000000000000000000000000000005",
+              "sha256:7800000000000000000000000000000000000000000000000000000000000001",
+              "sha256:7800000000000000000000000000000000000000000000000000000000000002",
+              "sha256:7800000000000000000000000000000000000000000000000000000000000003",
+              "sha256:7800000000000000000000000000000000000000000000000000000000000004",
+              "sha256:7800000000000000000000000000000000000000000000000000000000000005"
+            ],
+            "lifecycleStatusAtSeal": "ACTIVE",
+            "validFrom": "2026-08-27T00:00:00Z",
+            "validTo": null,
+            "availableAtSeal": true,
+            "conflictState": "NONE",
+            "decisionState": "ACCEPTED"
+          }
+        ]
+      },
+      "attemptHistory": [
+        {
+          "generationJobId": "generation_job_001",
+          "rootJobId": "generation_root_001",
+          "workspaceId": "workspace_synthetic_001",
+          "sourceVersion": 1,
+          "retryOfJobId": null,
+          "attemptNumber": 1,
+          "status": "SUCCEEDED",
+          "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+          "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+          "rejectionCode": null
+        }
+      ],
+      "selectedJob": {
+        "generationJobId": "generation_job_001",
+        "rootJobId": "generation_root_001",
+        "workspaceId": "workspace_synthetic_001",
+        "sourceVersion": 1,
+        "retryOfJobId": null,
+        "attemptNumber": 1,
+        "trigger": "AUTOMATIC",
+        "status": "SUCCEEDED",
+        "inputSchemaVersion": "1.0.0",
+        "outputSchemaVersion": "1.0.0",
+        "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "result": {
+          "resultSnapshotId": "generation_result_001",
+          "workspaceId": "workspace_synthetic_001",
+          "outputSchemaVersion": "1.0.0",
+          "validationStatus": "VALID",
+          "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+          "cases": [
+            {
+              "caseIndex": 0,
+              "caseSnapshotId": "generated_case_001",
+              "summary": {
+                "normalizedLength": 20,
+                "digest": "sha256:7000000000000000000000000000000000000000000000000000000000000001"
+              },
+              "caseExpectedResult": {
+                "normalizedLength": 20,
+                "digest": "sha256:7100000000000000000000000000000000000000000000000000000000000001"
+              },
+              "generationReason": {
+                "normalizedLength": 20,
+                "digest": "sha256:7200000000000000000000000000000000000000000000000000000000000001"
+              },
+              "exactContentKey": "sha256:7300000000000000000000000000000000000000000000000000000000000001",
+              "semanticDuplicateClusterId": "semantic_cluster_001",
+              "steps": [
+                {
+                  "sequence": 1,
+                  "precondition": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7400000000000000000000000000000000000000000000000000000000000001"
+                  },
+                  "action": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7500000000000000000000000000000000000000000000000000000000000001"
+                  },
+                  "expectedResult": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7600000000000000000000000000000000000000000000000000000000000001"
+                  }
+                }
+              ],
+              "evidenceReferences": [
+                {
+                  "evidenceReferenceId": "evidence_reference_case_001",
+                  "coverageTarget": {
+                    "unit": "CASE",
+                    "stepSequence": null
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7700000000000000000000000000000000000000000000000000000000000001"
+                },
+                {
+                  "evidenceReferenceId": "evidence_reference_step_001",
+                  "coverageTarget": {
+                    "unit": "STEP",
+                    "stepSequence": 1
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7800000000000000000000000000000000000000000000000000000000000001"
+                }
+              ],
+              "placement": {
+                "categoryDecision": "REUSE_EXISTING",
+                "categoryCanonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "parentDecision": "REUSE_EXISTING",
+                "parentCanonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "materialization": {
+                "kind": "APPLY_CREATED",
+                "applyId": "generation_apply_001",
+                "applyOutcomeId": "generation_apply_outcome_001",
+                "suggestionId": null,
+                "suggestionTargetId": null,
+                "sourceChangeAssessmentId": null,
+                "generationLineageId": null,
+                "baselineCaseVersionId": null,
+                "releaseReceiptId": null,
+                "sourceWorkspaceId": "workspace_synthetic_001",
+                "sourceGenerationJobId": "generation_job_001",
+                "sourceRootJobId": "generation_root_001",
+                "sourceVersion": 1,
+                "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            },
+            {
+              "caseIndex": 1,
+              "caseSnapshotId": "generated_case_002",
+              "summary": {
+                "normalizedLength": 20,
+                "digest": "sha256:7000000000000000000000000000000000000000000000000000000000000002"
+              },
+              "caseExpectedResult": {
+                "normalizedLength": 20,
+                "digest": "sha256:7100000000000000000000000000000000000000000000000000000000000002"
+              },
+              "generationReason": {
+                "normalizedLength": 20,
+                "digest": "sha256:7200000000000000000000000000000000000000000000000000000000000002"
+              },
+              "exactContentKey": "sha256:7300000000000000000000000000000000000000000000000000000000000002",
+              "semanticDuplicateClusterId": "semantic_cluster_002",
+              "steps": [
+                {
+                  "sequence": 1,
+                  "precondition": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7400000000000000000000000000000000000000000000000000000000000002"
+                  },
+                  "action": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7500000000000000000000000000000000000000000000000000000000000002"
+                  },
+                  "expectedResult": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7600000000000000000000000000000000000000000000000000000000000002"
+                  }
+                }
+              ],
+              "evidenceReferences": [
+                {
+                  "evidenceReferenceId": "evidence_reference_case_002",
+                  "coverageTarget": {
+                    "unit": "CASE",
+                    "stepSequence": null
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7700000000000000000000000000000000000000000000000000000000000002"
+                },
+                {
+                  "evidenceReferenceId": "evidence_reference_step_002",
+                  "coverageTarget": {
+                    "unit": "STEP",
+                    "stepSequence": 1
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7800000000000000000000000000000000000000000000000000000000000002"
+                }
+              ],
+              "placement": {
+                "categoryDecision": "REUSE_EXISTING",
+                "categoryCanonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "parentDecision": "REUSE_EXISTING",
+                "parentCanonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "materialization": {
+                "kind": "APPLY_CREATED",
+                "applyId": "generation_apply_001",
+                "applyOutcomeId": "generation_apply_outcome_002",
+                "suggestionId": null,
+                "suggestionTargetId": null,
+                "sourceChangeAssessmentId": null,
+                "generationLineageId": null,
+                "baselineCaseVersionId": null,
+                "releaseReceiptId": null,
+                "sourceWorkspaceId": "workspace_synthetic_001",
+                "sourceGenerationJobId": "generation_job_001",
+                "sourceRootJobId": "generation_root_001",
+                "sourceVersion": 1,
+                "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            },
+            {
+              "caseIndex": 2,
+              "caseSnapshotId": "generated_case_003",
+              "summary": {
+                "normalizedLength": 20,
+                "digest": "sha256:7000000000000000000000000000000000000000000000000000000000000003"
+              },
+              "caseExpectedResult": {
+                "normalizedLength": 20,
+                "digest": "sha256:7100000000000000000000000000000000000000000000000000000000000003"
+              },
+              "generationReason": {
+                "normalizedLength": 20,
+                "digest": "sha256:7200000000000000000000000000000000000000000000000000000000000003"
+              },
+              "exactContentKey": "sha256:7300000000000000000000000000000000000000000000000000000000000003",
+              "semanticDuplicateClusterId": "semantic_cluster_003",
+              "steps": [
+                {
+                  "sequence": 1,
+                  "precondition": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7400000000000000000000000000000000000000000000000000000000000003"
+                  },
+                  "action": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7500000000000000000000000000000000000000000000000000000000000003"
+                  },
+                  "expectedResult": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7600000000000000000000000000000000000000000000000000000000000003"
+                  }
+                }
+              ],
+              "evidenceReferences": [
+                {
+                  "evidenceReferenceId": "evidence_reference_case_003",
+                  "coverageTarget": {
+                    "unit": "CASE",
+                    "stepSequence": null
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7700000000000000000000000000000000000000000000000000000000000003"
+                },
+                {
+                  "evidenceReferenceId": "evidence_reference_step_003",
+                  "coverageTarget": {
+                    "unit": "STEP",
+                    "stepSequence": 1
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7800000000000000000000000000000000000000000000000000000000000003"
+                }
+              ],
+              "placement": {
+                "categoryDecision": "REUSE_EXISTING",
+                "categoryCanonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "parentDecision": "REUSE_EXISTING",
+                "parentCanonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "materialization": {
+                "kind": "APPLY_CREATED",
+                "applyId": "generation_apply_001",
+                "applyOutcomeId": "generation_apply_outcome_003",
+                "suggestionId": null,
+                "suggestionTargetId": null,
+                "sourceChangeAssessmentId": null,
+                "generationLineageId": null,
+                "baselineCaseVersionId": null,
+                "releaseReceiptId": null,
+                "sourceWorkspaceId": "workspace_synthetic_001",
+                "sourceGenerationJobId": "generation_job_001",
+                "sourceRootJobId": "generation_root_001",
+                "sourceVersion": 1,
+                "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            },
+            {
+              "caseIndex": 3,
+              "caseSnapshotId": "generated_case_004",
+              "summary": {
+                "normalizedLength": 20,
+                "digest": "sha256:7000000000000000000000000000000000000000000000000000000000000004"
+              },
+              "caseExpectedResult": {
+                "normalizedLength": 20,
+                "digest": "sha256:7100000000000000000000000000000000000000000000000000000000000004"
+              },
+              "generationReason": {
+                "normalizedLength": 20,
+                "digest": "sha256:7200000000000000000000000000000000000000000000000000000000000004"
+              },
+              "exactContentKey": "sha256:7300000000000000000000000000000000000000000000000000000000000004",
+              "semanticDuplicateClusterId": "semantic_cluster_004",
+              "steps": [
+                {
+                  "sequence": 1,
+                  "precondition": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7400000000000000000000000000000000000000000000000000000000000004"
+                  },
+                  "action": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7500000000000000000000000000000000000000000000000000000000000004"
+                  },
+                  "expectedResult": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7600000000000000000000000000000000000000000000000000000000000004"
+                  }
+                }
+              ],
+              "evidenceReferences": [
+                {
+                  "evidenceReferenceId": "evidence_reference_case_004",
+                  "coverageTarget": {
+                    "unit": "CASE",
+                    "stepSequence": null
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7700000000000000000000000000000000000000000000000000000000000004"
+                },
+                {
+                  "evidenceReferenceId": "evidence_reference_step_004",
+                  "coverageTarget": {
+                    "unit": "STEP",
+                    "stepSequence": 1
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7800000000000000000000000000000000000000000000000000000000000004"
+                }
+              ],
+              "placement": {
+                "categoryDecision": "REUSE_EXISTING",
+                "categoryCanonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "parentDecision": "REUSE_EXISTING",
+                "parentCanonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "materialization": {
+                "kind": "APPLY_CREATED",
+                "applyId": "generation_apply_001",
+                "applyOutcomeId": "generation_apply_outcome_004",
+                "suggestionId": null,
+                "suggestionTargetId": null,
+                "sourceChangeAssessmentId": null,
+                "generationLineageId": null,
+                "baselineCaseVersionId": null,
+                "releaseReceiptId": null,
+                "sourceWorkspaceId": "workspace_synthetic_001",
+                "sourceGenerationJobId": "generation_job_001",
+                "sourceRootJobId": "generation_root_001",
+                "sourceVersion": 1,
+                "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            },
+            {
+              "caseIndex": 4,
+              "caseSnapshotId": "generated_case_005",
+              "summary": {
+                "normalizedLength": 20,
+                "digest": "sha256:7000000000000000000000000000000000000000000000000000000000000005"
+              },
+              "caseExpectedResult": {
+                "normalizedLength": 20,
+                "digest": "sha256:7100000000000000000000000000000000000000000000000000000000000005"
+              },
+              "generationReason": {
+                "normalizedLength": 20,
+                "digest": "sha256:7200000000000000000000000000000000000000000000000000000000000005"
+              },
+              "exactContentKey": "sha256:7300000000000000000000000000000000000000000000000000000000000005",
+              "semanticDuplicateClusterId": "semantic_cluster_005",
+              "steps": [
+                {
+                  "sequence": 1,
+                  "precondition": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7400000000000000000000000000000000000000000000000000000000000005"
+                  },
+                  "action": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7500000000000000000000000000000000000000000000000000000000000005"
+                  },
+                  "expectedResult": {
+                    "normalizedLength": 10,
+                    "digest": "sha256:7600000000000000000000000000000000000000000000000000000000000005"
+                  }
+                }
+              ],
+              "evidenceReferences": [
+                {
+                  "evidenceReferenceId": "evidence_reference_case_005",
+                  "coverageTarget": {
+                    "unit": "CASE",
+                    "stepSequence": null
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7700000000000000000000000000000000000000000000000000000000000005"
+                },
+                {
+                  "evidenceReferenceId": "evidence_reference_step_005",
+                  "coverageTarget": {
+                    "unit": "STEP",
+                    "stepSequence": 1
+                  },
+                  "contextEntryId": "context_entry_active_001",
+                  "knowledgeNodeId": "knowledge_node_active_001",
+                  "citationSourceRevisionId": "slack_revision_001",
+                  "source": {
+                    "sourceType": "SLACK_MESSAGE_REVISION",
+                    "sourceEntityId": "slack_message_001",
+                    "sourceRevisionId": "slack_revision_001",
+                    "sourceContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+                  },
+                  "citationExcerptHash": "sha256:7800000000000000000000000000000000000000000000000000000000000005"
+                }
+              ],
+              "placement": {
+                "categoryDecision": "REUSE_EXISTING",
+                "categoryCanonicalKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "parentDecision": "REUSE_EXISTING",
+                "parentCanonicalKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "materialization": {
+                "kind": "APPLY_CREATED",
+                "applyId": "generation_apply_001",
+                "applyOutcomeId": "generation_apply_outcome_005",
+                "suggestionId": null,
+                "suggestionTargetId": null,
+                "sourceChangeAssessmentId": null,
+                "generationLineageId": null,
+                "baselineCaseVersionId": null,
+                "releaseReceiptId": null,
+                "sourceWorkspaceId": "workspace_synthetic_001",
+                "sourceGenerationJobId": "generation_job_001",
+                "sourceRootJobId": "generation_root_001",
+                "sourceVersion": 1,
+                "contextDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "inputDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "resultDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

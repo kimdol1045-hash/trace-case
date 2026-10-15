@@ -1,0 +1,586 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tc.invalid/schemas/knowledge-retrieval-eval.schema.json",
+  "title": "Knowledge retrieval evaluation inputs",
+  "description": "Strict contracts for deterministic synthetic fixtures and explicitly captured, offline operational result snapshots. The evaluator never fetches live results.",
+  "oneOf": [
+    {"$ref": "#/$defs/Manifest"},
+    {"$ref": "#/$defs/Dataset"},
+    {"$ref": "#/$defs/ResultSnapshot"}
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "Rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "RateByK": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[1-9][0-9]*$": {"$ref": "#/$defs/Rate"}
+      },
+      "additionalProperties": false
+    },
+    "SourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "sourceEntityId", "sourceRevisionId"],
+      "properties": {
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "SLACK_MESSAGE_REVISION",
+            "TEST_CASE_VERSION",
+            "EXECUTION_ATTEMPT",
+            "ISSUE_SNAPSHOT",
+            "MANUAL"
+          ]
+        },
+        "sourceEntityId": {"$ref": "#/$defs/Identifier"},
+        "sourceRevisionId": {"$ref": "#/$defs/Identifier"}
+      }
+    },
+    "Citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "label", "uri", "excerpt"],
+      "properties": {
+        "source": {"$ref": "#/$defs/SourceRef"},
+        "label": {"$ref": "#/$defs/NonBlank"},
+        "uri": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "format": "uri", "maxLength": 2048}
+          ]
+        },
+        "excerpt": {"$ref": "#/$defs/NonBlank"}
+      }
+    },
+    "Document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "nodeType",
+        "label",
+        "content",
+        "status",
+        "evidenceIds",
+        "source",
+        "citation",
+        "embedding"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "WORK_ITEM",
+            "MENU",
+            "FEATURE",
+            "REQUIREMENT",
+            "DECISION",
+            "CONSTRAINT",
+            "OPEN_QUESTION",
+            "RISK",
+            "TEST_CASE",
+            "EXECUTION",
+            "ISSUE",
+            "RELEASE"
+          ]
+        },
+        "label": {"$ref": "#/$defs/NonBlank"},
+        "content": {"$ref": "#/$defs/NonBlank"},
+        "status": {
+          "type": "string",
+          "enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED", "RETRACTED"]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "source": {"$ref": "#/$defs/SourceRef"},
+        "citation": {"$ref": "#/$defs/Citation"},
+        "embedding": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 64,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "Query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queryId",
+        "text",
+        "statuses",
+        "embedding",
+        "relevantNodeIds",
+        "lightRagCandidateNodeIds"
+      ],
+      "properties": {
+        "queryId": {"$ref": "#/$defs/Identifier"},
+        "text": {"$ref": "#/$defs/NonBlank"},
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED", "RETRACTED"]
+          }
+        },
+        "embedding": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 64,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "relevantNodeIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "lightRagCandidateNodeIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        }
+      }
+    },
+    "DefaultGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minRecallAtK",
+        "minActiveEvidenceCoverage",
+        "maxInactiveMisuseCount",
+        "minCitationSourceRevisionLinkRate",
+        "maxDuplicateCount",
+        "minReasonRankCompleteness",
+        "minDegradedFallbackRetention",
+        "maxFallbackContractFailures"
+      ],
+      "properties": {
+        "minRecallAtK": {"$ref": "#/$defs/RateByK"},
+        "minActiveEvidenceCoverage": {"const": 1},
+        "maxInactiveMisuseCount": {"const": 0},
+        "minCitationSourceRevisionLinkRate": {"$ref": "#/$defs/Rate"},
+        "maxDuplicateCount": {"const": 0},
+        "minReasonRankCompleteness": {"$ref": "#/$defs/Rate"},
+        "minDegradedFallbackRetention": {"$ref": "#/$defs/Rate"},
+        "maxFallbackContractFailures": {"const": 0}
+      }
+    },
+    "ThresholdGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minRecallAtK",
+        "minActiveEvidenceCoverage",
+        "maxInactiveMisuseCount",
+        "minCitationSourceRevisionLinkRate",
+        "maxDuplicateCount",
+        "minReasonRankCompleteness",
+        "minDegradedFallbackRetention",
+        "maxFallbackContractFailures",
+        "requiredRelevanceCategories",
+        "minRequiredCategoryRecall"
+      ],
+      "properties": {
+        "minRecallAtK": {"$ref": "#/$defs/RateByK"},
+        "minActiveEvidenceCoverage": {"$ref": "#/$defs/Rate"},
+        "maxInactiveMisuseCount": {"type": "integer", "minimum": 0},
+        "minCitationSourceRevisionLinkRate": {"$ref": "#/$defs/Rate"},
+        "maxDuplicateCount": {"type": "integer", "minimum": 0},
+        "minReasonRankCompleteness": {"$ref": "#/$defs/Rate"},
+        "minDegradedFallbackRetention": {"$ref": "#/$defs/Rate"},
+        "maxFallbackContractFailures": {"type": "integer", "minimum": 0},
+        "requiredRelevanceCategories": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/RelevanceCategory"}
+        },
+        "minRequiredCategoryRecall": {"$ref": "#/$defs/Rate"}
+      }
+    },
+    "ThresholdProfiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate", "release"],
+      "properties": {
+        "candidate": {"$ref": "#/$defs/ThresholdGate"},
+        "release": {"$ref": "#/$defs/ThresholdGate"}
+      }
+    },
+    "Manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureKind",
+        "schemaVersion",
+        "datasetId",
+        "synthetic",
+        "description",
+        "fixtureSchema",
+        "kValues",
+        "fallbackK",
+        "expectedMetrics",
+        "defaultGates",
+        "fixtures"
+      ],
+      "properties": {
+        "fixtureKind": {"const": "MANIFEST"},
+        "schemaVersion": {"enum": ["1.0.0", "1.1.0"]},
+        "datasetId": {"$ref": "#/$defs/Identifier"},
+        "synthetic": {"const": true},
+        "description": {"$ref": "#/$defs/NonBlank"},
+        "fixtureSchema": {"type": "string", "const": "retrieval-eval.schema.json"},
+        "kValues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 200}
+        },
+        "fallbackK": {"type": "integer", "minimum": 1, "maximum": 200},
+        "expectedMetrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recallAtK", "rationale"],
+          "properties": {
+            "recallAtK": {"$ref": "#/$defs/RateByK"},
+            "rationale": {"$ref": "#/$defs/NonBlank"}
+          }
+        },
+        "defaultGates": {"$ref": "#/$defs/DefaultGates"},
+        "thresholdProfiles": {"$ref": "#/$defs/ThresholdProfiles"},
+        "fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Za-z0-9_-]+\\.json$"}
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureKind",
+        "fixtureId",
+        "synthetic",
+        "description",
+        "privacy",
+        "documents",
+        "queries"
+      ],
+      "properties": {
+        "fixtureKind": {"const": "DATASET"},
+        "fixtureId": {"$ref": "#/$defs/Identifier"},
+        "synthetic": {"const": true},
+        "description": {"$ref": "#/$defs/NonBlank"},
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["containsProductionData", "containsPersonNames", "containsJiraUrls"],
+          "properties": {
+            "containsProductionData": {"const": false},
+            "containsPersonNames": {"const": false},
+            "containsJiraUrls": {"const": false}
+          }
+        },
+        "documents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Document"}
+        },
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Query"}
+        }
+      }
+    },
+    "RelevanceCategory": {
+      "type": "string",
+      "enum": ["EXISTING_TEST_CASE", "FAILED_EXECUTION", "ISSUE"]
+    },
+    "OperationalIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "OperationalSourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "sourceEntityId", "sourceRevisionId"],
+      "properties": {
+        "sourceType": {"$ref": "#/$defs/NonBlank"},
+        "sourceEntityId": {"$ref": "#/$defs/OperationalIdentifier"},
+        "sourceRevisionId": {"$ref": "#/$defs/OperationalIdentifier"}
+      }
+    },
+    "OperationalCitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "label", "uri", "excerpt"],
+      "properties": {
+        "source": {"$ref": "#/$defs/OperationalSourceRef"},
+        "label": {"$ref": "#/$defs/NonBlank"},
+        "uri": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "format": "uri", "maxLength": 2048}
+          ]
+        },
+        "excerpt": {"$ref": "#/$defs/NonBlank"}
+      }
+    },
+    "RelevantNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodeId", "nodeType"],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/OperationalIdentifier"},
+        "nodeType": {
+          "type": "string",
+          "enum": ["TEST_CASE", "EXECUTION", "ISSUE"]
+        },
+        "executionOutcome": {
+          "type": "string",
+          "enum": ["PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR"]
+        }
+      }
+    },
+    "SnapshotQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queryId",
+        "text",
+        "statuses",
+        "relevanceCategory",
+        "relevantNodes"
+      ],
+      "properties": {
+        "queryId": {"$ref": "#/$defs/OperationalIdentifier"},
+        "text": {"$ref": "#/$defs/NonBlank"},
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED", "RETRACTED"]
+          }
+        },
+        "relevanceCategory": {"$ref": "#/$defs/RelevanceCategory"},
+        "relevantNodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/RelevantNode"}
+        }
+      }
+    },
+    "SnapshotResultItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "nodeType",
+        "status",
+        "evidenceIds",
+        "source",
+        "citation",
+        "rank",
+        "score",
+        "reason",
+        "degraded"
+      ],
+      "properties": {
+        "nodeId": {"$ref": "#/$defs/OperationalIdentifier"},
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "WORK_ITEM",
+            "MENU",
+            "FEATURE",
+            "REQUIREMENT",
+            "DECISION",
+            "CONSTRAINT",
+            "OPEN_QUESTION",
+            "RISK",
+            "TEST_CASE",
+            "EXECUTION",
+            "ISSUE",
+            "RELEASE"
+          ]
+        },
+        "executionOutcome": {
+          "type": "string",
+          "enum": ["PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED", "RETRACTED"]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/OperationalIdentifier"}
+        },
+        "source": {"$ref": "#/$defs/OperationalSourceRef"},
+        "citation": {"$ref": "#/$defs/OperationalCitation"},
+        "rank": {"type": "integer", "minimum": 1},
+        "score": {"type": "number"},
+        "reason": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "signals"],
+          "properties": {
+            "summary": {"type": "string", "maxLength": 20000},
+            "signals": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/NonBlank"}
+            }
+          }
+        },
+        "degraded": {"type": "boolean"}
+      }
+    },
+    "SnapshotResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["degraded", "degradationReasons", "items"],
+      "properties": {
+        "degraded": {"type": "boolean"},
+        "degradationReasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/NonBlank"}
+        },
+        "items": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/SnapshotResultItem"}
+        }
+      }
+    },
+    "SnapshotDataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["datasetId", "description", "kValues", "fallbackK", "queries"],
+      "properties": {
+        "datasetId": {"$ref": "#/$defs/OperationalIdentifier"},
+        "description": {"$ref": "#/$defs/NonBlank"},
+        "kValues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 200}
+        },
+        "fallbackK": {"type": "integer", "minimum": 1, "maximum": 200},
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {"type": "string", "enum": ["UNREVIEWED", "REVIEWED"]},
+            "reviewedBy": {"$ref": "#/$defs/NonBlank"},
+            "reviewedAt": {"type": "string", "format": "date-time"},
+            "labelSetId": {"$ref": "#/$defs/OperationalIdentifier"}
+          }
+        },
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/SnapshotQuery"}
+        }
+      }
+    },
+    "CaptureProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capturedAt": {"type": "string", "format": "date-time"},
+        "environment": {"$ref": "#/$defs/NonBlank"},
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "serviceVersion": {"$ref": "#/$defs/NonBlank"},
+            "revision": {"$ref": "#/$defs/NonBlank"}
+          }
+        },
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "embeddingModel": {"$ref": "#/$defs/NonBlank"},
+            "rerankerModel": {"$ref": "#/$defs/NonBlank"}
+          }
+        },
+        "search": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "implementation": {"$ref": "#/$defs/NonBlank"},
+            "indexRevision": {"$ref": "#/$defs/NonBlank"},
+            "configurationRevision": {"$ref": "#/$defs/NonBlank"}
+          }
+        }
+      }
+    },
+    "ResultSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureKind",
+        "schemaVersion",
+        "synthetic",
+        "dataset",
+        "results"
+      ],
+      "properties": {
+        "fixtureKind": {"const": "RESULT_SNAPSHOT"},
+        "schemaVersion": {"const": "1.0.0"},
+        "synthetic": {"const": false},
+        "dataset": {"$ref": "#/$defs/SnapshotDataset"},
+        "provenance": {"$ref": "#/$defs/CaptureProvenance"},
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["queryId", "baseline", "degraded"],
+            "properties": {
+              "queryId": {"$ref": "#/$defs/OperationalIdentifier"},
+              "baseline": {"$ref": "#/$defs/SnapshotResponse"},
+              "degraded": {"$ref": "#/$defs/SnapshotResponse"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

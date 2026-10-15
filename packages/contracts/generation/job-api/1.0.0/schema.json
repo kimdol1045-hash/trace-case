@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/job-api/1.0.0/schema.json",
+  "title": "Generation job API 1.0.0",
+  "description": "Provider-neutral manual generation job contracts. Creating a job seals context without calling a provider; execute is an explicit idempotent action, and retry appends a new lineage attempt instead of mutating a terminal job.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "ShortString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "NullableIdentifier": {
+      "oneOf": [
+        {"$ref": "#/$defs/Identifier"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "NullableUri": {
+      "oneOf": [
+        {"type": "string", "format": "uri-reference", "maxLength": 2048},
+        {"type": "null"}
+      ]
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "NullableCursor": {
+      "oneOf": [
+        {"$ref": "#/$defs/Cursor"},
+        {"type": "null"}
+      ]
+    },
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "The canonical Idempotency-Key request-header value. Replaying the same key with the same normalized action returns the original result; using it with a different action payload returns IDEMPOTENCY_CONFLICT."
+    },
+    "GenerationJobStatus": {
+      "$ref": "../../../state-enums.schema.json#/$defs/GenerationJobStatus"
+    },
+    "GenerationOperation": {
+      "type": "string",
+      "enum": ["CREATE", "EXECUTE", "RETRY"]
+    },
+    "GenerationProviderErrorCode": {
+      "type": "string",
+      "enum": [
+        "GENERATION_UNSUPPORTED_SCHEMA_VERSION",
+        "GENERATION_AUTH_REJECTED",
+        "GENERATION_TIMEOUT",
+        "GENERATION_TRANSPORT_UNAVAILABLE",
+        "GENERATION_RATE_LIMITED",
+        "GENERATION_PROVIDER_REJECTED",
+        "GENERATION_PROVIDER_ERROR",
+        "GENERATION_INVALID_CONTENT_TYPE",
+        "GENERATION_RESPONSE_TOO_LARGE",
+        "GENERATION_MALFORMED_JSON",
+        "GENERATION_INVALID_RESPONSE"
+      ],
+      "description": "Stable redacted execution failure codes. Provider response bodies, URLs, credentials, native error strings and authentication headers never appear in this contract."
+    },
+    "GenerationFailureResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable", "attempts", "occurredAt"],
+      "properties": {
+        "code": {"$ref": "#/$defs/GenerationProviderErrorCode"},
+        "message": {"$ref": "#/$defs/ShortString"},
+        "retryable": {"type": "boolean"},
+        "attempts": {"type": "integer", "minimum": 1, "maximum": 5},
+        "occurredAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "NullableGenerationFailure": {
+      "oneOf": [
+        {"$ref": "#/$defs/GenerationFailureResource"},
+        {"type": "null"}
+      ]
+    },
+    "GenerationJobLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rootJobId", "retryOfJobId", "attemptNumber"],
+      "properties": {
+        "rootJobId": {"$ref": "#/$defs/Identifier"},
+        "retryOfJobId": {"$ref": "#/$defs/NullableIdentifier"},
+        "attemptNumber": {"type": "integer", "minimum": 1}
+      },
+      "description": "Append-only retry lineage. A root job has attemptNumber 1, rootJobId equal to its own ID and retryOfJobId null. Every retry is a distinct job linked to the immediately preceding failed job."
+    },
+    "GenerationContextProvenanceResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSchemaVersion",
+        "outputSchemaVersion",
+        "sourceVersion",
+        "generationVersion",
+        "ontologySchemaId",
+        "promptVersion",
+        "itemCount",
+        "digest",
+        "sealedAt"
+      ],
+      "properties": {
+        "inputSchemaVersion": {"const": "1.0.0"},
+        "outputSchemaVersion": {"const": "1.0.0"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "generationVersion": {"type": "integer", "minimum": 1},
+        "ontologySchemaId": {"$ref": "#/$defs/Identifier"},
+        "promptVersion": {"$ref": "#/$defs/Identifier"},
+        "itemCount": {"type": "integer", "minimum": 1},
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lower-case SHA-256 hex digest covering immutable context and trusted execution provenance."
+        },
+        "sealedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Server-owned immutable provenance sealed when the job is created. Execute and retry requests cannot replace or patch any field."
+    },
+    "GenerationContextSourceResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "entityType",
+        "entityId",
+        "revision",
+        "contentHash",
+        "permalink"
+      ],
+      "properties": {
+        "kind": {"type": "string", "enum": ["SOURCE_REVISION", "LEDGER_ENTITY"]},
+        "entityType": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 64},
+        "entityId": {"$ref": "#/$defs/Identifier"},
+        "revision": {"$ref": "#/$defs/ShortString"},
+        "contentHash": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S"},
+        "permalink": {"$ref": "#/$defs/NullableUri"}
+      }
+    },
+    "GenerationContextItemResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "knowledgeEvidenceId",
+        "subjectType",
+        "subjectId",
+        "source",
+        "rank",
+        "reason",
+        "snapshot"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "knowledgeEvidenceId": {"$ref": "#/$defs/Identifier"},
+        "subjectType": {"type": "string", "enum": ["NODE", "EDGE"]},
+        "subjectId": {"$ref": "#/$defs/Identifier"},
+        "source": {"$ref": "#/$defs/GenerationContextSourceResource"},
+        "rank": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/ShortString"},
+        "snapshot": {"type": "object"}
+      },
+      "description": "Read-only context snapshot entry. Entries are ordered by contiguous one-based rank and cannot be changed after context sealing."
+    },
+    "GenerationJobResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slackWorkItemId",
+        "status",
+        "lineage",
+        "context",
+        "failure",
+        "result",
+        "createdAt",
+        "startedAt",
+        "completedAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "status": {"$ref": "#/$defs/GenerationJobStatus"},
+        "lineage": {"$ref": "#/$defs/GenerationJobLineage"},
+        "context": {"$ref": "#/$defs/GenerationContextProvenanceResource"},
+        "failure": {"$ref": "#/$defs/NullableGenerationFailure"},
+        "result": {
+          "oneOf": [
+            {"$ref": "../../output/1.0.0/schema.json"},
+            {"type": "null"}
+          ]
+        },
+        "createdAt": {"type": "string", "format": "date-time"},
+        "startedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "QUEUED"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "startedAt": {"type": "null"},
+              "completedAt": {"type": "null"},
+              "failure": {"type": "null"},
+              "result": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "RUNNING"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "startedAt": {"type": "string", "format": "date-time"},
+              "completedAt": {"type": "null"},
+              "failure": {"type": "null"},
+              "result": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "SUCCEEDED"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "startedAt": {"type": "string", "format": "date-time"},
+              "completedAt": {"type": "string", "format": "date-time"},
+              "failure": {"type": "null"},
+              "result": {"$ref": "../../output/1.0.0/schema.json"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "FAILED"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "startedAt": {"type": "string", "format": "date-time"},
+              "completedAt": {"type": "string", "format": "date-time"},
+              "failure": {"$ref": "#/$defs/GenerationFailureResource"},
+              "result": {"type": "null"}
+            }
+          }
+        }
+      ],
+      "description": "The generated result is a candidate payload only. This resource contains no case IDs and does not write or imply writes to the QA test-case ledger."
+    },
+    "GenerationJobDetailResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["job", "contextItems"],
+      "properties": {
+        "job": {"$ref": "#/$defs/GenerationJobResource"},
+        "contextItems": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5000,
+          "items": {"$ref": "#/$defs/GenerationContextItemResource"}
+        }
+      }
+    },
+    "CreateGenerationJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "slackWorkItemId"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"}
+      },
+      "description": "POST /api/generation-jobs. Seals trusted context and returns a root QUEUED job without choosing or calling an external provider. Provider, model, endpoint, credentials, cost and sampling fields are not accepted."
+    },
+    "CreateGenerationJobResponse": {"$ref": "#/$defs/GenerationJobDetailResource"},
+    "GenerationJobListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slackWorkItemId", "statuses", "cursor", "limit"],
+      "properties": {
+        "slackWorkItemId": {"$ref": "#/$defs/NullableIdentifier"},
+        "statuses": {
+          "type": "array",
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/GenerationJobStatus"}
+        },
+        "cursor": {"$ref": "#/$defs/NullableCursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+      },
+      "description": "GET /api/generation-jobs. Results use a stable createdAt/id descending cursor and may be narrowed to one Slack work item."
+    },
+    "GenerationJobPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {"$ref": "#/$defs/GenerationJobResource"}
+        },
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "GetGenerationJobResponse": {"$ref": "#/$defs/GenerationJobDetailResource"},
+    "ExecuteGenerationJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"}
+      },
+      "description": "POST /api/generation-jobs/{jobId}/execute. Only QUEUED jobs are eligible. Provider routing is server-owned; no provider-native controls are accepted. If setup is incomplete, the job remains QUEUED and GENERATION_SETUP_REQUIRED proves no external call was attempted."
+    },
+    "ExecuteGenerationJobResponse": {"$ref": "#/$defs/GenerationJobDetailResource"},
+    "RetryGenerationJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "contextMode", "reason"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "contextMode": {"const": "REUSE_SEALED"},
+        "reason": {"$ref": "#/$defs/ShortString"}
+      },
+      "description": "POST /api/generation-jobs/{jobId}/retry. The source job must be FAILED. Retry creates a new QUEUED job with a copied-and-resealed immutable context, the same rootJobId and retryOfJobId pointing to the source; it never resets or overwrites the failed job."
+    },
+    "RetryGenerationJobResponse": {"$ref": "#/$defs/GenerationJobDetailResource"},
+    "SetupBlockingDecision": {
+      "type": "string",
+      "enum": ["PROVIDER_SELECTION", "ENDPOINT", "CREDENTIALS", "COST_APPROVAL"]
+    },
+    "GenerationSetupRequiredError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_SETUP_REQUIRED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "jobId",
+                "setupState",
+                "blockingDecisions",
+                "externalCallAttempted",
+                "manualCaseCreationAvailable"
+              ],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/Identifier"},
+                "setupState": {"const": "SETUP_REQUIRED"},
+                "blockingDecisions": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {"$ref": "#/$defs/SetupBlockingDecision"}
+                },
+                "externalCallAttempted": {"const": false},
+                "manualCaseCreationAvailable": {"const": true}
+              }
+            }
+          }
+        }
+      ],
+      "description": "Stable fail-closed response while T01 provider, endpoint, credentials or cost approval remains unresolved. It is not a FAILED provider attempt and leaves the job QUEUED."
+    },
+    "GenerationProviderExecutionError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"$ref": "#/$defs/GenerationProviderErrorCode"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "retryable", "attempts"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/Identifier"},
+                "retryable": {"type": "boolean"},
+                "attempts": {"type": "integer", "minimum": 1, "maximum": 5}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "GenerationJobStateConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_JOB_STATE_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "operation", "actualStatus", "allowedStatuses"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/Identifier"},
+                "operation": {"$ref": "#/$defs/GenerationOperation"},
+                "actualStatus": {"$ref": "#/$defs/GenerationJobStatus"},
+                "allowedStatuses": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {"$ref": "#/$defs/GenerationJobStatus"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "GenerationJobErrorResponse": {
+      "oneOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/ValidationError"},
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"},
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/GenerationSetupRequiredError"},
+        {"$ref": "#/$defs/GenerationProviderExecutionError"},
+        {"$ref": "#/$defs/GenerationJobStateConflictError"}
+      ]
+    }
+  }
+}

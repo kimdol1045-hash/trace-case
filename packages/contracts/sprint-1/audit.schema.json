@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-1/audit.schema.json",
+  "title": "Sprint 1 append-only audit read API payloads",
+  "description": "Read-only audit entry and page payloads. The public contract intentionally defines no audit create, update or delete command.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "WorkspaceId": {
+      "type": "string",
+      "pattern": "^workspace_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "AuditId": {
+      "type": "string",
+      "pattern": "^audit_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "EntityId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "\\S"
+    },
+    "JsonValue": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "boolean"},
+        {"type": "number"},
+        {"type": "string"},
+        {"type": "array", "items": {"$ref": "#/$defs/JsonValue"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/JsonValue"}}
+      ]
+    },
+    "Snapshot": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/JsonValue"}},
+        {"type": "null"}
+      ]
+    },
+    "AuditSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"type": "string", "enum": ["UI", "API", "SYSTEM", "SLACK", "WORKER"]},
+        "actorLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "externalActorId": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"}
+      }
+    },
+    "AuditEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "workspaceId",
+        "entityType",
+        "entityId",
+        "action",
+        "before",
+        "after",
+        "source",
+        "occurredAt",
+        "traceId"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/AuditId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "entityType": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 64},
+        "entityId": {"$ref": "#/$defs/EntityId"},
+        "action": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 64},
+        "before": {"$ref": "#/$defs/Snapshot"},
+        "after": {"$ref": "#/$defs/Snapshot"},
+        "source": {"$ref": "#/$defs/AuditSource"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "traceId": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
+        "idempotencyKey": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"}
+      }
+    },
+    "AuditPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/AuditEntry"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

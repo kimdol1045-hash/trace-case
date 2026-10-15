@@ -1,0 +1,550 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/retry-history/1.0.0/schema.json",
+  "title": "Automatic generation retry and attempt history 1.0.0",
+  "description": "Operator-safe failure queue, immutable conditional retry request, and automatic generation attempt-history resources. Job-level attempts, provider-internal attempts, and background-worker delivery attempts are deliberately separate authorities.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NullableIdentifier": {
+      "oneOf": [
+        {"$ref": "#/$defs/Identifier"},
+        {"type": "null"}
+      ]
+    },
+    "DateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"$ref": "#/$defs/DateTime"},
+        {"type": "null"}
+      ]
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "NullableSha256": {
+      "oneOf": [
+        {"$ref": "#/$defs/Sha256"},
+        {"type": "null"}
+      ]
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "NullableCursor": {
+      "oneOf": [
+        {"$ref": "#/$defs/Cursor"},
+        {"type": "null"}
+      ]
+    },
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "GenerationErrorCode": {
+      "type": "string",
+      "enum": [
+        "GENERATION_CONFIG_INVALID",
+        "GENERATION_UNSUPPORTED_SCHEMA_VERSION",
+        "GENERATION_AUTH_REQUIRED",
+        "GENERATION_AUTH_REJECTED",
+        "GENERATION_TIMEOUT",
+        "GENERATION_TRANSPORT_UNAVAILABLE",
+        "GENERATION_RATE_LIMITED",
+        "GENERATION_PROVIDER_REJECTED",
+        "GENERATION_PROVIDER_ERROR",
+        "GENERATION_INVALID_CONTENT_TYPE",
+        "GENERATION_RESPONSE_TOO_LARGE",
+        "GENERATION_MALFORMED_JSON",
+        "GENERATION_INVALID_RESPONSE",
+        "GENERATION_SOURCE_STALE",
+        "GENERATION_SOURCE_UNAVAILABLE",
+        "GENERATION_WORK_ITEM_DELETED",
+        "GENERATION_EXECUTION_OUTCOME_UNKNOWN",
+        "GENERATION_WORKER_DELIVERY_EXHAUSTED"
+      ],
+      "description": "Stable sanitized code only. Raw provider bodies, exception strings, endpoints, headers, prompts, source text, and credentials are never members of a retry-history resource."
+    },
+    "RetryOrigin": {
+      "type": "string",
+      "enum": ["ROOT", "AUTOMATIC_POLICY", "OPERATOR_CONDITIONS", "MANUAL_API"]
+    },
+    "FailureFinality": {
+      "type": "string",
+      "enum": [
+        "AUTOMATIC_RETRY_SCHEDULED",
+        "TERMINAL_NON_RETRYABLE",
+        "TERMINAL_EXHAUSTED",
+        "TERMINAL_REVIEW_REQUIRED"
+      ]
+    },
+    "AttemptStatus": {
+      "type": "string",
+      "enum": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED"]
+    },
+    "ExecutionState": {
+      "type": "string",
+      "enum": [
+        "NOT_BEFORE",
+        "READY",
+        "LEASED",
+        "PROVIDER_OUTCOME_UNKNOWN",
+        "TERMINAL"
+      ]
+    },
+    "MaterializationMode": {
+      "type": "string",
+      "enum": ["MANUAL_ONLY", "AUTOMATIC_APPLY", "AUTOMATIC_SUGGESTIONS"]
+    },
+    "MaterializationState": {
+      "type": "string",
+      "enum": [
+        "NOT_SCHEDULED",
+        "QUEUED",
+        "RUNNING",
+        "COMMITTED",
+        "SKIPPED_STALE_SOURCE",
+        "SKIPPED_SOURCE_UNAVAILABLE",
+        "REVIEW_REQUIRED",
+        "FAILED"
+      ]
+    },
+    "OperatorActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "principalId", "displayLabel"],
+      "properties": {
+        "type": {"const": "AUTHENTICATED_OPERATOR"},
+        "principalId": {"$ref": "#/$defs/Identifier"},
+        "displayLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "AdditionalConditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "unicodeCodePoints", "utf8Bytes", "digest"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S",
+          "description": "NFKC-normalized advisory text. It is a structured untrusted Generation Input field and is never interpolated into a system/developer prompt."
+        },
+        "unicodeCodePoints": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "utf8Bytes": {"type": "integer", "minimum": 1, "maximum": 4000},
+        "digest": {"$ref": "#/$defs/Sha256"}
+      }
+    },
+    "NullableAdditionalConditions": {
+      "oneOf": [
+        {"$ref": "#/$defs/AdditionalConditions"},
+        {"type": "null"}
+      ]
+    },
+    "InputSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contextPolicy",
+        "contextDigest",
+        "inputSchemaVersion",
+        "inputDigest",
+        "operatorConditions"
+      ],
+      "properties": {
+        "contextPolicy": {"const": "REUSE_SEALED"},
+        "contextDigest": {"$ref": "#/$defs/Sha256"},
+        "inputSchemaVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "inputDigest": {"$ref": "#/$defs/Sha256"},
+        "operatorConditions": {"$ref": "#/$defs/NullableAdditionalConditions"}
+      }
+    },
+    "ProviderAttempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerAttemptNumber",
+        "outcome",
+        "errorCode",
+        "safeProviderCode",
+        "httpStatus",
+        "startedAt",
+        "finishedAt"
+      ],
+      "properties": {
+        "providerAttemptNumber": {"type": "integer", "minimum": 1, "maximum": 5},
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "SUCCEEDED",
+            "RETRYABLE_FAILURE",
+            "NON_RETRYABLE_FAILURE",
+            "AMBIGUOUS"
+          ]
+        },
+        "errorCode": {
+          "oneOf": [
+            {"$ref": "#/$defs/GenerationErrorCode"},
+            {"type": "null"}
+          ]
+        },
+        "safeProviderCode": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-z0-9_]+$"},
+            {"type": "null"}
+          ]
+        },
+        "httpStatus": {
+          "oneOf": [
+            {"type": "integer", "minimum": 100, "maximum": 599},
+            {"type": "null"}
+          ]
+        },
+        "startedAt": {"$ref": "#/$defs/DateTime"},
+        "finishedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "FailureSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "messageLabel",
+        "retryable",
+        "finality",
+        "providerAttemptCount",
+        "failedAt",
+        "nextAttemptNotBefore",
+        "exhaustionReceiptId"
+      ],
+      "properties": {
+        "code": {"$ref": "#/$defs/GenerationErrorCode"},
+        "messageLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "retryable": {"type": "boolean"},
+        "finality": {"$ref": "#/$defs/FailureFinality"},
+        "providerAttemptCount": {"type": "integer", "minimum": 0, "maximum": 5},
+        "failedAt": {"$ref": "#/$defs/DateTime"},
+        "nextAttemptNotBefore": {"$ref": "#/$defs/NullableDateTime"},
+        "exhaustionReceiptId": {"$ref": "#/$defs/NullableIdentifier"}
+      }
+    },
+    "NullableFailureSummary": {
+      "oneOf": [
+        {"$ref": "#/$defs/FailureSummary"},
+        {"type": "null"}
+      ]
+    },
+    "MaterializationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "state", "applyId", "suggestionMaterializationId"],
+      "properties": {
+        "mode": {"$ref": "#/$defs/MaterializationMode"},
+        "state": {"$ref": "#/$defs/MaterializationState"},
+        "applyId": {"$ref": "#/$defs/NullableIdentifier"},
+        "suggestionMaterializationId": {"$ref": "#/$defs/NullableIdentifier"}
+      }
+    },
+    "NotificationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intentId", "receiptId", "outcome"],
+      "properties": {
+        "intentId": {"$ref": "#/$defs/NullableIdentifier"},
+        "receiptId": {"$ref": "#/$defs/NullableIdentifier"},
+        "outcome": {
+          "type": "string",
+          "enum": ["NONE", "PENDING", "DELIVERED", "SUPPRESSED", "DEAD"]
+        }
+      }
+    },
+    "AttemptHistoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jobId",
+        "rootJobId",
+        "retryOfJobId",
+        "jobAttemptNumber",
+        "retryOrigin",
+        "status",
+        "executionState",
+        "notBefore",
+        "workerDeliveryAttemptCount",
+        "input",
+        "providerAttempts",
+        "resultDigest",
+        "failure",
+        "materialization",
+        "notification",
+        "createdAt",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "rootJobId": {"$ref": "#/$defs/Identifier"},
+        "retryOfJobId": {"$ref": "#/$defs/NullableIdentifier"},
+        "jobAttemptNumber": {"type": "integer", "minimum": 1},
+        "retryOrigin": {"$ref": "#/$defs/RetryOrigin"},
+        "status": {"$ref": "#/$defs/AttemptStatus"},
+        "executionState": {"$ref": "#/$defs/ExecutionState"},
+        "notBefore": {"$ref": "#/$defs/DateTime"},
+        "workerDeliveryAttemptCount": {"type": "integer", "minimum": 0},
+        "input": {"$ref": "#/$defs/InputSeal"},
+        "providerAttempts": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/ProviderAttempt"}
+        },
+        "resultDigest": {"$ref": "#/$defs/NullableSha256"},
+        "failure": {"$ref": "#/$defs/NullableFailureSummary"},
+        "materialization": {"$ref": "#/$defs/MaterializationSummary"},
+        "notification": {"$ref": "#/$defs/NotificationSummary"},
+        "createdAt": {"$ref": "#/$defs/DateTime"},
+        "startedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "TimelineReferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retryRequestId",
+        "applyId",
+        "suggestionMaterializationId",
+        "notificationIntentId",
+        "notificationReceiptId"
+      ],
+      "properties": {
+        "retryRequestId": {"$ref": "#/$defs/NullableIdentifier"},
+        "applyId": {"$ref": "#/$defs/NullableIdentifier"},
+        "suggestionMaterializationId": {"$ref": "#/$defs/NullableIdentifier"},
+        "notificationIntentId": {"$ref": "#/$defs/NullableIdentifier"},
+        "notificationReceiptId": {"$ref": "#/$defs/NullableIdentifier"}
+      }
+    },
+    "TimelineEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "eventType",
+        "jobId",
+        "jobAttemptNumber",
+        "providerAttemptNumber",
+        "errorCode",
+        "occurredAt",
+        "references"
+      ],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "INPUT_SEALED",
+            "EXECUTION_QUEUED",
+            "WORKER_LEASED",
+            "PROVIDER_ATTEMPT_STARTED",
+            "PROVIDER_ATTEMPT_FAILED",
+            "PROVIDER_ATTEMPT_SUCCEEDED",
+            "JOB_FAILED",
+            "RETRY_SCHEDULED",
+            "JOB_SUCCEEDED",
+            "APPLY_SCHEDULED",
+            "APPLY_COMMITTED",
+            "SUGGESTION_SCHEDULED",
+            "SUGGESTION_COMMITTED",
+            "MATERIALIZATION_SKIPPED",
+            "SLACK_INTENT_CAPTURED",
+            "SLACK_DELIVERED",
+            "SLACK_SUPPRESSED",
+            "SLACK_DEAD"
+          ]
+        },
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "jobAttemptNumber": {"type": "integer", "minimum": 1},
+        "providerAttemptNumber": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1, "maximum": 5},
+            {"type": "null"}
+          ]
+        },
+        "errorCode": {
+          "oneOf": [
+            {"$ref": "#/$defs/GenerationErrorCode"},
+            {"type": "null"}
+          ]
+        },
+        "occurredAt": {"$ref": "#/$defs/DateTime"},
+        "references": {"$ref": "#/$defs/TimelineReferences"}
+      }
+    },
+    "FailureQueueItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rootJobId",
+        "failedJobId",
+        "slackWorkItemId",
+        "sourceVersion",
+        "jobAttemptNumber",
+        "failure",
+        "actionability",
+        "latestRetryJobId"
+      ],
+      "properties": {
+        "rootJobId": {"$ref": "#/$defs/Identifier"},
+        "failedJobId": {"$ref": "#/$defs/Identifier"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "jobAttemptNumber": {"type": "integer", "minimum": 1},
+        "failure": {"$ref": "#/$defs/FailureSummary"},
+        "actionability": {
+          "type": "string",
+          "enum": [
+            "AUTOMATIC_RETRY_SCHEDULED",
+            "OPERATOR_RETRY_ALLOWED",
+            "REASSESS_CURRENT_SOURCE",
+            "REVIEW_ONLY"
+          ]
+        },
+        "latestRetryJobId": {"$ref": "#/$defs/NullableIdentifier"}
+      }
+    },
+    "FailureQueuePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractVersion", "items", "nextCursor"],
+      "properties": {
+        "contractVersion": {"const": "automatic-generation-retry-history/1.0.0"},
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/FailureQueueItem"}
+        },
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "FailureDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "failure",
+        "attemptHistory",
+        "timeline"
+      ],
+      "properties": {
+        "contractVersion": {"const": "automatic-generation-retry-history/1.0.0"},
+        "failure": {"$ref": "#/$defs/FailureQueueItem"},
+        "attemptHistory": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/AttemptHistoryItem"}
+        },
+        "timeline": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2000,
+          "items": {"$ref": "#/$defs/TimelineEvent"}
+        }
+      }
+    },
+    "OperatorRetryRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotencyKey",
+        "expectedRootJobId",
+        "expectedFailedJobId",
+        "expectedAttemptNumber",
+        "contextMode",
+        "reason",
+        "additionalConditions"
+      ],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "expectedRootJobId": {"$ref": "#/$defs/Identifier"},
+        "expectedFailedJobId": {"$ref": "#/$defs/Identifier"},
+        "expectedAttemptNumber": {"type": "integer", "minimum": 1},
+        "contextMode": {"const": "REUSE_SEALED"},
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "\\S"
+        },
+        "additionalConditions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S"
+        }
+      },
+      "description": "The authenticated actor is server-derived and is not accepted in the body. Conditions are NFKC-normalized and stored as an immutable untrusted structured field."
+    },
+    "RetryScheduledResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "retryRequestId",
+        "requestDigest",
+        "actor",
+        "sourceFailedJobId",
+        "retryJobId",
+        "jobAttemptNumber",
+        "retryOrigin",
+        "contextMode",
+        "notBefore",
+        "additionalConditions"
+      ],
+      "properties": {
+        "contractVersion": {"const": "automatic-generation-retry-history/1.0.0"},
+        "retryRequestId": {"$ref": "#/$defs/Identifier"},
+        "requestDigest": {"$ref": "#/$defs/Sha256"},
+        "actor": {"$ref": "#/$defs/OperatorActor"},
+        "sourceFailedJobId": {"$ref": "#/$defs/Identifier"},
+        "retryJobId": {"$ref": "#/$defs/Identifier"},
+        "jobAttemptNumber": {"type": "integer", "minimum": 2},
+        "retryOrigin": {"const": "OPERATOR_CONDITIONS"},
+        "contextMode": {"const": "REUSE_SEALED"},
+        "notBefore": {"$ref": "#/$defs/DateTime"},
+        "additionalConditions": {"$ref": "#/$defs/AdditionalConditions"}
+      }
+    }
+  }
+}

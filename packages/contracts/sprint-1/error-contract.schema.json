@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json",
+  "title": "Sprint 1 API error contract",
+  "description": "Strict common and folder/workspace/audit error payloads with stable machine codes.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "TraceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "ResourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "\\S"
+    },
+    "CommonError": {
+      "type": "object",
+      "required": ["code", "message", "details", "traceId"],
+      "properties": {
+        "code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+        "message": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "details": {"type": "object"},
+        "traceId": {"$ref": "#/$defs/TraceId"}
+      }
+    },
+    "FieldViolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "reason"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      }
+    },
+    "ValidationError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "VALIDATION_FAILED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["fieldViolations"],
+              "properties": {
+                "fieldViolations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/FieldViolation"}}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ResourceNotFoundError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "RESOURCE_NOT_FOUND"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resourceType", "resourceId"],
+              "properties": {
+                "resourceType": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+                "resourceId": {"$ref": "#/$defs/ResourceId"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "VersionConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "VERSION_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resourceType", "resourceId", "expectedVersion", "actualVersion"],
+              "properties": {
+                "resourceType": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+                "resourceId": {"$ref": "#/$defs/ResourceId"},
+                "expectedVersion": {"type": "integer", "minimum": 1},
+                "actualVersion": {"type": "integer", "minimum": 1}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FolderMutationConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "FOLDER_CYCLE",
+                "FOLDER_PARENT_DELETED",
+                "FOLDER_NAME_CONFLICT",
+                "FOLDER_NOT_EMPTY",
+                "FOLDER_RESTORE_CONFLICT",
+                "FOLDER_ALIAS_CONFLICT",
+                "FOLDER_ALIAS_TARGET_DELETED",
+                "SYSTEM_FOLDER_PROTECTED"
+              ]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["folderId"],
+              "properties": {
+                "folderId": {"type": "string", "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+                "targetParentId": {
+                  "oneOf": [
+                    {"type": "string", "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+                    {"type": "null"}
+                  ]
+                },
+                "conflictFolderId": {"type": "string", "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+                "activeTestCaseCount": {"type": "integer", "minimum": 0}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FolderContentWarningError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "FOLDER_CONTENT_WARNING"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["folderId", "affectedFolderCount", "activeTestCaseCount", "requiresConfirmation"],
+              "properties": {
+                "folderId": {"type": "string", "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+                "affectedFolderCount": {"type": "integer", "minimum": 1},
+                "activeTestCaseCount": {"type": "integer", "minimum": 0},
+                "requiresConfirmation": {"const": true}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IdempotencyConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "IDEMPOTENCY_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["idempotencyKey"],
+              "properties": {
+                "idempotencyKey": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "KeyAllocationError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "KEY_ALLOCATION_FAILED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["entityType"],
+              "properties": {
+                "entityType": {"type": "string", "enum": ["TEST_CASE", "ISSUE"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AuditCursorError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "AUDIT_CURSOR_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cursor"],
+              "properties": {
+                "cursor": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ErrorResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/ValidationError"},
+        {"$ref": "#/$defs/ResourceNotFoundError"},
+        {"$ref": "#/$defs/VersionConflictError"},
+        {"$ref": "#/$defs/FolderMutationConflictError"},
+        {"$ref": "#/$defs/FolderContentWarningError"},
+        {"$ref": "#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/KeyAllocationError"},
+        {"$ref": "#/$defs/AuditCursorError"}
+      ]
+    }
+  }
+}

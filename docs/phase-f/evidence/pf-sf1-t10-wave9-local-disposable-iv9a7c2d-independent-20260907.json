@@ -1,0 +1,1294 @@
+{
+  "cleanup": {
+    "evidenceBound": true,
+    "performed": false,
+    "required": true
+  },
+  "confirmationRequired": "RUN PF-SF1-T10 LOCAL-DISPOSABLE-MIGRATION-ROUNDTRIP ON tc-phase-f-pf-sf1-t10-wave9-iv9a7c2d-disposable",
+  "contractDigest": {
+    "sha256": "bc46318da8e556609ab64f96d02fd65543e29fdbca62ab9a2a143f70b29ca4bd",
+    "version": "tc.canonical-json.sha256.v1"
+  },
+  "credentialsOmitted": true,
+  "databaseUrlsOmitted": true,
+  "dump": {
+    "bytes": 689165,
+    "fileIdentity": {
+      "ctimeNs": 1788749606467148456,
+      "device": 16777231,
+      "inode": 96648361,
+      "linkCount": 1,
+      "modeOctal": "0600",
+      "mtimeNs": 1788749606467148456,
+      "size": 689165
+    },
+    "sha256": "9978a64b0aa8a64da77d9046b8e7dcbedf9971f8cf6dca9f0728c62e390e223f",
+    "sourceAccess": "EXPORTED_REPEATABLE_READ_READ_ONLY_SNAPSHOT_AND_PG_DUMP"
+  },
+  "dumpFile": "/private/tmp/pf-sf1-t10-wave9-iv9a7c2d-independent/pf-sf1-t10-wave9-iv9a7c2d-independent.dump",
+  "evidenceFile": "docs/phase-f/evidence/pf-sf1-t10-wave9-local-disposable-iv9a7c2d-independent-20260907.json",
+  "migration": {
+    "downgradeSteps": 1,
+    "graphDigest": {
+      "sha256": "d457d498cf02baed12fd06a96c0fedaef43adab69a72c67650da98ef332f5e0b",
+      "version": "tc.alembic-single-head-edge.v1"
+    },
+    "head": "20260902_0030",
+    "headFile": "backend/migrations/versions/20260902_0030_lightrag_generation_control_plane.py",
+    "headFileSha256": "c5e1feddc53f28464504828499121fedfefe5954cac0908117f2e8fb106938c0",
+    "immediatePredecessor": "20260901_0029",
+    "upgradeSteps": 1
+  },
+  "mode": "LOCAL_DISPOSABLE_PASS",
+  "notRun": [
+    "staging migration rehearsal",
+    "live or production migration rehearsal",
+    "operator handoff",
+    "production RTO/RPO",
+    "PF-SF1-T10 task gate",
+    "Phase F release gate"
+  ],
+  "preflight": {
+    "controlPlane": {
+      "generationRows": 0,
+      "pointerRows": 1,
+      "pristinePointerRows": 1,
+      "safeDowngradeBoundary": true,
+      "transitionRows": 0
+    },
+    "emptyTarget": {
+      "alembicRevision": null,
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t10_wave9_iv9a7c2d_test_disposable",
+      "emptyTargetRequired": true,
+      "extensions": [],
+      "publicTableCount": 0,
+      "serverVersionNum": 160012
+    },
+    "projectInventory": {
+      "containers": [
+        "tc-pf-sf1-t10-wave9-iv9a7c2d-postgres-disposable"
+      ],
+      "networks": [
+        "tc-pf-sf1-t10-wave9-iv9a7c2d-network-disposable"
+      ],
+      "volumes": [
+        "tc-pf-sf1-t10-wave9-iv9a7c2d-data-disposable"
+      ]
+    },
+    "restoreAttestation": {
+      "logicalColumnCount": 945,
+      "logicalColumnDigest": {
+        "sha256": "824392080bc6b2523621c2b96ad5d86ea39e82070c61b58cfb183bc7ffae5d30",
+        "version": "tc.postgresql.logical-columns.v1"
+      },
+      "logicalDataExact": true,
+      "logicalSchemaExact": true,
+      "rawPhysicalSchemaDifference": "DROPPED_COLUMN_ATTRIBUTE_SLOTS_COMPACTED_BY_PG_DUMP",
+      "rawPhysicalSchemaFingerprintEqual": false
+    },
+    "restoredHead": {
+      "alembicRevision": "20260902_0030",
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t10_wave9_iv9a7c2d_test_disposable",
+      "emptyTargetRequired": false,
+      "extensions": [
+        "pgcrypto",
+        "vector"
+      ],
+      "publicTableCount": 78,
+      "serverVersionNum": 160012
+    }
+  },
+  "preservation": {
+    "afterDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "beforeDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "beforeDockerInventory": {
+      "counts": {
+        "containers": 8,
+        "images": 37,
+        "networks": 5,
+        "volumes": 5
+      },
+      "digest": {
+        "sha256": "2f8b63f57ab62e8bb4b07f3fbd5045e6932973d66d225b57455b86eadce97a33",
+        "version": "tc.docker-local-inventory.v1"
+      },
+      "version": "tc.docker-local-inventory.v1"
+    },
+    "currentTcFingerprintEqual": true,
+    "priorEvidence": {
+      "count": 29,
+      "digest": {
+        "sha256": "c9fed6bbd9cdae0e871c1beee31614f18b2a407c0646cb2a1c6abe9ae9a23831",
+        "version": "tc.phase-f.prior-evidence-inventory.v1"
+      },
+      "entries": [
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856-r2.json",
+          "sha256": "7a4acb6a8395082ef04ed482e7e7faacc2c1b68e6358caf8576f100a507696f0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856.json",
+          "sha256": "b3b3a6b738c145e2cce97500e8657a652d65b585cd7b562cbd2c33e4c9573e16"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-backup.json",
+          "sha256": "4dbe36c55ad7d20db700097acf3d8dbe3b1f6c9af5aace135463660eac5c07d2"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-restore.json",
+          "sha256": "ee85ca0ed0969e9ff9693350c47d8b3e86f2be6ca499eef77b99219ebd65cde7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-seed.json",
+          "sha256": "bf32440ff186a2458d3310ccc63501b07a93b20f4a6b8e111c5059a49783e5d6"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup-r2.json",
+          "sha256": "d557297dd7dc6f69f396e62268c72be1d448d9b17a24b1ade7a219efe791b9d9"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup.json",
+          "sha256": "c0c634ac26d15ab781f415c9704ecd4d210b66fa59753f41a257ca7e1c571cd7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-restore-r2.json",
+          "sha256": "7255f643c5b9bf60807c95b8fa4edfc7fa17c8583a24aab0957c3f2b7fdbe1ac"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-seed.json",
+          "sha256": "be3fc0afce6774fc234652a5befa0bc1df8d0af4e19bb873e12dcfcc73049ab0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-backup.json",
+          "sha256": "c49a8c52fe6fb10674f8f8a6a591b229c1c6271a81669094fd942459c1705cc7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-restore.json",
+          "sha256": "0e197c1796ad39be92cf2254bfbd92e5bb91fbe0ce2a05edca1ea09cd3b37f4b"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-seed.json",
+          "sha256": "d3984780a8b3cc841f5c8124ed391e1ef2bc6feaaae070a408af63de9316eb91"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-backup.json",
+          "sha256": "3f735a01279f6d0250706481210a1da8afae1ddc25d791f72bd114c4e12ce0c3"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-seed.json",
+          "sha256": "b57da068e6c51f7a7342e8865fe5d1d2398dd4f566f3810f96dcf1b97abfa179"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-backup.json",
+          "sha256": "20081fff77b0ac8b7c57b340f328134b2362a91778ed4f4d8825342bb9e85ffd"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-restore.json",
+          "sha256": "849e1fb76a08721e9dd1d1b9e777f9abc32b63d8e6dd3073da43eb92355be1ad"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-cleanup.json",
+          "sha256": "34e72df84d23848062b2649bb3e19d76748f32bffcfd1a75c13345a16043a000"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-manifest.json",
+          "sha256": "0ae1658cb4b731008f050bc55e191f22fadf0d68d2a65d941c51e7471a1c97fc"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-recovery.json",
+          "sha256": "8d2c0a0d9a5a18867f2aa81c3684cc1ee25dba58fe781fdd1852f9424f153976"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-d31c8e7a-retry1-failure.json",
+          "sha256": "1c673b8f9ead029d1656a9ccf08f9e8b4a1b95996751d2586e71f427c8c17593"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-e29f6c4b-retry2-failure.json",
+          "sha256": "87e6d9a901aa36c5389bb13cb16986efbe63ac77766c5438cbf56ff6ae070872"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-20260907.json",
+          "sha256": "3b25f4e2b255be02ddaefdda17503fb2930b7f002561295d424e3986305d7970"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-final-20260907.json",
+          "sha256": "d77654b5bce8b07c8f4b05df36345f0fdd8c62d96a79338cbb1ab4e7f8d2821c"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-sg9c42fd-20260907.json",
+          "sha256": "76d1dbdd2d77ff17b1edff866dafe70dd41f5d0b2d3f270b31030ed56f7f0f84"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-20260907.json",
+          "sha256": "db303df0de3c1e692f21a65f3bc3b2c596b01830329c6e16f40ced009f7e3efa"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-final-20260907.json",
+          "sha256": "e8cc291d7875e852b29e84b13407ec59a7673f710e7f9e11d08eb9621d8c57a5"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-sg9c42fd-20260907.json",
+          "sha256": "13489b5388989d5ee6a34016e03191def750b44c7025f4b7afc7b37da482eb76"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t10-wave9-cleanup-w9rt7c3b-20260907.json",
+          "sha256": "9c5941a7bbbaadfff3731ea693d525c9562a982a6f8b93a1918368c5a377a22a"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t10-wave9-local-disposable-w9rt7c3b-20260907.json",
+          "sha256": "8ce31fb7f0e6e5b043ef7419c84ebbce88786b783dffeb6c73dead268b82a486"
+        }
+      ],
+      "version": "tc.phase-f.prior-evidence-inventory.v1"
+    },
+    "priorEvidenceHashesPreserved": true
+  },
+  "rawRowsOmitted": true,
+  "releaseGate": "NOT_RUN",
+  "roundTrip": {
+    "baseline": {
+      "catalogFingerprintVersion": "postgresql-public-catalog-v3",
+      "normalizedData": {
+        "dataSha256": "d442ad6912990492b426f2b29326122e66f26772e0518a84e5843c145749661c",
+        "normalization": {
+          "otherValues": "EXACT",
+          "pristineLightRagPointerUpdatedAt": "REPLACED_WITH_SENTINEL"
+        },
+        "tableCount": 78,
+        "tables": [
+          {
+            "rowCount": 1,
+            "sha256": "251d85f0aa6afb3e87691ba1d9e42a6066032ac97447d05f28984ea431b64e9d",
+            "table": "alembic_version"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "api_idempotency_receipts"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "c32daeed448a8173edeae0dc369c82e85531ec1071c99d430fe07ce2a0a3e9aa",
+            "table": "attachments"
+          },
+          {
+            "rowCount": 227,
+            "sha256": "0ba2e87dc506df37f009279dd7c25c9e97ff8c3fa16dc0c807241bf15f692eab",
+            "table": "audit_logs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "background_jobs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "comments"
+          },
+          {
+            "rowCount": 89,
+            "sha256": "efa9a86d9da8a70a2903c9d6055e9486e4253d3b43da1591bed334280b89a544",
+            "table": "cycle_items"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "drive_reconciliation_records"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "drive_usage_snapshots"
+          },
+          {
+            "rowCount": 23,
+            "sha256": "9ba873f8adb1b6c264ad6c7d137254e40395627c44a2069fb253fbe39ebe7f54",
+            "table": "execution_attempts"
+          },
+          {
+            "rowCount": 77,
+            "sha256": "a60ba95d403c310bad18cfda7bd4a4621ea43730d690378f47c56dc555dbc9cf",
+            "table": "execution_step_results"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "folder_aliases"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "c2629d420f4de01b725de9a1b0d350fcacf9c94ce42e402e93e60eb382c31f73",
+            "table": "folders"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_applies"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_apply_outcomes"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_attempt_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_activations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_approvals"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_audit_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_change_requests"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_rollbacks"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_runtime"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_change_assessments"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_contexts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_execution_schedules"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_jobs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_materialization_schedules"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_provider_call_observations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_provider_call_permits"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_approvals"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_candidate_roots"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_candidates"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_review_decisions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_reviewer_authorities"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_retry_exhaustions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_retry_requests"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_delivery_attempts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_delivery_observations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_intents"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_receipts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_materializations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_resolutions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_targets"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_version_sets"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "integration_settings"
+          },
+          {
+            "rowCount": 8,
+            "sha256": "ace03966cbb0d256398e199a3feb428890767092d1fb161c60882302d8743752",
+            "table": "issue_links"
+          },
+          {
+            "rowCount": 7,
+            "sha256": "ff5f99f9a9bef8a5f3576e491ccb868c1ca2c1e20d9f127f6499bf9534eca77b",
+            "table": "issue_steps"
+          },
+          {
+            "rowCount": 7,
+            "sha256": "e71a535d9c1d88d79cd2a3253e0a88d7bd54e8c90341c8b9215fc965373f285b",
+            "table": "issues"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_edges"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_embeddings"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_evidence"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_nodes"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_projection_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_source_records"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "de8512daa95517b9da2e605e0122b82150fcce32623d6d869ac4004f101f0aed",
+            "table": "lightrag_active_generation_pointer"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "lightrag_generation_transition_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "lightrag_generations"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "3ba1cf6784e242c70e83e031978221f176023945b260bf97e941a91b52f660be",
+            "table": "ontology_schemas"
+          },
+          {
+            "rowCount": 60,
+            "sha256": "6064120df4cbf7dd52d27719a8d24a964aaef306c8c96656be3bb8caa68515b9",
+            "table": "outbox_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_channel_allowlist"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_message_revisions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_messages"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_parse_results"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_threads"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_work_items"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "35ef8160ea68d253db80920628b2c7f2a9a1448d4855cf260eb991df1d0b5b70",
+            "table": "tags"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "test_case_generation_management_events"
+          },
+          {
+            "rowCount": 35,
+            "sha256": "66460fabda707db7b4072915d6893bb0d7893884990a2e3d0f2b6830cbf94127",
+            "table": "test_case_tags"
+          },
+          {
+            "rowCount": 35,
+            "sha256": "7c570402b761c573a6fef05ca7c1acbcd117a97ed13406be5a18b1d85edd3f8a",
+            "table": "test_case_version_tags"
+          },
+          {
+            "rowCount": 20,
+            "sha256": "c52f50254d6a363a6632d282831b972f56d4e5649b7a352f12ae8cf460c17e94",
+            "table": "test_case_versions"
+          },
+          {
+            "rowCount": 20,
+            "sha256": "92825ad85b802b21da3cfea88464e077fbc79ae79c829153de090a045d13efa2",
+            "table": "test_cases"
+          },
+          {
+            "rowCount": 8,
+            "sha256": "6cc8a8dd286ac1fe94ac581ade092a22739cbd2cb407917e1c79a9cf4d048556",
+            "table": "test_cycles"
+          },
+          {
+            "rowCount": 74,
+            "sha256": "881d72d20db0d771207046a73ca1212faf51c1618f34e6ff17b61ef7a505478a",
+            "table": "test_steps"
+          },
+          {
+            "rowCount": 2,
+            "sha256": "b870636a530791a6cc8415b27fe17fbbc65699e946934fdf7a584e9ea0dc9053",
+            "table": "work_items"
+          },
+          {
+            "rowCount": 2,
+            "sha256": "e7ae5ee811f4d6d1462288e1b4721bca94287536f5429744831a1c94c3d08b08",
+            "table": "workspace_key_counters"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "0f919159daeba348f826e94fe7d99b98ad7c6deb1b147ad53892e00d6ebf6c30",
+            "table": "workspace_settings"
+          }
+        ],
+        "totalRows": 707,
+        "version": "tc.postgresql-wave9-normalized-data.v1"
+      },
+      "roleCatalog": {
+        "digest": {
+          "sha256": "cd8185d908e8a2dff95fb4cb79e3037caad4040e7df30c4e784172522c47b446",
+          "version": "tc.postgresql-role-catalog.v1"
+        },
+        "membershipCount": 3,
+        "roleCount": 15,
+        "version": "tc.postgresql-role-catalog.v1"
+      },
+      "schemaCategorySha256": {
+        "collations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "columns": "c7e6e68e151451223516574a7cac56e8d88431b5a160f36287631b2e05c910f8",
+        "constraints": "f4788efbefe6501161acd34bbdb15db58cb4f6bd3223a847639449fab4e0980b",
+        "extensions": "bb4b5f74b57e44133bc5d6dfdef31afafc004097525fd9840d7011dee8cbacd8",
+        "indexes": "65c6ba6e2766f45e6d0066cd5c242a7be69785b3ac45cc724f5eed3d3868ec27",
+        "inheritance": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "partitions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policies": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relations": "a9662cd572e6de4e3eb42fdad8a67bf3ff2f207858c56dc7e77f614ccafe287e",
+        "routines": "cfebfffc735e5e0f194052a01eef6a61e2af14944a81a7eeb018d8fbb8d915a1",
+        "rules": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sequences": "9024a1ecae706026448f887a012340c87c803ab8edc825fcbbe21debbb012699",
+        "statistics": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "triggers": "50c15e9e1fe1879fec75a0a2da65fb1ea6692ef9920fd2631078ec2462d190ea",
+        "types": "6801524477c26eb81f877cce7732c81a5bc34d2a856ff965638db80d25706304",
+        "views": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "schemaObjectCounts": {
+        "collations": 0,
+        "columns": 945,
+        "constraints": 738,
+        "extensions": 2,
+        "indexes": 260,
+        "inheritance": 0,
+        "partitions": 0,
+        "policies": 0,
+        "relations": 78,
+        "routines": 230,
+        "rules": 0,
+        "sequences": 1,
+        "statistics": 0,
+        "triggers": 106,
+        "types": 3,
+        "views": 0
+      },
+      "schemaSha256": "8846c25f73faecdc56220b9597a399b5e44a41202b0dc4ac1eec5dc18414ed62"
+    },
+    "downgrade": {
+      "excludedRevisionBookkeepingTable": "alembic_version",
+      "headFunctionsAbsent": [
+        "tc_lightrag_guard_active_pointer",
+        "tc_lightrag_guard_transition_event_insert",
+        "tc_lightrag_reject_immutable_mutation"
+      ],
+      "headTablesAbsent": [
+        "lightrag_active_generation_pointer",
+        "lightrag_generation_transition_events",
+        "lightrag_generations"
+      ],
+      "headTriggersAbsent": [
+        "trg_lightrag_active_generation_pointer_guard",
+        "trg_lightrag_generation_transition_events_immutable",
+        "trg_lightrag_generation_transition_events_insert_guard",
+        "trg_lightrag_generations_immutable"
+      ],
+      "revision": "20260901_0029",
+      "roleCatalogExact": true,
+      "survivingDataExact": true
+    },
+    "equality": {
+      "normalizedDataExact": true,
+      "physicalDriftExcluded": [
+        "volatile object identifiers",
+        "dropped-column physical attribute slots during source dump/restore"
+      ],
+      "rawDataDifference": "PRISTINE_POINTER_GENERATED_UPDATED_AT_ONLY",
+      "rawDataDifferenceTables": [
+        "lightrag_active_generation_pointer"
+      ],
+      "rolesExact": true,
+      "schemaCategoriesExact": true,
+      "schemaExact": true,
+      "schemaObjectCountsExact": true
+    },
+    "final": {
+      "catalogFingerprintVersion": "postgresql-public-catalog-v3",
+      "normalizedData": {
+        "dataSha256": "d442ad6912990492b426f2b29326122e66f26772e0518a84e5843c145749661c",
+        "normalization": {
+          "otherValues": "EXACT",
+          "pristineLightRagPointerUpdatedAt": "REPLACED_WITH_SENTINEL"
+        },
+        "tableCount": 78,
+        "tables": [
+          {
+            "rowCount": 1,
+            "sha256": "251d85f0aa6afb3e87691ba1d9e42a6066032ac97447d05f28984ea431b64e9d",
+            "table": "alembic_version"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "api_idempotency_receipts"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "c32daeed448a8173edeae0dc369c82e85531ec1071c99d430fe07ce2a0a3e9aa",
+            "table": "attachments"
+          },
+          {
+            "rowCount": 227,
+            "sha256": "0ba2e87dc506df37f009279dd7c25c9e97ff8c3fa16dc0c807241bf15f692eab",
+            "table": "audit_logs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "background_jobs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "comments"
+          },
+          {
+            "rowCount": 89,
+            "sha256": "efa9a86d9da8a70a2903c9d6055e9486e4253d3b43da1591bed334280b89a544",
+            "table": "cycle_items"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "drive_reconciliation_records"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "drive_usage_snapshots"
+          },
+          {
+            "rowCount": 23,
+            "sha256": "9ba873f8adb1b6c264ad6c7d137254e40395627c44a2069fb253fbe39ebe7f54",
+            "table": "execution_attempts"
+          },
+          {
+            "rowCount": 77,
+            "sha256": "a60ba95d403c310bad18cfda7bd4a4621ea43730d690378f47c56dc555dbc9cf",
+            "table": "execution_step_results"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "folder_aliases"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "c2629d420f4de01b725de9a1b0d350fcacf9c94ce42e402e93e60eb382c31f73",
+            "table": "folders"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_applies"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_apply_outcomes"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_attempt_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_activations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_approvals"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_audit_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_change_requests"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_rollbacks"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_baseline_runtime"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_change_assessments"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_contexts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_execution_schedules"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_jobs"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_materialization_schedules"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_provider_call_observations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_provider_call_permits"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_approvals"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_candidate_roots"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_candidates"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_review_decisions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_quality_reviewer_authorities"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_retry_exhaustions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_retry_requests"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_delivery_attempts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_delivery_observations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_intents"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_slack_notification_receipts"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_materializations"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_resolutions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestion_targets"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_suggestions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "generation_version_sets"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "integration_settings"
+          },
+          {
+            "rowCount": 8,
+            "sha256": "ace03966cbb0d256398e199a3feb428890767092d1fb161c60882302d8743752",
+            "table": "issue_links"
+          },
+          {
+            "rowCount": 7,
+            "sha256": "ff5f99f9a9bef8a5f3576e491ccb868c1ca2c1e20d9f127f6499bf9534eca77b",
+            "table": "issue_steps"
+          },
+          {
+            "rowCount": 7,
+            "sha256": "e71a535d9c1d88d79cd2a3253e0a88d7bd54e8c90341c8b9215fc965373f285b",
+            "table": "issues"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_edges"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_embeddings"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_evidence"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_nodes"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_projection_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "knowledge_source_records"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "de8512daa95517b9da2e605e0122b82150fcce32623d6d869ac4004f101f0aed",
+            "table": "lightrag_active_generation_pointer"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "lightrag_generation_transition_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "lightrag_generations"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "3ba1cf6784e242c70e83e031978221f176023945b260bf97e941a91b52f660be",
+            "table": "ontology_schemas"
+          },
+          {
+            "rowCount": 60,
+            "sha256": "6064120df4cbf7dd52d27719a8d24a964aaef306c8c96656be3bb8caa68515b9",
+            "table": "outbox_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_channel_allowlist"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_events"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_message_revisions"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_messages"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_parse_results"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_threads"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "slack_work_items"
+          },
+          {
+            "rowCount": 3,
+            "sha256": "35ef8160ea68d253db80920628b2c7f2a9a1448d4855cf260eb991df1d0b5b70",
+            "table": "tags"
+          },
+          {
+            "rowCount": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "table": "test_case_generation_management_events"
+          },
+          {
+            "rowCount": 35,
+            "sha256": "66460fabda707db7b4072915d6893bb0d7893884990a2e3d0f2b6830cbf94127",
+            "table": "test_case_tags"
+          },
+          {
+            "rowCount": 35,
+            "sha256": "7c570402b761c573a6fef05ca7c1acbcd117a97ed13406be5a18b1d85edd3f8a",
+            "table": "test_case_version_tags"
+          },
+          {
+            "rowCount": 20,
+            "sha256": "c52f50254d6a363a6632d282831b972f56d4e5649b7a352f12ae8cf460c17e94",
+            "table": "test_case_versions"
+          },
+          {
+            "rowCount": 20,
+            "sha256": "92825ad85b802b21da3cfea88464e077fbc79ae79c829153de090a045d13efa2",
+            "table": "test_cases"
+          },
+          {
+            "rowCount": 8,
+            "sha256": "6cc8a8dd286ac1fe94ac581ade092a22739cbd2cb407917e1c79a9cf4d048556",
+            "table": "test_cycles"
+          },
+          {
+            "rowCount": 74,
+            "sha256": "881d72d20db0d771207046a73ca1212faf51c1618f34e6ff17b61ef7a505478a",
+            "table": "test_steps"
+          },
+          {
+            "rowCount": 2,
+            "sha256": "b870636a530791a6cc8415b27fe17fbbc65699e946934fdf7a584e9ea0dc9053",
+            "table": "work_items"
+          },
+          {
+            "rowCount": 2,
+            "sha256": "e7ae5ee811f4d6d1462288e1b4721bca94287536f5429744831a1c94c3d08b08",
+            "table": "workspace_key_counters"
+          },
+          {
+            "rowCount": 1,
+            "sha256": "0f919159daeba348f826e94fe7d99b98ad7c6deb1b147ad53892e00d6ebf6c30",
+            "table": "workspace_settings"
+          }
+        ],
+        "totalRows": 707,
+        "version": "tc.postgresql-wave9-normalized-data.v1"
+      },
+      "roleCatalog": {
+        "digest": {
+          "sha256": "cd8185d908e8a2dff95fb4cb79e3037caad4040e7df30c4e784172522c47b446",
+          "version": "tc.postgresql-role-catalog.v1"
+        },
+        "membershipCount": 3,
+        "roleCount": 15,
+        "version": "tc.postgresql-role-catalog.v1"
+      },
+      "schemaCategorySha256": {
+        "collations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "columns": "c7e6e68e151451223516574a7cac56e8d88431b5a160f36287631b2e05c910f8",
+        "constraints": "f4788efbefe6501161acd34bbdb15db58cb4f6bd3223a847639449fab4e0980b",
+        "extensions": "bb4b5f74b57e44133bc5d6dfdef31afafc004097525fd9840d7011dee8cbacd8",
+        "indexes": "65c6ba6e2766f45e6d0066cd5c242a7be69785b3ac45cc724f5eed3d3868ec27",
+        "inheritance": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "partitions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policies": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relations": "a9662cd572e6de4e3eb42fdad8a67bf3ff2f207858c56dc7e77f614ccafe287e",
+        "routines": "cfebfffc735e5e0f194052a01eef6a61e2af14944a81a7eeb018d8fbb8d915a1",
+        "rules": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sequences": "9024a1ecae706026448f887a012340c87c803ab8edc825fcbbe21debbb012699",
+        "statistics": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "triggers": "50c15e9e1fe1879fec75a0a2da65fb1ea6692ef9920fd2631078ec2462d190ea",
+        "types": "6801524477c26eb81f877cce7732c81a5bc34d2a856ff965638db80d25706304",
+        "views": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "schemaObjectCounts": {
+        "collations": 0,
+        "columns": 945,
+        "constraints": 738,
+        "extensions": 2,
+        "indexes": 260,
+        "inheritance": 0,
+        "partitions": 0,
+        "policies": 0,
+        "relations": 78,
+        "routines": 230,
+        "rules": 0,
+        "sequences": 1,
+        "statistics": 0,
+        "triggers": 106,
+        "types": 3,
+        "views": 0
+      },
+      "schemaSha256": "8846c25f73faecdc56220b9597a399b5e44a41202b0dc4ac1eec5dc18414ed62"
+    },
+    "finalPreflight": {
+      "alembicRevision": "20260902_0030",
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t10_wave9_iv9a7c2d_test_disposable",
+      "emptyTargetRequired": false,
+      "extensions": [
+        "pgcrypto",
+        "vector"
+      ],
+      "publicTableCount": 78,
+      "serverVersionNum": 160012
+    },
+    "steps": {
+      "broadDowngrade": false,
+      "downgrade": 1,
+      "upgrade": 1
+    }
+  },
+  "schemaVersion": "tc.phase-f.migration-wave9-evidence.v1",
+  "smoke": {
+    "apiStatusCodes": {
+      "folderTreeRead": 200,
+      "health": 200,
+      "ready": 200,
+      "workspaceRead": 200
+    },
+    "databaseCapabilities": {
+      "embeddingColumn": "vector(1024)",
+      "pgvectorPresent": true,
+      "postgresql16OrNewer": true
+    },
+    "externalCalls": 0,
+    "responseBodiesOmitted": true,
+    "transactionalWrite": {
+      "rolledBack": true,
+      "rowsMatched": 1
+    },
+    "workerStartup": {
+      "constructed": true,
+      "externalIntegrationsEnabled": false,
+      "handlerCount": 9,
+      "jobsClaimed": 0
+    }
+  },
+  "source": {
+    "access": "EXPORTED_REPEATABLE_READ_READ_ONLY_SNAPSHOT_AND_PG_DUMP",
+    "alembicRevision": "20260902_0030",
+    "beforeAfterFingerprintEqual": true,
+    "database": "tc",
+    "environment": "local",
+    "fingerprintDigest": {
+      "sha256": "553ebef6582db2c9cb90a20e24ece69bf20728e38b475b1f60db130731695887",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "rawRowsOmitted": true,
+    "snapshot": {
+      "alembicRevision": "20260902_0030",
+      "capturedAtUtc": "2026-09-07T02:53:25.801963Z",
+      "snapshotId": "00000003-00038272-1",
+      "transactionSnapshot": "91230:91230:",
+      "walLsn": "1/8784D550"
+    }
+  },
+  "subGate": "LOCAL_DISPOSABLE",
+  "target": {
+    "container": "tc-pf-sf1-t10-wave9-iv9a7c2d-postgres-disposable",
+    "database": "tc_phase_f_pf_sf1_t10_wave9_iv9a7c2d_test_disposable",
+    "databaseComment": "tc-phase-f-rehearsal:disposable:tc-phase-f-pf-sf1-t10-wave9-iv9a7c2d-disposable",
+    "network": "tc-pf-sf1-t10-wave9-iv9a7c2d-network-disposable",
+    "port": {
+      "generated": 55493,
+      "host": "127.0.0.1"
+    },
+    "postgresqlMajor": 16,
+    "project": "tc-pf-sf1-t10-wave9-iv9a7c2d",
+    "runId": "iv9a7c2d",
+    "targetClass": "disposable",
+    "targetName": "tc-phase-f-pf-sf1-t10-wave9-iv9a7c2d-disposable",
+    "volume": "tc-pf-sf1-t10-wave9-iv9a7c2d-data-disposable"
+  },
+  "task": "PF-SF1-T10",
+  "tempDirectory": "/private/tmp/pf-sf1-t10-wave9-iv9a7c2d-independent",
+  "timing": {
+    "finishedAtUtc": "2026-09-07T02:53:36.072126+00:00",
+    "localMeasuredSeconds": 10.275655,
+    "productionRtoRpo": "NOT_RUN",
+    "startedAtUtc": "2026-09-07T02:53:25.796360+00:00"
+  }
+}

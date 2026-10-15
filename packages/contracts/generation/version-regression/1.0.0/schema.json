@@ -1,0 +1,1127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/version-regression/1.0.0/schema.json",
+  "title": "Automatic generation version regression 1.0.0",
+  "description": "Strict offline comparison, baseline-governance ledger, approval, activation, and rollback artifacts for PE-SE2-T09.",
+  "oneOf": [
+    {"$ref": "#/$defs/RegressionEvaluationInput"},
+    {"$ref": "#/$defs/RegressionEvaluationReport"},
+    {"$ref": "#/$defs/BaselineLedgerSnapshot"}
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$"
+    },
+    "NonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "pattern": "\\S"
+    },
+    "PinnedText": {
+      "type": "string",
+      "allOf": [
+        {"$ref": "#/$defs/NonBlank"},
+        {
+          "not": {
+            "enum": [
+              "latest", "LATEST", "Latest",
+              "unknown", "UNKNOWN", "Unknown",
+              "unconfigured", "UNCONFIGURED", "Unconfigured",
+              "unpinned", "UNPINNED", "Unpinned",
+              "missing", "MISSING", "Missing"
+            ]
+          }
+        }
+      ],
+      "pattern": "^(?!(?:.*[:/@._-])?(?:latest|LATEST|Latest|current|CURRENT|Current|stable|STABLE|Stable|default|DEFAULT|Default|head|HEAD|Head|main|MAIN|Main|master|MASTER|Master)$)(?!.*[\\s*^~<>]).+$"
+    },
+    "Digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "NullableIdentifier": {
+      "oneOf": [
+        {"$ref": "#/$defs/Identifier"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDigest": {
+      "oneOf": [
+        {"$ref": "#/$defs/Digest"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "BaselineIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationPolicyVersion",
+        "generationPolicyDigest",
+        "promptVersion",
+        "promptDigest",
+        "providerId",
+        "modelId",
+        "modelRevision",
+        "embeddingProviderId",
+        "embeddingModelId",
+        "embeddingRevision",
+        "embeddingDimensions",
+        "semanticDuplicateAlgorithmVersion",
+        "semanticDuplicateThreshold",
+        "semanticDuplicatePolicyDigest",
+        "exactDuplicateAlgorithmVersion",
+        "generationInputSchemaVersion",
+        "generationOutputSchemaVersion",
+        "suggestionSchemaVersion",
+        "qualityGateSchemaVersion",
+        "ontologySchemaVersion",
+        "ontologySchemaDigest",
+        "regressionEvaluatorVersion",
+        "regressionPolicyVersion",
+        "regressionPolicyDigest",
+        "placementPolicyVersion",
+        "placementPolicyDigest"
+      ],
+      "properties": {
+        "generationPolicyVersion": {"$ref": "#/$defs/PinnedText"},
+        "generationPolicyDigest": {"$ref": "#/$defs/Digest"},
+        "promptVersion": {"$ref": "#/$defs/PinnedText"},
+        "promptDigest": {"$ref": "#/$defs/Digest"},
+        "providerId": {"$ref": "#/$defs/PinnedText"},
+        "modelId": {"$ref": "#/$defs/PinnedText"},
+        "modelRevision": {"$ref": "#/$defs/PinnedText"},
+        "embeddingProviderId": {"$ref": "#/$defs/PinnedText"},
+        "embeddingModelId": {"$ref": "#/$defs/PinnedText"},
+        "embeddingRevision": {"$ref": "#/$defs/PinnedText"},
+        "embeddingDimensions": {"type": "integer", "minimum": 2, "maximum": 65536},
+        "semanticDuplicateAlgorithmVersion": {"$ref": "#/$defs/PinnedText"},
+        "semanticDuplicateThreshold": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "semanticDuplicatePolicyDigest": {"$ref": "#/$defs/Digest"},
+        "exactDuplicateAlgorithmVersion": {"$ref": "#/$defs/PinnedText"},
+        "generationInputSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "generationOutputSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "suggestionSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "qualityGateSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "ontologySchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "ontologySchemaDigest": {"$ref": "#/$defs/Digest"},
+        "regressionEvaluatorVersion": {"$ref": "#/$defs/PinnedText"},
+        "regressionPolicyVersion": {"$ref": "#/$defs/PinnedText"},
+        "regressionPolicyDigest": {"$ref": "#/$defs/Digest"},
+        "placementPolicyVersion": {"$ref": "#/$defs/PinnedText"},
+        "placementPolicyDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "BaselineReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baselineId", "ledgerVersion", "state", "identity", "identityDigest"],
+      "properties": {
+        "baselineId": {"$ref": "#/$defs/Identifier"},
+        "ledgerVersion": {"type": "integer", "minimum": 1},
+        "state": {"enum": ["ACTIVE", "SUPERSEDED", "ROLLED_BACK", "CONTRACT_ONLY"]},
+        "identity": {"$ref": "#/$defs/BaselineIdentity"},
+        "identityDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "QualityThresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceCoverage",
+        "retiredKnowledgeMisuseCount",
+        "duplicateCount",
+        "unresolvedAuthorityCount",
+        "provenanceFailureCount",
+        "invalidOrBlankResultCount",
+        "orderingFailureCount"
+      ],
+      "properties": {
+        "evidenceCoverage": {"const": 1},
+        "retiredKnowledgeMisuseCount": {"const": 0},
+        "duplicateCount": {"const": 0},
+        "unresolvedAuthorityCount": {"const": 0},
+        "provenanceFailureCount": {"const": 0},
+        "invalidOrBlankResultCount": {"const": 0},
+        "orderingFailureCount": {"const": 0}
+      }
+    },
+    "QualityMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceCoverage",
+        "retiredKnowledgeMisuseCount",
+        "duplicateCount",
+        "unresolvedAuthorityCount",
+        "provenanceFailureCount",
+        "invalidOrBlankResultCount",
+        "orderingFailureCount"
+      ],
+      "properties": {
+        "evidenceCoverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "retiredKnowledgeMisuseCount": {"type": "integer", "minimum": 0},
+        "duplicateCount": {"type": "integer", "minimum": 0},
+        "unresolvedAuthorityCount": {"type": "integer", "minimum": 0},
+        "provenanceFailureCount": {"type": "integer", "minimum": 0},
+        "invalidOrBlankResultCount": {"type": "integer", "minimum": 0},
+        "orderingFailureCount": {"type": "integer", "minimum": 0}
+      }
+    },
+    "GoldenQualityReportReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportId",
+        "reportArtifactDigest",
+        "qualityGateContractVersion",
+        "datasetKind",
+        "synthetic",
+        "releaseCertified",
+        "gatePassed",
+        "cohortId",
+        "cohortDigest",
+        "sourcePopulationDigest",
+        "populationMembershipDigest",
+        "resultPopulationDigest",
+        "snapshotFingerprint",
+        "baselineIdentityDigest",
+        "metrics"
+      ],
+      "properties": {
+        "reportId": {"$ref": "#/$defs/Identifier"},
+        "reportArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "qualityGateContractVersion": {"const": "automatic-generation-quality-gate/1.0.0"},
+        "datasetKind": {"enum": ["SYNTHETIC_FIXTURE", "OPERATIONAL_GOLDEN"]},
+        "synthetic": {"type": "boolean"},
+        "releaseCertified": {"type": "boolean"},
+        "gatePassed": {"const": true},
+        "cohortId": {"$ref": "#/$defs/Identifier"},
+        "cohortDigest": {"$ref": "#/$defs/Digest"},
+        "sourcePopulationDigest": {"$ref": "#/$defs/Digest"},
+        "populationMembershipDigest": {"$ref": "#/$defs/Digest"},
+        "resultPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "snapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "baselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "metrics": {"$ref": "#/$defs/QualityMetrics"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"datasetKind": {"const": "SYNTHETIC_FIXTURE"}}, "required": ["datasetKind"]},
+          "then": {
+            "properties": {
+              "synthetic": {"const": true},
+              "releaseCertified": {"const": false}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"datasetKind": {"const": "OPERATIONAL_GOLDEN"}}, "required": ["datasetKind"]},
+          "then": {
+            "properties": {
+              "synthetic": {"const": false},
+              "releaseCertified": {"const": true}
+            }
+          }
+        }
+      ]
+    },
+    "ResultSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slotId",
+        "generationRootId",
+        "sourceSnapshotFingerprint",
+        "oldResultSnapshotId",
+        "oldResultDigest",
+        "newResultSnapshotId",
+        "newResultDigest"
+      ],
+      "properties": {
+        "slotId": {"$ref": "#/$defs/Identifier"},
+        "generationRootId": {"$ref": "#/$defs/Identifier"},
+        "sourceSnapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "oldResultSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "oldResultDigest": {"$ref": "#/$defs/Digest"},
+        "newResultSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "newResultDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "ComparisonPopulation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cohortId",
+        "cohortStatus",
+        "cohortApprovalId",
+        "cohortApprovalDigest",
+        "cohortDigest",
+        "sourcePopulationDigest",
+        "populationMembershipDigest",
+        "oldResultPopulationDigest",
+        "newResultPopulationDigest",
+        "rootCount",
+        "resultSlots"
+      ],
+      "properties": {
+        "cohortId": {"$ref": "#/$defs/Identifier"},
+        "cohortStatus": {"enum": ["SYNTHETIC", "APPROVED"]},
+        "cohortApprovalId": {"$ref": "#/$defs/NullableIdentifier"},
+        "cohortApprovalDigest": {"$ref": "#/$defs/NullableDigest"},
+        "cohortDigest": {"$ref": "#/$defs/Digest"},
+        "sourcePopulationDigest": {"$ref": "#/$defs/Digest"},
+        "populationMembershipDigest": {"$ref": "#/$defs/Digest"},
+        "oldResultPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "newResultPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "rootCount": {"type": "integer", "minimum": 1},
+        "resultSlots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "items": {"$ref": "#/$defs/ResultSlot"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"cohortStatus": {"const": "SYNTHETIC"}}, "required": ["cohortStatus"]},
+          "then": {
+            "properties": {
+              "cohortApprovalId": {"type": "null"},
+              "cohortApprovalDigest": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"cohortStatus": {"const": "APPROVED"}}, "required": ["cohortStatus"]},
+          "then": {
+            "properties": {
+              "cohortApprovalId": {"$ref": "#/$defs/Identifier"},
+              "cohortApprovalDigest": {"$ref": "#/$defs/Digest"}
+            }
+          }
+        }
+      ]
+    },
+    "CompatibilityDimension": {
+      "type": "string",
+      "enum": [
+        "GENERATION_POLICY",
+        "PROMPT",
+        "GENERATION_PROVIDER_MODEL",
+        "EMBEDDING_PROVIDER_MODEL_REVISION",
+        "EMBEDDING_DIMENSION",
+        "SEMANTIC_THRESHOLD_POLICY",
+        "EXACT_DUPLICATE_ALGORITHM",
+        "GENERATION_INPUT_SCHEMA",
+        "GENERATION_OUTPUT_SCHEMA",
+        "SUGGESTION_SCHEMA",
+        "QUALITY_GATE_SCHEMA",
+        "ONTOLOGY_SCHEMA",
+        "REGRESSION_EVALUATOR_POLICY",
+        "PLACEMENT_POLICY"
+      ]
+    },
+    "CompatibilityEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension",
+        "changeType",
+        "oldReaderNewArtifact",
+        "newReaderOldArtifact",
+        "migrationPlanId",
+        "activationAllowed"
+      ],
+      "properties": {
+        "dimension": {"$ref": "#/$defs/CompatibilityDimension"},
+        "changeType": {"enum": ["UNCHANGED", "COMPATIBLE", "MIGRATION_REQUIRED", "INCOMPATIBLE"]},
+        "oldReaderNewArtifact": {"enum": ["SUPPORTED", "MIGRATION_REQUIRED", "REJECTED"]},
+        "newReaderOldArtifact": {"enum": ["SUPPORTED", "MIGRATION_REQUIRED", "REJECTED"]},
+        "migrationPlanId": {"$ref": "#/$defs/NullableIdentifier"},
+        "activationAllowed": {"type": "boolean"}
+      }
+    },
+    "SchemaMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationPlanId",
+        "dimension",
+        "fromVersion",
+        "toVersion",
+        "mode",
+        "lossless",
+        "reversible",
+        "migrationArtifactDigest",
+        "verificationStatus",
+        "verificationReceiptDigest",
+        "rollbackArtifactDigest"
+        ,"sourcePopulationDigest"
+        ,"populationMembershipDigest"
+      ],
+      "properties": {
+        "migrationPlanId": {"$ref": "#/$defs/Identifier"},
+        "dimension": {"$ref": "#/$defs/CompatibilityDimension"},
+        "fromVersion": {"$ref": "#/$defs/PinnedText"},
+        "toVersion": {"$ref": "#/$defs/PinnedText"},
+        "mode": {"const": "OFFLINE_DETERMINISTIC"},
+        "lossless": {"const": true},
+        "reversible": {"const": true},
+        "migrationArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "verificationStatus": {"const": "VERIFIED"},
+        "verificationReceiptDigest": {"$ref": "#/$defs/Digest"},
+        "rollbackArtifactDigest": {"$ref": "#/$defs/Digest"}
+        ,"sourcePopulationDigest": {"$ref": "#/$defs/Digest"}
+        ,"populationMembershipDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "EmbeddingMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationPlanId",
+        "oldDimensions",
+        "newDimensions",
+        "sourcePopulationDigest",
+        "reembeddedPopulationDigest",
+        "rollbackVectorPopulationDigest",
+        "mixedDimensionsObserved",
+        "verificationStatus",
+        "receiptDigest"
+      ],
+      "properties": {
+        "migrationPlanId": {"$ref": "#/$defs/Identifier"},
+        "oldDimensions": {"type": "integer", "minimum": 2, "maximum": 65536},
+        "newDimensions": {"type": "integer", "minimum": 2, "maximum": 65536},
+        "sourcePopulationDigest": {"$ref": "#/$defs/Digest"},
+        "reembeddedPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "rollbackVectorPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "mixedDimensionsObserved": {"const": false},
+        "verificationStatus": {"const": "VERIFIED"},
+        "receiptDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "CompatibilityMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matrixId",
+        "matrixVersion",
+        "oldBaselineIdentityDigest",
+        "newBaselineIdentityDigest",
+        "entries",
+        "schemaMigrations",
+        "embeddingMigration",
+        "unknownCompatibilityCount",
+        "missingMigrationCount",
+        "downgradeIncompatibilityCount",
+        "forwardIncompatibilityCount",
+        "matrixDigest"
+      ],
+      "properties": {
+        "matrixId": {"$ref": "#/$defs/Identifier"},
+        "matrixVersion": {"const": "automatic-generation-version-compatibility/1.0.0"},
+        "oldBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "newBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "entries": {
+          "type": "array",
+          "minItems": 14,
+          "maxItems": 14,
+          "items": {"$ref": "#/$defs/CompatibilityEntry"}
+        },
+        "schemaMigrations": {
+          "type": "array",
+          "maxItems": 14,
+          "items": {"$ref": "#/$defs/SchemaMigration"}
+        },
+        "embeddingMigration": {
+          "oneOf": [
+            {"$ref": "#/$defs/EmbeddingMigration"},
+            {"type": "null"}
+          ]
+        },
+        "unknownCompatibilityCount": {"const": 0},
+        "missingMigrationCount": {"const": 0},
+        "downgradeIncompatibilityCount": {"type": "integer", "minimum": 0},
+        "forwardIncompatibilityCount": {"type": "integer", "minimum": 0},
+        "matrixDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "ChangeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeRequestId",
+        "idempotencyKey",
+        "requestDigest",
+        "requesterPrincipalId",
+        "requestedAt",
+        "reasonDigest",
+        "expectedActiveBaselineId",
+        "expectedLedgerVersion",
+        "oldBaselineIdentityDigest",
+        "proposedBaselineIdentityDigest",
+        "changedDimensions",
+        "compatibilityMatrixId"
+      ],
+      "properties": {
+        "changeRequestId": {"$ref": "#/$defs/Identifier"},
+        "idempotencyKey": {"$ref": "#/$defs/Identifier"},
+        "requestDigest": {"$ref": "#/$defs/Digest"},
+        "requesterPrincipalId": {"$ref": "#/$defs/Identifier"},
+        "requestedAt": {"type": "string", "format": "date-time"},
+        "reasonDigest": {"$ref": "#/$defs/Digest"},
+        "expectedActiveBaselineId": {"$ref": "#/$defs/Identifier"},
+        "expectedLedgerVersion": {"type": "integer", "minimum": 1},
+        "oldBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "proposedBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "changedDimensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/CompatibilityDimension"}
+        },
+        "compatibilityMatrixId": {"$ref": "#/$defs/Identifier"}
+      }
+    },
+    "LiveAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "gateId",
+        "artifactDigest",
+        "environment",
+        "providerCredentialed",
+        "oldProviderCallObserved",
+        "newProviderCallObserved",
+        "oldBaselineIdentityDigest",
+        "newBaselineIdentityDigest",
+        "populationMembershipDigest",
+        "approvedBy",
+        "approvedAt"
+      ],
+      "properties": {
+        "status": {"enum": ["NOT_RUN", "PASSED", "FAILED"]},
+        "gateId": {"$ref": "#/$defs/NullableIdentifier"},
+        "artifactDigest": {"$ref": "#/$defs/NullableDigest"},
+        "environment": {
+          "oneOf": [
+            {"enum": ["staging", "production"]},
+            {"type": "null"}
+          ]
+        },
+        "providerCredentialed": {"type": "boolean"},
+        "oldProviderCallObserved": {"type": "boolean"},
+        "newProviderCallObserved": {"type": "boolean"},
+        "oldBaselineIdentityDigest": {"$ref": "#/$defs/NullableDigest"},
+        "newBaselineIdentityDigest": {"$ref": "#/$defs/NullableDigest"},
+        "populationMembershipDigest": {"$ref": "#/$defs/NullableDigest"},
+        "approvedBy": {"$ref": "#/$defs/NullableIdentifier"},
+        "approvedAt": {"$ref": "#/$defs/NullableDateTime"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "NOT_RUN"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "gateId": {"type": "null"},
+              "artifactDigest": {"type": "null"},
+              "environment": {"type": "null"},
+              "providerCredentialed": {"const": false},
+              "oldProviderCallObserved": {"const": false},
+              "newProviderCallObserved": {"const": false},
+              "oldBaselineIdentityDigest": {"type": "null"},
+              "newBaselineIdentityDigest": {"type": "null"},
+              "populationMembershipDigest": {"type": "null"},
+              "approvedBy": {"type": "null"},
+              "approvedAt": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "PASSED"}}, "required": ["status"]},
+          "then": {
+            "properties": {
+              "gateId": {"$ref": "#/$defs/Identifier"},
+              "artifactDigest": {"$ref": "#/$defs/Digest"},
+              "environment": {"enum": ["staging", "production"]},
+              "providerCredentialed": {"const": true},
+              "oldProviderCallObserved": {"const": true},
+              "newProviderCallObserved": {"const": true},
+              "oldBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+              "newBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+              "populationMembershipDigest": {"$ref": "#/$defs/Digest"},
+              "approvedBy": {"$ref": "#/$defs/Identifier"},
+              "approvedAt": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyVersion",
+        "requiredApproverCount",
+        "distinctPrincipalsRequired",
+        "requesterMayApprove",
+        "roles"
+      ],
+      "properties": {
+        "policyVersion": {"const": "automatic-generation-baseline-approval/1.0.0"},
+        "requiredApproverCount": {"const": 2},
+        "distinctPrincipalsRequired": {"const": true},
+        "requesterMayApprove": {"const": false},
+        "roles": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"enum": ["QUALITY_OWNER", "RELEASE_OWNER"]}
+        }
+      }
+    },
+    "ConcurrencyPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expectedActiveBaselineId",
+        "expectedLedgerVersion",
+        "activationMode",
+        "trafficPercent",
+        "partialRolloutAllowed",
+        "compareAndSwapRequired"
+      ],
+      "properties": {
+        "expectedActiveBaselineId": {"$ref": "#/$defs/Identifier"},
+        "expectedLedgerVersion": {"type": "integer", "minimum": 1},
+        "activationMode": {"const": "ATOMIC_ALL_WORKSPACES"},
+        "trafficPercent": {"const": 100},
+        "partialRolloutAllowed": {"const": false},
+        "compareAndSwapRequired": {"const": true}
+      }
+    },
+    "ReportPaths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["json", "junit", "markdown"],
+      "properties": {
+        "json": {"type": "string", "pattern": "\\.json$", "maxLength": 1024},
+        "junit": {"type": "string", "pattern": "\\.xml$", "maxLength": 1024},
+        "markdown": {"type": "string", "pattern": "\\.md$", "maxLength": 1024}
+      }
+    },
+    "Retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retentionDays", "immutable", "legalHoldOverridesDeletion"],
+      "properties": {
+        "retentionDays": {"type": "integer", "minimum": 400},
+        "immutable": {"const": true},
+        "legalHoldOverridesDeletion": {"const": true}
+      }
+    },
+    "RegressionEvaluationInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "profile",
+        "synthetic",
+        "changeRequest",
+        "oldBaseline",
+        "newCandidate",
+        "comparisonPopulation",
+        "oldGoldenReport",
+        "newGoldenReport",
+        "compatibilityMatrix",
+        "thresholds",
+        "liveAttestation",
+        "approvalPolicy",
+        "concurrencyPolicy",
+        "reportOutputs",
+        "retention"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_VERSION_REGRESSION_INPUT"},
+        "contractVersion": {"const": "automatic-generation-version-regression/1.0.0"},
+        "profile": {"enum": ["CANDIDATE", "PRODUCTION_APPROVAL"]},
+        "synthetic": {"type": "boolean"},
+        "changeRequest": {"$ref": "#/$defs/ChangeRequest"},
+        "oldBaseline": {"$ref": "#/$defs/BaselineReference"},
+        "newCandidate": {"$ref": "#/$defs/BaselineReference"},
+        "comparisonPopulation": {"$ref": "#/$defs/ComparisonPopulation"},
+        "oldGoldenReport": {"$ref": "#/$defs/GoldenQualityReportReference"},
+        "newGoldenReport": {"$ref": "#/$defs/GoldenQualityReportReference"},
+        "compatibilityMatrix": {"$ref": "#/$defs/CompatibilityMatrix"},
+        "thresholds": {"$ref": "#/$defs/QualityThresholds"},
+        "liveAttestation": {"$ref": "#/$defs/LiveAttestation"},
+        "approvalPolicy": {"$ref": "#/$defs/ApprovalPolicy"},
+        "concurrencyPolicy": {"$ref": "#/$defs/ConcurrencyPolicy"},
+        "reportOutputs": {"$ref": "#/$defs/ReportPaths"},
+        "retention": {"$ref": "#/$defs/Retention"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"profile": {"const": "PRODUCTION_APPROVAL"}}, "required": ["profile"]},
+          "then": {
+            "properties": {
+              "synthetic": {"const": false},
+              "comparisonPopulation": {
+                "type": "object",
+                "properties": {"cohortStatus": {"const": "APPROVED"}},
+                "required": ["cohortStatus"]
+              },
+              "oldGoldenReport": {
+                "type": "object",
+                "properties": {"datasetKind": {"const": "OPERATIONAL_GOLDEN"}},
+                "required": ["datasetKind"]
+              },
+              "newGoldenReport": {
+                "type": "object",
+                "properties": {"datasetKind": {"const": "OPERATIONAL_GOLDEN"}},
+                "required": ["datasetKind"]
+              },
+              "liveAttestation": {
+                "type": "object",
+                "properties": {"status": {"const": "PASSED"}},
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"synthetic": {"const": true}}, "required": ["synthetic"]},
+          "then": {
+            "properties": {
+              "profile": {"const": "CANDIDATE"},
+              "comparisonPopulation": {
+                "type": "object",
+                "properties": {"cohortStatus": {"const": "SYNTHETIC"}},
+                "required": ["cohortStatus"]
+              },
+              "oldGoldenReport": {
+                "type": "object",
+                "properties": {
+                  "datasetKind": {"const": "SYNTHETIC_FIXTURE"},
+                  "releaseCertified": {"const": false}
+                },
+                "required": ["datasetKind", "releaseCertified"]
+              },
+              "newGoldenReport": {
+                "type": "object",
+                "properties": {
+                  "datasetKind": {"const": "SYNTHETIC_FIXTURE"},
+                  "releaseCertified": {"const": false}
+                },
+                "required": ["datasetKind", "releaseCertified"]
+              },
+              "liveAttestation": {
+                "type": "object",
+                "properties": {"status": {"const": "NOT_RUN"}},
+                "required": ["status"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "RegressionCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "passed", "oldValue", "newValue"],
+      "properties": {
+        "code": {"$ref": "#/$defs/Identifier"},
+        "passed": {"type": "boolean"},
+        "oldValue": {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]},
+        "newValue": {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]}
+      }
+    },
+    "RegressionEvaluationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "profile",
+        "synthetic",
+        "changeRequestId",
+        "oldBaselineIdentityDigest",
+        "newBaselineIdentityDigest",
+        "cohortId",
+        "cohortDigest",
+        "sourcePopulationDigest",
+        "populationMembershipDigest",
+        "oldResultPopulationDigest",
+        "newResultPopulationDigest",
+        "thresholds",
+        "checks",
+        "unknownPinCount",
+        "missingPinCount",
+        "compatibilityPassed",
+        "schemaMigrationPassed",
+        "embeddingMigrationPassed",
+        "partialRolloutDetected",
+        "liveGatePassed",
+        "approvalEligible",
+        "candidateDisposition",
+        "reasonCodes",
+        "artifacts",
+        "retention"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_VERSION_REGRESSION_REPORT"},
+        "contractVersion": {"const": "automatic-generation-version-regression/1.0.0"},
+        "profile": {"enum": ["CANDIDATE", "PRODUCTION_APPROVAL"]},
+        "synthetic": {"type": "boolean"},
+        "changeRequestId": {"$ref": "#/$defs/Identifier"},
+        "oldBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "newBaselineIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "cohortId": {"$ref": "#/$defs/Identifier"},
+        "cohortDigest": {"$ref": "#/$defs/Digest"},
+        "sourcePopulationDigest": {"$ref": "#/$defs/Digest"},
+        "populationMembershipDigest": {"$ref": "#/$defs/Digest"},
+        "oldResultPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "newResultPopulationDigest": {"$ref": "#/$defs/Digest"},
+        "thresholds": {"$ref": "#/$defs/QualityThresholds"},
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/RegressionCheck"}
+        },
+        "unknownPinCount": {"const": 0},
+        "missingPinCount": {"const": 0},
+        "compatibilityPassed": {"type": "boolean"},
+        "schemaMigrationPassed": {"type": "boolean"},
+        "embeddingMigrationPassed": {"type": "boolean"},
+        "partialRolloutDetected": {"const": false},
+        "liveGatePassed": {"type": "boolean"},
+        "approvalEligible": {"type": "boolean"},
+        "candidateDisposition": {"enum": ["CONTRACT_ONLY", "BASELINE_CANDIDATE", "REJECTED"]},
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "artifacts": {"$ref": "#/$defs/ReportPaths"},
+        "retention": {"$ref": "#/$defs/Retention"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"synthetic": {"const": true}}, "required": ["synthetic"]},
+          "then": {
+            "properties": {
+              "profile": {"const": "CANDIDATE"},
+              "liveGatePassed": {"const": false},
+              "approvalEligible": {"const": false},
+              "candidateDisposition": {"enum": ["CONTRACT_ONLY", "REJECTED"]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"candidateDisposition": {"const": "BASELINE_CANDIDATE"}}, "required": ["candidateDisposition"]},
+          "then": {
+            "properties": {
+              "profile": {"const": "PRODUCTION_APPROVAL"},
+              "synthetic": {"const": false},
+              "compatibilityPassed": {"const": true},
+              "schemaMigrationPassed": {"const": true},
+              "embeddingMigrationPassed": {"const": true},
+              "liveGatePassed": {"const": true},
+              "approvalEligible": {"const": true}
+            }
+          }
+        }
+      ]
+    },
+    "PersonApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["principalId", "role", "approvedAt", "decisionDigest"],
+      "properties": {
+        "principalId": {"$ref": "#/$defs/Identifier"},
+        "role": {"enum": ["QUALITY_OWNER", "RELEASE_OWNER"]},
+        "approvedAt": {"type": "string", "format": "date-time"},
+        "decisionDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "BaselineApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvalId",
+        "candidateId",
+        "requestedBy",
+        "policyVersion",
+        "decision",
+        "approvals",
+        "approvalArtifactDigest"
+      ],
+      "properties": {
+        "approvalId": {"$ref": "#/$defs/Identifier"},
+        "candidateId": {"$ref": "#/$defs/Identifier"},
+        "requestedBy": {"$ref": "#/$defs/Identifier"},
+        "policyVersion": {"const": "automatic-generation-baseline-approval/1.0.0"},
+        "decision": {"enum": ["APPROVED", "REJECTED"]},
+        "approvals": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/PersonApproval"}
+        },
+        "approvalArtifactDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "BaselineRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineId",
+        "baselineVersion",
+        "state",
+        "synthetic",
+        "identity",
+        "identityDigest",
+        "changeRequestId",
+        "comparisonReportId",
+        "approvalId",
+        "activationReceiptId",
+        "supersededByBaselineId",
+        "createdAt",
+        "auditDigest"
+      ],
+      "properties": {
+        "baselineId": {"$ref": "#/$defs/Identifier"},
+        "baselineVersion": {"type": "integer", "minimum": 1},
+        "state": {"enum": ["CONTRACT_ONLY", "APPROVED", "ACTIVE", "SUPERSEDED", "ROLLED_BACK"]},
+        "synthetic": {"type": "boolean"},
+        "identity": {"$ref": "#/$defs/BaselineIdentity"},
+        "identityDigest": {"$ref": "#/$defs/Digest"},
+        "changeRequestId": {"$ref": "#/$defs/Identifier"},
+        "comparisonReportId": {"$ref": "#/$defs/Identifier"},
+        "approvalId": {"$ref": "#/$defs/NullableIdentifier"},
+        "activationReceiptId": {"$ref": "#/$defs/NullableIdentifier"},
+        "supersededByBaselineId": {"$ref": "#/$defs/NullableIdentifier"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "auditDigest": {"$ref": "#/$defs/Digest"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"synthetic": {"const": true}}, "required": ["synthetic"]},
+          "then": {
+            "properties": {
+              "state": {"const": "CONTRACT_ONLY"},
+              "approvalId": {"type": "null"},
+              "activationReceiptId": {"type": "null"},
+              "supersededByBaselineId": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "ActivationReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activationReceiptId",
+        "idempotencyKey",
+        "requestDigest",
+        "candidateId",
+        "newBaselineId",
+        "previousBaselineId",
+        "approvalId",
+        "expectedLedgerVersion",
+        "committedLedgerVersion",
+        "activationMode",
+        "trafficPercent",
+        "partialRolloutAllowed",
+        "supersessionEventId",
+        "activatedAt",
+        "receiptDigest"
+      ],
+      "properties": {
+        "activationReceiptId": {"$ref": "#/$defs/Identifier"},
+        "idempotencyKey": {"$ref": "#/$defs/Identifier"},
+        "requestDigest": {"$ref": "#/$defs/Digest"},
+        "candidateId": {"$ref": "#/$defs/Identifier"},
+        "newBaselineId": {"$ref": "#/$defs/Identifier"},
+        "previousBaselineId": {"$ref": "#/$defs/Identifier"},
+        "approvalId": {"$ref": "#/$defs/Identifier"},
+        "expectedLedgerVersion": {"type": "integer", "minimum": 1},
+        "committedLedgerVersion": {"type": "integer", "minimum": 2},
+        "activationMode": {"const": "ATOMIC_ALL_WORKSPACES"},
+        "trafficPercent": {"const": 100},
+        "partialRolloutAllowed": {"const": false},
+        "supersessionEventId": {"$ref": "#/$defs/Identifier"},
+        "activatedAt": {"type": "string", "format": "date-time"},
+        "receiptDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "RollbackReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollbackReceiptId",
+        "idempotencyKey",
+        "requestDigest",
+        "failedBaselineId",
+        "targetBaselineId",
+        "targetIdentityDigest",
+        "targetOriginalActivationReceiptId",
+        "expectedLedgerVersion",
+        "committedLedgerVersion",
+        "rollbackMode",
+        "trafficPercent",
+        "partialRolloutAllowed",
+        "reproductionStatus",
+        "reproductionReportId",
+        "reproductionArtifactDigest",
+        "restoredQualityMetrics",
+        "rolledBackAt",
+        "receiptDigest"
+      ],
+      "properties": {
+        "rollbackReceiptId": {"$ref": "#/$defs/Identifier"},
+        "idempotencyKey": {"$ref": "#/$defs/Identifier"},
+        "requestDigest": {"$ref": "#/$defs/Digest"},
+        "failedBaselineId": {"$ref": "#/$defs/Identifier"},
+        "targetBaselineId": {"$ref": "#/$defs/Identifier"},
+        "targetIdentityDigest": {"$ref": "#/$defs/Digest"},
+        "targetOriginalActivationReceiptId": {"$ref": "#/$defs/Identifier"},
+        "expectedLedgerVersion": {"type": "integer", "minimum": 1},
+        "committedLedgerVersion": {"type": "integer", "minimum": 2},
+        "rollbackMode": {"const": "ATOMIC_ALL_WORKSPACES"},
+        "trafficPercent": {"const": 100},
+        "partialRolloutAllowed": {"const": false},
+        "reproductionStatus": {"const": "VERIFIED"},
+        "reproductionReportId": {"$ref": "#/$defs/Identifier"},
+        "reproductionArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "restoredQualityMetrics": {"$ref": "#/$defs/QualityThresholds"},
+        "rolledBackAt": {"type": "string", "format": "date-time"},
+        "receiptDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "LedgerEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "sequence",
+        "eventType",
+        "idempotencyKey",
+        "requestDigest",
+        "expectedLedgerVersion",
+        "committedLedgerVersion",
+        "baselineId",
+        "beforeActiveBaselineId",
+        "afterActiveBaselineId",
+        "principalId",
+        "occurredAt",
+        "outcome",
+        "receiptDigest"
+      ],
+      "properties": {
+        "eventId": {"$ref": "#/$defs/Identifier"},
+        "sequence": {"type": "integer", "minimum": 1},
+        "eventType": {"enum": [
+          "CANDIDATE_RECORDED",
+          "APPROVAL_RECORDED",
+          "BASELINE_ACTIVATED",
+          "BASELINE_SUPERSEDED",
+          "ROLLBACK_REQUESTED",
+          "ROLLBACK_ACTIVATED"
+        ]},
+        "idempotencyKey": {"$ref": "#/$defs/Identifier"},
+        "requestDigest": {"$ref": "#/$defs/Digest"},
+        "expectedLedgerVersion": {"type": "integer", "minimum": 0},
+        "committedLedgerVersion": {"type": "integer", "minimum": 1},
+        "baselineId": {"$ref": "#/$defs/Identifier"},
+        "beforeActiveBaselineId": {"$ref": "#/$defs/NullableIdentifier"},
+        "afterActiveBaselineId": {"$ref": "#/$defs/NullableIdentifier"},
+        "principalId": {"$ref": "#/$defs/Identifier"},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "outcome": {"enum": ["COMMITTED", "REPLAYED", "STALE_REJECTED", "IDEMPOTENCY_CONFLICT"]},
+        "receiptDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "BaselineLedgerSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "environment",
+        "synthetic",
+        "ledgerVersion",
+        "activeBaselineId",
+        "records",
+        "approvals",
+        "activations",
+        "rollbacks",
+        "events",
+        "snapshotDigest",
+        "retention"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_BASELINE_LEDGER_SNAPSHOT"},
+        "contractVersion": {"const": "automatic-generation-version-regression/1.0.0"},
+        "environment": {"enum": ["fixture", "staging", "production"]},
+        "synthetic": {"type": "boolean"},
+        "ledgerVersion": {"type": "integer", "minimum": 1},
+        "activeBaselineId": {"$ref": "#/$defs/NullableIdentifier"},
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/BaselineRecord"}
+        },
+        "approvals": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/BaselineApproval"}
+        },
+        "activations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ActivationReceipt"}
+        },
+        "rollbacks": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/RollbackReceipt"}
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/LedgerEvent"}
+        },
+        "snapshotDigest": {"$ref": "#/$defs/Digest"},
+        "retention": {"$ref": "#/$defs/Retention"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"synthetic": {"const": true}}, "required": ["synthetic"]},
+          "then": {
+            "properties": {
+              "environment": {"const": "fixture"},
+              "activeBaselineId": {"type": "null"},
+              "approvals": {"type": "array", "maxItems": 0},
+              "activations": {"type": "array", "maxItems": 0},
+              "rollbacks": {"type": "array", "maxItems": 0}
+            }
+          }
+        }
+      ]
+    }
+  }
+}

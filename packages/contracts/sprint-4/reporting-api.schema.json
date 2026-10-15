@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-4/reporting-api.schema.json",
+  "title": "Sprint 4 overview and reports API payloads",
+  "description": "Strict cycle, platform, latest-attempt execution and internal-issue severity KPI contracts shared by Overview and Reports. Consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "CycleId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/CycleId"
+    },
+    "WorkItemId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/WorkItemId"
+    },
+    "CategoryId": {
+      "type": "string",
+      "pattern": "^folder_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "IssueId": {
+      "$ref": "issue-api.schema.json#/$defs/IssueId"
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "KpiFilterQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cycleIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/CycleId"}},
+        "workItemIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/WorkItemId"}},
+        "cycleStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"}},
+        "platforms": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"}},
+        "executionStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"}},
+        "issueSeverities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"}},
+        "issueStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"}},
+        "from": {"type": "string", "format": "date-time"},
+        "to": {"type": "string", "format": "date-time"}
+      },
+      "description": "Different supplied filters are ANDed and array members are ORed. Execution metrics use exactly the latest attempt per cycle-item/platform; a missing attempt is UNEXECUTED."
+    },
+    "KpiFilterEcho": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycleIds", "workItemIds", "cycleStatuses", "platforms", "executionStatuses", "issueSeverities", "issueStatuses", "from", "to"],
+      "properties": {
+        "cycleIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/CycleId"}},
+        "workItemIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/WorkItemId"}},
+        "cycleStatuses": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"}},
+        "platforms": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"}},
+        "executionStatuses": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"}},
+        "issueSeverities": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"}},
+        "issueStatuses": {"type": "array", "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"}},
+        "from": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+        "to": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}
+      }
+    },
+    "ExecutionStatusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["UNEXECUTED", "PASS", "FAIL", "BLOCKED", "total", "executed", "terminal", "passRate", "aggregateStatus"],
+      "properties": {
+        "UNEXECUTED": {"type": "integer", "minimum": 0},
+        "PASS": {"type": "integer", "minimum": 0},
+        "FAIL": {"type": "integer", "minimum": 0},
+        "BLOCKED": {"type": "integer", "minimum": 0},
+        "total": {"type": "integer", "minimum": 0},
+        "executed": {"type": "integer", "minimum": 0},
+        "terminal": {"type": "integer", "minimum": 0},
+        "passRate": {"type": "number", "minimum": 0, "maximum": 1},
+        "aggregateStatus": {"$ref": "../state-enums.schema.json#/$defs/ExecutionAggregateStatus"}
+      },
+      "description": "total is the four-state sum; executed is PASS+FAIL; terminal is PASS+FAIL+BLOCKED; passRate is PASS/(PASS+FAIL) or 0 when executed is zero. aggregateStatus excludes UNEXECUTED and BLOCKED with FAIL priority."
+    },
+    "PlatformKpi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "counts"],
+      "properties": {
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "counts": {"$ref": "#/$defs/ExecutionStatusCounts"}
+      }
+    },
+    "PlatformKpiSet": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/PlatformKpi"},
+      "allOf": [
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "WEB"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "AOS"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "IOS"}}}, "minContains": 1, "maxContains": 1}
+      ]
+    },
+    "IssueSeverityKpi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "total", "open", "resolved", "closed"],
+      "properties": {
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "total": {"type": "integer", "minimum": 0},
+        "open": {"type": "integer", "minimum": 0},
+        "resolved": {"type": "integer", "minimum": 0},
+        "closed": {"type": "integer", "minimum": 0}
+      },
+      "description": "open includes OPEN, IN_PROGRESS and REOPENED; total equals open+resolved+closed."
+    },
+    "IssueSeverityKpiSet": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/IssueSeverityKpi"},
+      "allOf": [
+        {"contains": {"type": "object", "required": ["severity"], "properties": {"severity": {"const": "LOW"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["severity"], "properties": {"severity": {"const": "MEDIUM"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["severity"], "properties": {"severity": {"const": "HIGH"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["severity"], "properties": {"severity": {"const": "CRITICAL"}}}, "minContains": 1, "maxContains": 1}
+      ]
+    },
+    "WorkItemKpiRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workItemId", "categoryId", "categoryName", "key", "summary"],
+      "properties": {
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "categoryName": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "key": {"$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/WorkItemKey"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"}
+      }
+    },
+    "CycleKpi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycleId", "cycleName", "cycleStatus", "caseCount", "platformSlotCount", "workItems", "execution", "platforms", "issueSeverities"],
+      "properties": {
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "cycleName": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "cycleStatus": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+        "caseCount": {"type": "integer", "minimum": 0},
+        "platformSlotCount": {"type": "integer", "minimum": 0},
+        "workItems": {"type": "array", "items": {"$ref": "#/$defs/WorkItemKpiRef"}},
+        "execution": {"$ref": "#/$defs/ExecutionStatusCounts"},
+        "platforms": {"$ref": "#/$defs/PlatformKpiSet"},
+        "issueSeverities": {"$ref": "#/$defs/IssueSeverityKpiSet"}
+      },
+      "description": "platformSlotCount equals caseCount×3 before query filtering; execution and platform rows are computed from the same latest-attempt projection."
+    },
+    "OverviewKpiQuery": {"$ref": "#/$defs/KpiFilterQuery"},
+    "OverviewKpiResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filters", "cycleCount", "caseCount", "platformSlotCount", "workItems", "execution", "platforms", "issueSeverities", "generatedAt"],
+      "properties": {
+        "filters": {"$ref": "#/$defs/KpiFilterEcho"},
+        "cycleCount": {"type": "integer", "minimum": 0},
+        "caseCount": {"type": "integer", "minimum": 0},
+        "platformSlotCount": {"type": "integer", "minimum": 0},
+        "workItems": {"type": "array", "items": {"$ref": "#/$defs/WorkItemKpiRef"}},
+        "execution": {"$ref": "#/$defs/ExecutionStatusCounts"},
+        "platforms": {"$ref": "#/$defs/PlatformKpiSet"},
+        "issueSeverities": {"$ref": "#/$defs/IssueSeverityKpiSet"},
+        "generatedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Overview and Reports read the same PostgreSQL ledger projection; values are not independently recomputed in clients."
+    },
+    "CycleReportQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cycleIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/CycleId"}},
+        "workItemIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/WorkItemId"}},
+        "cycleStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"}},
+        "platforms": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"}},
+        "executionStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"}},
+        "issueSeverities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"}},
+        "issueStatuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"}},
+        "from": {"type": "string", "format": "date-time"},
+        "to": {"type": "string", "format": "date-time"},
+        "sort": {"type": "string", "enum": ["UPDATED_AT_DESC", "UPDATED_AT_ASC", "NAME_ASC"], "default": "UPDATED_AT_DESC"},
+        "cursor": {"$ref": "#/$defs/Cursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "KPI filters match Overview. Stable pagination is by selected sort plus cycleId, and cursor identity includes all filters."
+    },
+    "CycleReportPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filters", "items", "nextCursor", "total", "generatedAt"],
+      "properties": {
+        "filters": {"$ref": "#/$defs/KpiFilterEcho"},
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/CycleKpi"}},
+        "nextCursor": {"oneOf": [{"$ref": "#/$defs/Cursor"}, {"type": "null"}]},
+        "total": {"type": "integer", "minimum": 0},
+        "generatedAt": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

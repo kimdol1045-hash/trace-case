@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/state-enums.schema.json",
+  "title": "QA platform canonical enums",
+  "description": "Canonical enum source derived from the product plan and development specification. The root validates only an empty object; consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "TestCaseStatus": {
+      "type": "string",
+      "enum": ["ACTIVE", "DEPRECATED"]
+    },
+    "ExpectedResultMode": {
+      "type": "string",
+      "enum": ["PER_STEP", "CASE"]
+    },
+    "TestCaseVersionSourceType": {
+      "type": "string",
+      "enum": ["UI", "API", "SYSTEM", "SLACK", "WORKER"]
+    },
+    "CycleStatus": {
+      "type": "string",
+      "enum": ["PLANNED", "IN_PROGRESS", "COMPLETED"]
+    },
+    "CycleScopeType": {
+      "type": "string",
+      "enum": ["WORK_ITEM", "LABEL"]
+    },
+    "ExecutionPlatform": {
+      "type": "string",
+      "enum": ["WEB", "AOS", "IOS"]
+    },
+    "ExecutionStatus": {
+      "type": "string",
+      "enum": ["UNEXECUTED", "PASS", "FAIL", "BLOCKED"]
+    },
+    "ExecutionAggregateStatus": {
+      "type": "string",
+      "enum": ["UNEXECUTED", "PASS", "FAIL"],
+      "description": "Shared verdict after excluding UNEXECUTED and BLOCKED, with FAIL priority."
+    },
+    "IssueStatus": {
+      "type": "string",
+      "enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED"]
+    },
+    "KnowledgeStatus": {
+      "type": "string",
+      "enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED", "RETRACTED"]
+    },
+    "GenerationJobStatus": {
+      "type": "string",
+      "enum": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED"]
+    },
+    "Priority": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    },
+    "Severity": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    },
+    "IssueSeverity": {
+      "$comment": "Sprint 4 canonical issue severity. Severity remains as a backward-compatible alias for legacy core payloads.",
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    },
+    "TestCaseSourceType": {
+      "type": "string",
+      "enum": ["MANUAL", "SLACK_AI", "FILE_IMPORT", "API"]
+    },
+    "SlackWorkItemField": {
+      "type": "string",
+      "enum": ["developmentItem", "requestedMenu", "featureDescription", "requestDetails"]
+    },
+    "KnowledgeNodeType": {
+      "type": "string",
+      "enum": [
+        "WORK_ITEM",
+        "MENU",
+        "FEATURE",
+        "REQUIREMENT",
+        "DECISION",
+        "CONSTRAINT",
+        "OPEN_QUESTION",
+        "RISK",
+        "TEST_CASE",
+        "EXECUTION",
+        "ISSUE",
+        "RELEASE"
+      ]
+    },
+    "KnowledgePredicate": {
+      "type": "string",
+      "enum": [
+        "AFFECTS",
+        "TARGETS",
+        "DISCUSSES",
+        "DERIVED_FROM",
+        "REFINES",
+        "SUPERSEDES",
+        "APPLIES_TO",
+        "VERIFIES",
+        "COVERS",
+        "INSTANCE_OF",
+        "FOUND_BY"
+      ]
+    }
+  }
+}

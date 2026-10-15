@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/reconstruction/1.0.0/schema.json",
+  "title": "Generation input reconstruction 1.0.0",
+  "description": "Provider-neutral, read-only reconstruction of the exact trusted Generation Input JSON value sealed for one job. The operation reads only immutable job/input/context snapshots, never substitutes live domain state, never calls a provider, and never mutates data.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "SemVer": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 100,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "InputDigestProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value", "canonicalByteLength"],
+      "properties": {
+        "algorithm": {"const": "SHA-256"},
+        "canonicalization": {"const": "RFC8785"},
+        "value": {"$ref": "#/$defs/Sha256Hex"},
+        "canonicalByteLength": {"type": "integer", "minimum": 2, "maximum": 16777216}
+      },
+      "description": "SHA-256 over the UTF-8 bytes of the RFC 8785 JSON Canonicalization Scheme representation of input. Object member order is canonicalized; array order and JSON null/empty values are preserved."
+    },
+    "AvailableReconstructionProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sealedContextDigest", "sealedAt", "inputDigest"],
+      "properties": {
+        "sealedContextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "sealedAt": {"type": "string", "format": "date-time"},
+        "inputDigest": {"$ref": "#/$defs/InputDigestProvenance"}
+      },
+      "description": "The existing context seal and the distinct canonical digest of the exact provider-neutral input. The two digests are not interchangeable."
+    },
+    "UnavailableReconstructionProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sealedContextDigest", "sealedAt", "inputDigest"],
+      "properties": {
+        "sealedContextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "sealedAt": {"type": "string", "format": "date-time"},
+        "inputDigest": {
+          "oneOf": [
+            {"$ref": "#/$defs/InputDigestProvenance"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "ReconstructionReadPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceBasis",
+        "readOnly",
+        "sealedSnapshotsOnly",
+        "liveSlackConsulted",
+        "liveKnowledgeConsulted",
+        "liveCasesConsulted",
+        "liveIssuesConsulted",
+        "liveCategoriesConsulted",
+        "providerCallAttempted",
+        "mutationPerformed",
+        "arrayOrderPreserved",
+        "nullEmptyDistinctionsPreserved"
+      ],
+      "properties": {
+        "sourceBasis": {"const": "SEALED_GENERATION_INPUT"},
+        "readOnly": {"const": true},
+        "sealedSnapshotsOnly": {"const": true},
+        "liveSlackConsulted": {"const": false},
+        "liveKnowledgeConsulted": {"const": false},
+        "liveCasesConsulted": {"const": false},
+        "liveIssuesConsulted": {"const": false},
+        "liveCategoriesConsulted": {"const": false},
+        "providerCallAttempted": {"const": false},
+        "mutationPerformed": {"const": false},
+        "arrayOrderPreserved": {"const": true},
+        "nullEmptyDistinctionsPreserved": {"const": true}
+      },
+      "description": "Executable invariants for GET /api/generation-jobs/{jobId}/reconstruction."
+    },
+    "AvailableGenerationReconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconstructionSchemaVersion",
+        "jobId",
+        "availability",
+        "reason",
+        "recordedInputSchemaVersion",
+        "input",
+        "provenance",
+        "policy"
+      ],
+      "properties": {
+        "reconstructionSchemaVersion": {"const": "1.0.0"},
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "availability": {"const": "AVAILABLE"},
+        "reason": {"type": "null"},
+        "recordedInputSchemaVersion": {"const": "1.0.0"},
+        "input": {"$ref": "../../input/1.0.0/schema.json"},
+        "provenance": {"$ref": "#/$defs/AvailableReconstructionProvenance"},
+        "policy": {"$ref": "#/$defs/ReconstructionReadPolicy"}
+      },
+      "description": "The input is the exact immutable JSON value sealed before execution. It is not projected from current rows or rebuilt from the comparison read model."
+    },
+    "LegacyGenerationReconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconstructionSchemaVersion",
+        "jobId",
+        "availability",
+        "reason",
+        "recordedInputSchemaVersion",
+        "input",
+        "provenance",
+        "policy"
+      ],
+      "properties": {
+        "reconstructionSchemaVersion": {"const": "1.0.0"},
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "availability": {"const": "UNAVAILABLE"},
+        "reason": {"const": "LEGACY_INPUT_NOT_SEALED"},
+        "recordedInputSchemaVersion": {"type": "null"},
+        "input": {"type": "null"},
+        "provenance": {
+          "allOf": [
+            {"$ref": "#/$defs/UnavailableReconstructionProvenance"},
+            {"type": "object", "properties": {"inputDigest": {"type": "null"}}}
+          ]
+        },
+        "policy": {"$ref": "#/$defs/ReconstructionReadPolicy"}
+      },
+      "description": "Stable successful read for a pre-capture job. No value may be backfilled from live state."
+    },
+    "IncompleteGenerationReconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconstructionSchemaVersion",
+        "jobId",
+        "availability",
+        "reason",
+        "recordedInputSchemaVersion",
+        "input",
+        "provenance",
+        "policy"
+      ],
+      "properties": {
+        "reconstructionSchemaVersion": {"const": "1.0.0"},
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "availability": {"const": "UNAVAILABLE"},
+        "reason": {"const": "SEALED_INPUT_INCOMPLETE"},
+        "recordedInputSchemaVersion": {
+          "oneOf": [
+            {"$ref": "#/$defs/SemVer"},
+            {"type": "null"}
+          ]
+        },
+        "input": {"type": "null"},
+        "provenance": {
+          "allOf": [
+            {"$ref": "#/$defs/UnavailableReconstructionProvenance"},
+            {"type": "object", "properties": {"inputDigest": {"type": "null"}}}
+          ]
+        },
+        "policy": {"$ref": "#/$defs/ReconstructionReadPolicy"}
+      },
+      "description": "Fail-closed state for a partial capture, invalid payload, sealed-context failure, schema/version disagreement, or canonical digest mismatch. Suspect input bytes are never returned."
+    },
+    "UnsupportedVersionGenerationReconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconstructionSchemaVersion",
+        "jobId",
+        "availability",
+        "reason",
+        "recordedInputSchemaVersion",
+        "input",
+        "provenance",
+        "policy"
+      ],
+      "properties": {
+        "reconstructionSchemaVersion": {"const": "1.0.0"},
+        "jobId": {"$ref": "#/$defs/Identifier"},
+        "availability": {"const": "UNAVAILABLE"},
+        "reason": {"const": "UNSUPPORTED_INPUT_SCHEMA_VERSION"},
+        "recordedInputSchemaVersion": {
+          "allOf": [
+            {"$ref": "#/$defs/SemVer"},
+            {"not": {"const": "1.0.0"}}
+          ]
+        },
+        "input": {"type": "null"},
+        "provenance": {
+          "allOf": [
+            {"$ref": "#/$defs/UnavailableReconstructionProvenance"},
+            {"type": "object", "properties": {"inputDigest": {"$ref": "#/$defs/InputDigestProvenance"}}}
+          ]
+        },
+        "policy": {"$ref": "#/$defs/ReconstructionReadPolicy"}
+      },
+      "description": "The stored JSON and digest are complete, but this response contract does not allowlist the recorded input schema. It never guesses compatibility or returns a downgraded payload."
+    },
+    "GenerationReconstructionResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/AvailableGenerationReconstruction"},
+        {"$ref": "#/$defs/LegacyGenerationReconstruction"},
+        {"$ref": "#/$defs/IncompleteGenerationReconstruction"},
+        {"$ref": "#/$defs/UnsupportedVersionGenerationReconstruction"}
+      ],
+      "description": "Authoritative 200 response for GET /api/generation-jobs/{jobId}/reconstruction. Every found job produces one exact availability state; the operation has no request body, query mode, provider option, or mutation mode."
+    },
+    "GetGenerationReconstructionResponse": {
+      "$ref": "#/$defs/GenerationReconstructionResponse"
+    },
+    "GenerationReconstructionErrorResponse": {
+      "$ref": "../../../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"
+    }
+  }
+}

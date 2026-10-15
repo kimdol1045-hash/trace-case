@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json",
+  "title": "Sprint 3 cycle and execution API error contract",
+  "description": "Strict typed errors for cycle lifecycle gates, immutable snapshots, append-only attempts, conditional result fields, cursor validation and incomplete-completion warnings. Sprint 1 shared shapes remain backward compatible.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "CycleId": {
+      "$ref": "cycle-execution-api.schema.json#/$defs/CycleId"
+    },
+    "CycleItemId": {
+      "$ref": "cycle-execution-api.schema.json#/$defs/CycleItemId"
+    },
+    "ExecutionAttemptId": {
+      "$ref": "cycle-execution-api.schema.json#/$defs/ExecutionAttemptId"
+    },
+    "TestCaseId": {
+      "$ref": "cycle-execution-api.schema.json#/$defs/TestCaseId"
+    },
+    "TestCaseVersionId": {
+      "$ref": "cycle-execution-api.schema.json#/$defs/TestCaseVersionId"
+    },
+    "ValidationError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/ValidationError"
+    },
+    "ResourceNotFoundError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"
+    },
+    "VersionConflictError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/VersionConflictError"
+    },
+    "IdempotencyConflictError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"
+    },
+    "CycleStateTransitionError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "CYCLE_STATE_TRANSITION_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycleId", "currentStatus", "requestedStatus", "allowedTransitions"],
+              "properties": {
+                "cycleId": {"$ref": "#/$defs/CycleId"},
+                "currentStatus": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+                "requestedStatus": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+                "allowedTransitions": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CycleMutationLockedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "CYCLE_SCOPE_LOCKED",
+                "CYCLE_EXECUTION_NOT_STARTED",
+                "CYCLE_EXECUTION_LOCKED",
+                "CYCLE_DELETE_LOCKED",
+                "CYCLE_RESTORE_CONFLICT"
+              ]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycleId", "status", "operation"],
+              "properties": {
+                "cycleId": {"$ref": "#/$defs/CycleId"},
+                "status": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+                "operation": {
+                  "type": "string",
+                  "enum": ["UPDATE_SCOPE", "REFRESH_SNAPSHOT", "START_ATTEMPT", "COMPLETE_ATTEMPT", "RETRY_ATTEMPT", "DELETE_CYCLE", "RESTORE_CYCLE"]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"type": "object", "required": ["code"], "properties": {"code": {"const": "CYCLE_EXECUTION_NOT_STARTED"}}},
+          "then": {
+            "type": "object",
+            "required": ["details"],
+            "properties": {
+              "details": {
+                "type": "object",
+                "required": ["status", "operation"],
+                "properties": {
+                  "status": {"const": "PLANNED"},
+                  "operation": {"type": "string", "enum": ["START_ATTEMPT", "COMPLETE_ATTEMPT", "RETRY_ATTEMPT"]}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"type": "object", "required": ["code"], "properties": {"code": {"const": "CYCLE_SCOPE_LOCKED"}}},
+          "then": {
+            "type": "object",
+            "required": ["details"],
+            "properties": {
+              "details": {
+                "type": "object",
+                "required": ["status", "operation"],
+                "properties": {
+                  "status": {"type": "string", "enum": ["IN_PROGRESS", "COMPLETED"]},
+                  "operation": {"const": "UPDATE_SCOPE"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"type": "object", "required": ["code"], "properties": {"code": {"const": "CYCLE_EXECUTION_LOCKED"}}},
+          "then": {
+            "type": "object",
+            "required": ["details"],
+            "properties": {
+              "details": {
+                "type": "object",
+                "required": ["status", "operation"],
+                "properties": {
+                  "status": {"const": "COMPLETED"},
+                  "operation": {
+                    "type": "string",
+                    "enum": ["REFRESH_SNAPSHOT", "START_ATTEMPT", "COMPLETE_ATTEMPT", "RETRY_ATTEMPT"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"type": "object", "required": ["code"], "properties": {"code": {"const": "CYCLE_DELETE_LOCKED"}}},
+          "then": {
+            "type": "object",
+            "required": ["details"],
+            "properties": {
+              "details": {
+                "type": "object",
+                "required": ["status", "operation"],
+                "properties": {
+                  "status": {"type": "string", "enum": ["IN_PROGRESS", "COMPLETED"]},
+                  "operation": {"const": "DELETE_CYCLE"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"type": "object", "required": ["code"], "properties": {"code": {"const": "CYCLE_RESTORE_CONFLICT"}}},
+          "then": {
+            "type": "object",
+            "required": ["details"],
+            "properties": {
+              "details": {
+                "type": "object",
+                "required": ["status", "operation"],
+                "properties": {
+                  "status": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+                  "operation": {"const": "RESTORE_CYCLE"}
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "CYCLE_EXECUTION_NOT_STARTED rejects PLANNED execution writes; CYCLE_SCOPE_LOCKED rejects scope writes after start; CYCLE_EXECUTION_LOCKED rejects completed execution and snapshot writes."
+    },
+    "CycleScopeError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": ["CYCLE_SCOPE_EMPTY", "CYCLE_SCOPE_INVALID", "CYCLE_SCOPE_DUPLICATE_CASE"]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["scopeType", "scopeValue"],
+              "properties": {
+                "cycleId": {"$ref": "#/$defs/CycleId"},
+                "scopeType": {"$ref": "../state-enums.schema.json#/$defs/CycleScopeType"},
+                "scopeValue": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+                "testCaseId": {"$ref": "#/$defs/TestCaseId"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SnapshotRefreshConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": ["SNAPSHOT_PIN_CONFLICT", "SNAPSHOT_TARGET_NOT_LATEST", "SNAPSHOT_CASE_MISMATCH"]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycleItemId", "expectedPinnedVersionId", "actualPinnedVersionId", "latestVersionId"],
+              "properties": {
+                "cycleItemId": {"$ref": "#/$defs/CycleItemId"},
+                "expectedPinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+                "actualPinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+                "latestVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+                "targetVersionId": {"$ref": "#/$defs/TestCaseVersionId"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ExecutionAttemptConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "EXECUTION_ATTEMPT_ALREADY_ACTIVE",
+                "EXECUTION_ATTEMPT_FINAL",
+                "EXECUTION_ATTEMPT_SEQUENCE_CONFLICT",
+                "EXECUTION_PLATFORM_DUPLICATE"
+              ]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycleItemId", "platform"],
+              "properties": {
+                "cycleItemId": {"$ref": "#/$defs/CycleItemId"},
+                "attemptId": {"$ref": "#/$defs/ExecutionAttemptId"},
+                "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+                "expectedAttemptNo": {"type": "integer", "minimum": 1},
+                "actualAttemptNo": {"type": "integer", "minimum": 1},
+                "status": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ActualResultRequiredError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "ACTUAL_RESULT_REQUIRED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attemptId", "status", "field"],
+              "properties": {
+                "attemptId": {"$ref": "#/$defs/ExecutionAttemptId"},
+                "status": {"const": "FAIL"},
+                "field": {"const": "actualResult"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CycleIncompleteWarningError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "CYCLE_INCOMPLETE_WARNING"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycleId", "unexecutedCount", "requiresConfirmation"],
+              "properties": {
+                "cycleId": {"$ref": "#/$defs/CycleId"},
+                "unexecutedCount": {"type": "integer", "minimum": 1},
+                "requiresConfirmation": {"const": true}
+              }
+            }
+          }
+        }
+      ],
+      "description": "A warning response, not a terminal prohibition. Retry CompleteCycle with acknowledgeIncomplete=true to complete while preserving UNEXECUTED latest states."
+    },
+    "CursorInvalidError": {
+      "$ref": "../sprint-2/error-contract.schema.json#/$defs/CursorInvalidError"
+    },
+    "ErrorResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/ValidationError"},
+        {"$ref": "#/$defs/ResourceNotFoundError"},
+        {"$ref": "#/$defs/VersionConflictError"},
+        {"$ref": "#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/CycleStateTransitionError"},
+        {"$ref": "#/$defs/CycleMutationLockedError"},
+        {"$ref": "#/$defs/CycleScopeError"},
+        {"$ref": "#/$defs/SnapshotRefreshConflictError"},
+        {"$ref": "#/$defs/ExecutionAttemptConflictError"},
+        {"$ref": "#/$defs/ActualResultRequiredError"},
+        {"$ref": "#/$defs/CycleIncompleteWarningError"},
+        {"$ref": "#/$defs/CursorInvalidError"},
+        {"$ref": "../sprint-2/error-contract.schema.json#/$defs/PermanentDeleteConflictError"}
+      ]
+    }
+  }
+}

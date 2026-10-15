@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/slack-work-item-parse-result.schema.json",
+  "title": "Slack work item parse result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["missingFields", "confidence", "sourceMessageRevisions"],
+  "properties": {
+    "developmentItem": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "requestedMenu": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "featureDescription": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "requestDetails": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "missingFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "state-enums.schema.json#/$defs/SlackWorkItemField"}
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "sourceMessageRevisions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "pattern": "\\S"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"missingFields": {"type": "array", "contains": {"const": "developmentItem"}}}},
+      "then": {"properties": {"developmentItem": false}},
+      "else": {"properties": {"developmentItem": {}}, "required": ["developmentItem"]}
+    },
+    {
+      "if": {"properties": {"missingFields": {"type": "array", "contains": {"const": "requestedMenu"}}}},
+      "then": {"properties": {"requestedMenu": false}},
+      "else": {"properties": {"requestedMenu": {}}, "required": ["requestedMenu"]}
+    },
+    {
+      "if": {"properties": {"missingFields": {"type": "array", "contains": {"const": "featureDescription"}}}},
+      "then": {"properties": {"featureDescription": false}},
+      "else": {"properties": {"featureDescription": {}}, "required": ["featureDescription"]}
+    },
+    {
+      "if": {"properties": {"missingFields": {"type": "array", "contains": {"const": "requestDetails"}}}},
+      "then": {"properties": {"requestDetails": false}},
+      "else": {"properties": {"requestDetails": {}}, "required": ["requestDetails"]}
+    }
+  ]
+}

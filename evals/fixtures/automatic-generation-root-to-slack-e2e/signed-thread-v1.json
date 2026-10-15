@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "pe-se2-t10-thread/1.0.0",
+  "signingSecret": "pe-se2-t10-signing-secret",
+  "workspaceId": "TPESE2T10",
+  "channelId": "CPESE2T10",
+  "rootTs": "1890000000.000100",
+  "permalink": "https://fake.slack.invalid/archives/CPESE2T10/p1890000000000100",
+  "events": [
+    {
+      "type": "event_callback",
+      "event_id": "EvPeSe2T10Root001",
+      "team_id": "TPESE2T10",
+      "event_time": 1890000000,
+      "event": {
+        "type": "message",
+        "channel": "CPESE2T10",
+        "channel_type": "channel",
+        "user": "UPESE2T10ROOT",
+        "text": "개발건: 결제 승인 회귀\n요청 메뉴: 결제 > 승인\n기능 설명: 카드 승인 실패 잠금\n요청 내용: 승인 실패 흐름을 자동 케이스로 관리한다.",
+        "ts": "1890000000.000100",
+        "event_ts": "1890000000.000100"
+      }
+    },
+    {
+      "type": "event_callback",
+      "event_id": "EvPeSe2T10Reply001",
+      "team_id": "TPESE2T10",
+      "event_time": 1890000001,
+      "event": {
+        "type": "message",
+        "channel": "CPESE2T10",
+        "channel_type": "channel",
+        "user": "UPESE2T10REPLY",
+        "text": "결제 승인은 실패 잠금 정책을 따라야 한다.",
+        "ts": "1890000001.000100",
+        "thread_ts": "1890000000.000100",
+        "event_ts": "1890000001.000100"
+      }
+    }
+  ]
+}

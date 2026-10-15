@@ -1,0 +1,1410 @@
+{
+  "action": "POSTGRES-RESTORE",
+  "applicationSmoke": {
+    "inProcess": true,
+    "readOnly": true,
+    "requests": {
+      "health": {
+        "httpStatus": 200,
+        "responseSha256": "5114222c31f9713eb2b65821989fb5df554017ab3e1951ee475f344026fc254e"
+      },
+      "ready": {
+        "httpStatus": 200,
+        "responseSha256": "b81d9084a29e15d10b0d92b04f83b57d6e6a529fcd9b751d54a5974f05bf3b02",
+        "status": "ready"
+      },
+      "testCases": {
+        "httpStatus": 200,
+        "responseSha256": "a9ee7f593913ea72a98376981e1e501b36fa1491a680850f3845e51236189d0d",
+        "total": 3
+      },
+      "workItems": {
+        "httpStatus": 200,
+        "responseSha256": "42fd96840a20972911f5a124eeb52ef9696bd63591baac46566b17fa13eff0b2",
+        "total": 2
+      },
+      "workspace": {
+        "httpStatus": 200,
+        "responseSha256": "3486671a91618d76026a98731879cbe8174e030b919bf2b87b5cb44a6251557a"
+      }
+    },
+    "transactionDefaultReadOnly": true
+  },
+  "archive": {
+    "dumpBytes": 605480,
+    "dumpSha256": "317a78225f06a96c0195b25681b0b37099a117eba34b171f313c2cab407ab823",
+    "entryCount": 791,
+    "listingSha256": "00a91718552a8e77ce1727797ffe07cc6e8085287579f5ede523e0627ffcf50c",
+    "validated": true
+  },
+  "backupEvidenceFile": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-backup.json",
+  "client": {
+    "composeService": "postgres",
+    "credentialsInArgv": false,
+    "mode": "compose-exec"
+  },
+  "comparison": {
+    "catalogCategoryDigestsEqual": true,
+    "catalogEqual": true,
+    "catalogObjectCountsEqual": true,
+    "catalogVersionEqual": true,
+    "dataEqual": true,
+    "perTableEqual": true,
+    "tableCountEqual": true,
+    "totalRowsEqual": true
+  },
+  "confirmationRequired": "RUN PF-SF1-T07 POSTGRES-RESTORE ON tc-phase-f-t07-wave6-retry3-c640954b-restore-disposable",
+  "dumpBytes": 605480,
+  "dumpSha256": "317a78225f06a96c0195b25681b0b37099a117eba34b171f313c2cab407ab823",
+  "evidenceFile": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-restore.json",
+  "executes": true,
+  "mode": "executed",
+  "mutates": [
+    "declared empty attested PostgreSQL restore destination"
+  ],
+  "ok": true,
+  "postSmokeComparison": {
+    "allTableDataEqual": true,
+    "perTableEqual": true,
+    "sequenceStateEqual": true,
+    "tableCountEqual": true,
+    "totalRowsEqual": true
+  },
+  "postSmokeFingerprint": {
+    "dataSha256": "f85a64edaf94a892130927c3e8d07d8b58c90b95a53d91acd77ffe292e96102a",
+    "sequenceStateSha256": "9024a1ecae706026448f887a012340c87c803ab8edc825fcbbe21debbb012699",
+    "tableCount": 78,
+    "tables": [
+      {
+        "rowCount": 1,
+        "sha256": "251d85f0aa6afb3e87691ba1d9e42a6066032ac97447d05f28984ea431b64e9d",
+        "table": "alembic_version"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "api_idempotency_receipts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "attachments"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "cb7e5e7aba024321ad86a5bc2501bedd0d3a0095c51b737cf73f2a471fe46c9a",
+        "table": "audit_logs"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "background_jobs"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "3c17cd87c35068045e1be03355ca2b719298011f4a324f36e275161b8f739df4",
+        "table": "comments"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "13fc2f54934a2eaba25dfa869471f308fb9992278fed24c1b54cfd66a5fbc0c1",
+        "table": "cycle_items"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "drive_reconciliation_records"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "drive_usage_snapshots"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "execution_attempts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "execution_step_results"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "folder_aliases"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "588c07a82d292e904133eb4c8b5eadea828424743870d27dd6b920a897b2f64d",
+        "table": "folders"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_applies"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_apply_outcomes"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_attempt_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_activations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_approvals"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_audit_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_change_requests"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_rollbacks"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_runtime"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_change_assessments"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_contexts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_execution_schedules"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_jobs"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_materialization_schedules"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_provider_call_observations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_provider_call_permits"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_approvals"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_candidate_roots"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_candidates"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_review_decisions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_reviewer_authorities"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_retry_exhaustions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_retry_requests"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_delivery_attempts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_delivery_observations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_intents"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_receipts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_materializations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_resolutions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_targets"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_version_sets"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "integration_settings"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "5a40048e2bfe8fb606531b201164bf76bc205d78f5aaccb54a0900ee7b98845e",
+        "table": "issue_links"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "f116d05b6eeebc3f27b15e0f88495d8c3047b9beb9b320817e412a1549c3d230",
+        "table": "issue_steps"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "4ef967c3c43881586eb000b6c533641b103752196bb34cfdc3c80aa7d292d1fa",
+        "table": "issues"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_edges"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_embeddings"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_evidence"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_nodes"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_projection_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_source_records"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "28795ab9828da0dd394ecfc95ae1ed8b33aa8591099e1c15853e8b643cfdac56",
+        "table": "lightrag_active_generation_pointer"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "lightrag_generation_transition_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "lightrag_generations"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "6a603ee6423e3355886e77a64eb7e3eb368f2b10419fb27fdd9c761ad507e9d5",
+        "table": "ontology_schemas"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "outbox_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_channel_allowlist"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_message_revisions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_messages"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_parse_results"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_threads"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_work_items"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "c876679449326cfd32134f6f6045bef0a5918ce2d5732d8620329ffefba56178",
+        "table": "tags"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "test_case_generation_management_events"
+      },
+      {
+        "rowCount": 3,
+        "sha256": "1d7672ce142aabadeeb2de8f4ab3c2e924a41efe0691ba61340f07247f9ffea4",
+        "table": "test_case_tags"
+      },
+      {
+        "rowCount": 5,
+        "sha256": "23e60a5bcc58a9b909e1b605eb458f2c9f2613f97a43609880824af3f277f604",
+        "table": "test_case_version_tags"
+      },
+      {
+        "rowCount": 4,
+        "sha256": "d92bf1a017df52a5ae2e44a4b8298a9ffff7489712be0d8b4c0611a91d520cd8",
+        "table": "test_case_versions"
+      },
+      {
+        "rowCount": 3,
+        "sha256": "54b6467bd0579c3f1212b27019b884809e2ec6441bf531081141880cb458a5a6",
+        "table": "test_cases"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "0529deed69a99ce09c3e2ade3b6a179c95b40bcad7e4b912673181abcc38b2bc",
+        "table": "test_cycles"
+      },
+      {
+        "rowCount": 5,
+        "sha256": "7dcaebb2ee335f12d8c7d6aaf06a2aebb1eb881566650c0af1fd1a7e5d2b9475",
+        "table": "test_steps"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "5d14866bdc86fd769810ea2e45c9c8edce8b47ddccda5861c85ca9654b115d7e",
+        "table": "work_items"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "de1f4879c0a127647c359609c5e6f6f0985b6b828e765d5e5f9f9e45919e073a",
+        "table": "workspace_key_counters"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "1681579ee5e0e8b63674c63e6e9ebe778f97cf8ba55a7421f0ccaad48febef53",
+        "table": "workspace_settings"
+      }
+    ],
+    "totalRows": 40
+  },
+  "postflight": {
+    "alembicRevision": "20260902_0030",
+    "attested": true,
+    "databaseAttestation": "tc-phase-f-rehearsal:disposable:tc-phase-f-t07-wave6-retry3-c640954b-restore-disposable",
+    "databaseName": "tc_phase_f_t07_wave6_retry3_c640954b_restore_test_disposable",
+    "publicTableCount": 78,
+    "serverVersionNum": 160012
+  },
+  "preflight": {
+    "alembicRevision": null,
+    "attested": true,
+    "databaseAttestation": "tc-phase-f-rehearsal:disposable:tc-phase-f-t07-wave6-retry3-c640954b-restore-disposable",
+    "databaseName": "tc_phase_f_t07_wave6_retry3_c640954b_restore_test_disposable",
+    "publicTableCount": 0,
+    "serverVersionNum": 160012
+  },
+  "reads": [
+    "existing custom-format dump outside the repository"
+  ],
+  "recoveryPoint": {
+    "capturedAtUtc": "2026-09-04T06:51:53.051959Z",
+    "measuredAgeAtBackupCompletionSeconds": 0.485801,
+    "measuredAgeAtRestoredSmokeSeconds": 28.238806,
+    "productionRpoPromise": "NOT_CLAIMED",
+    "snapshotId": "00000003-00002AC4-1",
+    "transactionSnapshot": "84442:84442:",
+    "walLsn": "1/69091230"
+  },
+  "restoredFingerprint": {
+    "catalogFingerprintVersion": "postgresql-public-catalog-v3",
+    "dataSha256": "f85a64edaf94a892130927c3e8d07d8b58c90b95a53d91acd77ffe292e96102a",
+    "schemaCategorySha256": {
+      "collations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "columns": "c7e6e68e151451223516574a7cac56e8d88431b5a160f36287631b2e05c910f8",
+      "constraints": "f4788efbefe6501161acd34bbdb15db58cb4f6bd3223a847639449fab4e0980b",
+      "extensions": "bb4b5f74b57e44133bc5d6dfdef31afafc004097525fd9840d7011dee8cbacd8",
+      "indexes": "65c6ba6e2766f45e6d0066cd5c242a7be69785b3ac45cc724f5eed3d3868ec27",
+      "inheritance": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "partitions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "policies": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relations": "a9662cd572e6de4e3eb42fdad8a67bf3ff2f207858c56dc7e77f614ccafe287e",
+      "routines": "cfebfffc735e5e0f194052a01eef6a61e2af14944a81a7eeb018d8fbb8d915a1",
+      "rules": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sequences": "9024a1ecae706026448f887a012340c87c803ab8edc825fcbbe21debbb012699",
+      "statistics": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "triggers": "50c15e9e1fe1879fec75a0a2da65fb1ea6692ef9920fd2631078ec2462d190ea",
+      "types": "6801524477c26eb81f877cce7732c81a5bc34d2a856ff965638db80d25706304",
+      "views": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "schemaObjectCounts": {
+      "collations": 0,
+      "columns": 945,
+      "constraints": 738,
+      "extensions": 2,
+      "indexes": 260,
+      "inheritance": 0,
+      "partitions": 0,
+      "policies": 0,
+      "relations": 78,
+      "routines": 230,
+      "rules": 0,
+      "sequences": 1,
+      "statistics": 0,
+      "triggers": 106,
+      "types": 3,
+      "views": 0
+    },
+    "schemaSha256": "8846c25f73faecdc56220b9597a399b5e44a41202b0dc4ac1eec5dc18414ed62",
+    "tableCount": 78,
+    "tables": [
+      {
+        "rowCount": 1,
+        "sha256": "251d85f0aa6afb3e87691ba1d9e42a6066032ac97447d05f28984ea431b64e9d",
+        "table": "alembic_version"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "api_idempotency_receipts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "attachments"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "cb7e5e7aba024321ad86a5bc2501bedd0d3a0095c51b737cf73f2a471fe46c9a",
+        "table": "audit_logs"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "background_jobs"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "3c17cd87c35068045e1be03355ca2b719298011f4a324f36e275161b8f739df4",
+        "table": "comments"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "13fc2f54934a2eaba25dfa869471f308fb9992278fed24c1b54cfd66a5fbc0c1",
+        "table": "cycle_items"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "drive_reconciliation_records"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "drive_usage_snapshots"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "execution_attempts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "execution_step_results"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "folder_aliases"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "588c07a82d292e904133eb4c8b5eadea828424743870d27dd6b920a897b2f64d",
+        "table": "folders"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_applies"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_apply_outcomes"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_attempt_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_activations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_approvals"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_audit_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_change_requests"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_rollbacks"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_baseline_runtime"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_change_assessments"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_contexts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_execution_schedules"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_jobs"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_materialization_schedules"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_provider_call_observations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_provider_call_permits"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_approvals"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_candidate_roots"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_candidates"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_review_decisions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_quality_reviewer_authorities"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_retry_exhaustions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_retry_requests"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_delivery_attempts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_delivery_observations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_intents"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_slack_notification_receipts"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_materializations"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_resolutions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestion_targets"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_suggestions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "generation_version_sets"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "integration_settings"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "5a40048e2bfe8fb606531b201164bf76bc205d78f5aaccb54a0900ee7b98845e",
+        "table": "issue_links"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "f116d05b6eeebc3f27b15e0f88495d8c3047b9beb9b320817e412a1549c3d230",
+        "table": "issue_steps"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "4ef967c3c43881586eb000b6c533641b103752196bb34cfdc3c80aa7d292d1fa",
+        "table": "issues"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_edges"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_embeddings"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_evidence"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_nodes"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_projection_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "knowledge_source_records"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "28795ab9828da0dd394ecfc95ae1ed8b33aa8591099e1c15853e8b643cfdac56",
+        "table": "lightrag_active_generation_pointer"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "lightrag_generation_transition_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "lightrag_generations"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "6a603ee6423e3355886e77a64eb7e3eb368f2b10419fb27fdd9c761ad507e9d5",
+        "table": "ontology_schemas"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "outbox_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_channel_allowlist"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_events"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_message_revisions"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_messages"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_parse_results"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_threads"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "slack_work_items"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "c876679449326cfd32134f6f6045bef0a5918ce2d5732d8620329ffefba56178",
+        "table": "tags"
+      },
+      {
+        "rowCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "table": "test_case_generation_management_events"
+      },
+      {
+        "rowCount": 3,
+        "sha256": "1d7672ce142aabadeeb2de8f4ab3c2e924a41efe0691ba61340f07247f9ffea4",
+        "table": "test_case_tags"
+      },
+      {
+        "rowCount": 5,
+        "sha256": "23e60a5bcc58a9b909e1b605eb458f2c9f2613f97a43609880824af3f277f604",
+        "table": "test_case_version_tags"
+      },
+      {
+        "rowCount": 4,
+        "sha256": "d92bf1a017df52a5ae2e44a4b8298a9ffff7489712be0d8b4c0611a91d520cd8",
+        "table": "test_case_versions"
+      },
+      {
+        "rowCount": 3,
+        "sha256": "54b6467bd0579c3f1212b27019b884809e2ec6441bf531081141880cb458a5a6",
+        "table": "test_cases"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "0529deed69a99ce09c3e2ade3b6a179c95b40bcad7e4b912673181abcc38b2bc",
+        "table": "test_cycles"
+      },
+      {
+        "rowCount": 5,
+        "sha256": "7dcaebb2ee335f12d8c7d6aaf06a2aebb1eb881566650c0af1fd1a7e5d2b9475",
+        "table": "test_steps"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "5d14866bdc86fd769810ea2e45c9c8edce8b47ddccda5861c85ca9654b115d7e",
+        "table": "work_items"
+      },
+      {
+        "rowCount": 2,
+        "sha256": "de1f4879c0a127647c359609c5e6f6f0985b6b828e765d5e5f9f9e45919e073a",
+        "table": "workspace_key_counters"
+      },
+      {
+        "rowCount": 1,
+        "sha256": "1681579ee5e0e8b63674c63e6e9ebe778f97cf8ba55a7421f0ccaad48febef53",
+        "table": "workspace_settings"
+      }
+    ],
+    "totalRows": 40
+  },
+  "rpoBoundary": "measured recovery-point timestamp and age only; no production RPO promise",
+  "safety": {
+    "credentialsPrinted": false,
+    "databaseCommentAttestationRequired": true,
+    "rejectsProductionLikeNames": true
+  },
+  "source": {
+    "fingerprint": {
+      "catalogFingerprintVersion": "postgresql-public-catalog-v3",
+      "dataSha256": "f85a64edaf94a892130927c3e8d07d8b58c90b95a53d91acd77ffe292e96102a",
+      "schemaCategorySha256": {
+        "collations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "columns": "c7e6e68e151451223516574a7cac56e8d88431b5a160f36287631b2e05c910f8",
+        "constraints": "f4788efbefe6501161acd34bbdb15db58cb4f6bd3223a847639449fab4e0980b",
+        "extensions": "bb4b5f74b57e44133bc5d6dfdef31afafc004097525fd9840d7011dee8cbacd8",
+        "indexes": "65c6ba6e2766f45e6d0066cd5c242a7be69785b3ac45cc724f5eed3d3868ec27",
+        "inheritance": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "partitions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policies": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relations": "a9662cd572e6de4e3eb42fdad8a67bf3ff2f207858c56dc7e77f614ccafe287e",
+        "routines": "cfebfffc735e5e0f194052a01eef6a61e2af14944a81a7eeb018d8fbb8d915a1",
+        "rules": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sequences": "9024a1ecae706026448f887a012340c87c803ab8edc825fcbbe21debbb012699",
+        "statistics": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "triggers": "50c15e9e1fe1879fec75a0a2da65fb1ea6692ef9920fd2631078ec2462d190ea",
+        "types": "6801524477c26eb81f877cce7732c81a5bc34d2a856ff965638db80d25706304",
+        "views": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "schemaObjectCounts": {
+        "collations": 0,
+        "columns": 945,
+        "constraints": 738,
+        "extensions": 2,
+        "indexes": 260,
+        "inheritance": 0,
+        "partitions": 0,
+        "policies": 0,
+        "relations": 78,
+        "routines": 230,
+        "rules": 0,
+        "sequences": 1,
+        "statistics": 0,
+        "triggers": 106,
+        "types": 3,
+        "views": 0
+      },
+      "schemaSha256": "8846c25f73faecdc56220b9597a399b5e44a41202b0dc4ac1eec5dc18414ed62",
+      "tableCount": 78,
+      "tables": [
+        {
+          "rowCount": 1,
+          "sha256": "251d85f0aa6afb3e87691ba1d9e42a6066032ac97447d05f28984ea431b64e9d",
+          "table": "alembic_version"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "api_idempotency_receipts"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "attachments"
+        },
+        {
+          "rowCount": 2,
+          "sha256": "cb7e5e7aba024321ad86a5bc2501bedd0d3a0095c51b737cf73f2a471fe46c9a",
+          "table": "audit_logs"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "background_jobs"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "3c17cd87c35068045e1be03355ca2b719298011f4a324f36e275161b8f739df4",
+          "table": "comments"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "13fc2f54934a2eaba25dfa869471f308fb9992278fed24c1b54cfd66a5fbc0c1",
+          "table": "cycle_items"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "drive_reconciliation_records"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "drive_usage_snapshots"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "execution_attempts"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "execution_step_results"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "folder_aliases"
+        },
+        {
+          "rowCount": 2,
+          "sha256": "588c07a82d292e904133eb4c8b5eadea828424743870d27dd6b920a897b2f64d",
+          "table": "folders"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_applies"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_apply_outcomes"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_attempt_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_activations"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_approvals"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_audit_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_change_requests"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_rollbacks"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_baseline_runtime"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_change_assessments"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_contexts"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_execution_schedules"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_jobs"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_materialization_schedules"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_provider_call_observations"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_provider_call_permits"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_quality_approvals"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_quality_candidate_roots"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_quality_candidates"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_quality_review_decisions"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_quality_reviewer_authorities"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_retry_exhaustions"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_retry_requests"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_slack_notification_delivery_attempts"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_slack_notification_delivery_observations"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_slack_notification_intents"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_slack_notification_receipts"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_suggestion_materializations"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_suggestion_resolutions"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_suggestion_targets"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_suggestions"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "generation_version_sets"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "integration_settings"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "5a40048e2bfe8fb606531b201164bf76bc205d78f5aaccb54a0900ee7b98845e",
+          "table": "issue_links"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "f116d05b6eeebc3f27b15e0f88495d8c3047b9beb9b320817e412a1549c3d230",
+          "table": "issue_steps"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "4ef967c3c43881586eb000b6c533641b103752196bb34cfdc3c80aa7d292d1fa",
+          "table": "issues"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_edges"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_embeddings"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_evidence"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_nodes"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_projection_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "knowledge_source_records"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "28795ab9828da0dd394ecfc95ae1ed8b33aa8591099e1c15853e8b643cfdac56",
+          "table": "lightrag_active_generation_pointer"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "lightrag_generation_transition_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "lightrag_generations"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "6a603ee6423e3355886e77a64eb7e3eb368f2b10419fb27fdd9c761ad507e9d5",
+          "table": "ontology_schemas"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "outbox_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_channel_allowlist"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_events"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_message_revisions"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_messages"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_parse_results"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_threads"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "slack_work_items"
+        },
+        {
+          "rowCount": 2,
+          "sha256": "c876679449326cfd32134f6f6045bef0a5918ce2d5732d8620329ffefba56178",
+          "table": "tags"
+        },
+        {
+          "rowCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "table": "test_case_generation_management_events"
+        },
+        {
+          "rowCount": 3,
+          "sha256": "1d7672ce142aabadeeb2de8f4ab3c2e924a41efe0691ba61340f07247f9ffea4",
+          "table": "test_case_tags"
+        },
+        {
+          "rowCount": 5,
+          "sha256": "23e60a5bcc58a9b909e1b605eb458f2c9f2613f97a43609880824af3f277f604",
+          "table": "test_case_version_tags"
+        },
+        {
+          "rowCount": 4,
+          "sha256": "d92bf1a017df52a5ae2e44a4b8298a9ffff7489712be0d8b4c0611a91d520cd8",
+          "table": "test_case_versions"
+        },
+        {
+          "rowCount": 3,
+          "sha256": "54b6467bd0579c3f1212b27019b884809e2ec6441bf531081141880cb458a5a6",
+          "table": "test_cases"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "0529deed69a99ce09c3e2ade3b6a179c95b40bcad7e4b912673181abcc38b2bc",
+          "table": "test_cycles"
+        },
+        {
+          "rowCount": 5,
+          "sha256": "7dcaebb2ee335f12d8c7d6aaf06a2aebb1eb881566650c0af1fd1a7e5d2b9475",
+          "table": "test_steps"
+        },
+        {
+          "rowCount": 2,
+          "sha256": "5d14866bdc86fd769810ea2e45c9c8edce8b47ddccda5861c85ca9654b115d7e",
+          "table": "work_items"
+        },
+        {
+          "rowCount": 2,
+          "sha256": "de1f4879c0a127647c359609c5e6f6f0985b6b828e765d5e5f9f9e45919e073a",
+          "table": "workspace_key_counters"
+        },
+        {
+          "rowCount": 1,
+          "sha256": "1681579ee5e0e8b63674c63e6e9ebe778f97cf8ba55a7421f0ccaad48febef53",
+          "table": "workspace_settings"
+        }
+      ],
+      "totalRows": 40
+    },
+    "preflight": {
+      "alembicRevision": "20260902_0030",
+      "attested": true,
+      "databaseAttestation": "tc-phase-f-rehearsal:disposable:tc-phase-f-t07-wave6-retry3-c640954b-source-disposable",
+      "databaseName": "tc_phase_f_t07_wave6_retry3_c640954b_source_test_disposable",
+      "publicTableCount": 78,
+      "serverVersionNum": 160012
+    },
+    "target": {
+      "class": "disposable",
+      "name": "tc-phase-f-t07-wave6-retry3-c640954b-source-disposable"
+    }
+  },
+  "steps": [
+    "validate the matched backup evidence, dump SHA-256, and archive inventory",
+    "verify exact database identity, comment attestation, and zero public tables",
+    "restore without --clean, owner, or ACL",
+    "require restored Alembic revision 20260902_0030",
+    "compare stable catalog structure plus per-table counts and SHA-256 data digests",
+    "run read-only in-process health/readiness/workspace/work-item/test-case API smoke",
+    "report restore command timing, measured RTO, and recovery-point age"
+  ],
+  "target": {
+    "class": "disposable",
+    "name": "tc-phase-f-t07-wave6-retry3-c640954b-restore-disposable"
+  },
+  "task": "PF-SF1-T07",
+  "timing": {
+    "finishedAtUtc": "2026-09-04T06:52:21.290747+00:00",
+    "productionRtoPromise": "NOT_CLAIMED",
+    "restoreCommandSeconds": 0.639901,
+    "rtoMeasuredThroughReadOnlyApplicationSmokeSeconds": 2.450985,
+    "startedAtUtc": "2026-09-04T06:52:18.839576+00:00"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "reconstructionSchemaVersion": "1.0.0",
+  "jobId": "generation_job_legacy_001",
+  "availability": "UNAVAILABLE",
+  "reason": "LEGACY_INPUT_NOT_SEALED",
+  "recordedInputSchemaVersion": null,
+  "input": null,
+  "provenance": {
+    "sealedContextDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sealedAt": "2026-08-26T01:00:00Z",
+    "inputDigest": null
+  },
+  "policy": {
+    "sourceBasis": "SEALED_GENERATION_INPUT",
+    "readOnly": true,
+    "sealedSnapshotsOnly": true,
+    "liveSlackConsulted": false,
+    "liveKnowledgeConsulted": false,
+    "liveCasesConsulted": false,
+    "liveIssuesConsulted": false,
+    "liveCategoriesConsulted": false,
+    "providerCallAttempted": false,
+    "mutationPerformed": false,
+    "arrayOrderPreserved": true,
+    "nullEmptyDistinctionsPreserved": true
+  }
+}

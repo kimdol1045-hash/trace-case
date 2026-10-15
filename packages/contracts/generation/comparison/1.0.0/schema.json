@@ -1,0 +1,964 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/comparison/1.0.0/schema.json",
+  "title": "Generation comparison read model 1.0.0",
+  "description": "Provider-neutral, read-only historical comparison of one generation job. Every displayed value is projected from that job's sealed context, stored result, or immutable committed apply receipt; live-source substitution, generation-input reconstruction, provider calls, and mutations are forbidden.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "ShortString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "HistoricalText": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "PRESENT"},
+            "value": {"$ref": "#/$defs/NonBlankString"},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "EMPTY"},
+            "value": {"type": "null"},
+            "reason": {"const": "SEALED_EMPTY"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "REDACTED"},
+            "value": {"type": "null"},
+            "reason": {
+              "type": "string",
+              "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "MISSING_SOURCE"},
+            "value": {"type": "null"},
+            "reason": {
+              "type": "string",
+              "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT", "UNRESOLVED_REFERENCE"]
+            }
+          }
+        }
+      ],
+      "description": "A stable four-state historical scalar. EMPTY proves the sealed value was empty; REDACTED proves it is intentionally withheld; MISSING_SOURCE proves the job did not seal enough information. None may be backfilled from a live source."
+    },
+    "SourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contextItemId",
+        "contextRank",
+        "knowledgeEvidenceId",
+        "subjectType",
+        "subjectId",
+        "sourceKind",
+        "sourceEntityType",
+        "sourceEntityId",
+        "sourceRevision",
+        "contentHash",
+        "permalink"
+      ],
+      "properties": {
+        "contextItemId": {"$ref": "#/$defs/Identifier"},
+        "contextRank": {"type": "integer", "minimum": 1},
+        "knowledgeEvidenceId": {"$ref": "#/$defs/Identifier"},
+        "subjectType": {"type": "string", "enum": ["NODE", "EDGE"]},
+        "subjectId": {"$ref": "#/$defs/Identifier"},
+        "sourceKind": {"type": "string", "enum": ["SOURCE_REVISION", "LEDGER_ENTITY"]},
+        "sourceEntityType": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 64},
+        "sourceEntityId": {"$ref": "#/$defs/Identifier"},
+        "sourceRevision": {"$ref": "#/$defs/ShortString"},
+        "contentHash": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S"},
+        "permalink": {"$ref": "#/$defs/HistoricalText"}
+      },
+      "description": "Exact metadata copied from one immutable generation_context row. It never describes a current source revision."
+    },
+    "SlackStructuredField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "value", "sourceReferences"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": ["DEVELOPMENT_ITEM", "REQUESTED_MENU", "FEATURE_DESCRIPTION", "REQUEST_DETAILS"]
+        },
+        "value": {"$ref": "#/$defs/HistoricalText"},
+        "sourceReferences": {
+          "type": "array",
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "properties": {"state": {"const": "PRESENT"}},
+                "required": ["state"]
+              }
+            },
+            "required": ["value"]
+          },
+          "then": {"properties": {"sourceReferences": {"type": "array", "minItems": 1}}}
+        }
+      ]
+    },
+    "SlackRevisionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "sourceRevisionId",
+        "messageId",
+        "messageTs",
+        "revisionTs",
+        "role",
+        "operation",
+        "authorId",
+        "body",
+        "permalink",
+        "recordedAt",
+        "sourceReferences"
+      ],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0},
+        "sourceRevisionId": {"$ref": "#/$defs/Identifier"},
+        "messageId": {"$ref": "#/$defs/Identifier"},
+        "messageTs": {"type": "string", "pattern": "^[0-9]{10,12}\\.[0-9]{6}$"},
+        "revisionTs": {"type": "string", "pattern": "^[0-9]{10,12}\\.[0-9]{6}$"},
+        "role": {"type": "string", "enum": ["ROOT", "REPLY"]},
+        "operation": {"type": "string", "enum": ["CREATE", "EDIT", "DELETE"]},
+        "authorId": {"$ref": "#/$defs/HistoricalText"},
+        "body": {"$ref": "#/$defs/HistoricalText"},
+        "permalink": {"$ref": "#/$defs/HistoricalText"},
+        "recordedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"operation": {"const": "DELETE"}}, "required": ["operation"]},
+          "then": {
+            "properties": {
+              "body": {
+                "type": "object",
+                "properties": {"state": {"const": "EMPTY"}}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackThreadEvidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5000,
+              "items": {"$ref": "#/$defs/SlackRevisionEvidence"}
+            },
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"const": "SEALED_EMPTY"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {
+              "type": "string",
+              "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]
+            }
+          }
+        }
+      ]
+    },
+    "SlackSourceComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slackWorkItemId",
+        "sourceVersion",
+        "workspaceId",
+        "channelId",
+        "messageTs",
+        "threadTs",
+        "permalink",
+        "fields",
+        "threadEvidence"
+      ],
+      "properties": {
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "workspaceId": {"$ref": "#/$defs/HistoricalText"},
+        "channelId": {"$ref": "#/$defs/HistoricalText"},
+        "messageTs": {"$ref": "#/$defs/HistoricalText"},
+        "threadTs": {"$ref": "#/$defs/HistoricalText"},
+        "permalink": {"$ref": "#/$defs/HistoricalText"},
+        "fields": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "#/$defs/SlackStructuredField"},
+                {"type": "object", "properties": {"field": {"const": "DEVELOPMENT_ITEM"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/SlackStructuredField"},
+                {"type": "object", "properties": {"field": {"const": "REQUESTED_MENU"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/SlackStructuredField"},
+                {"type": "object", "properties": {"field": {"const": "FEATURE_DESCRIPTION"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/SlackStructuredField"},
+                {"type": "object", "properties": {"field": {"const": "REQUEST_DETAILS"}}}
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 4
+        },
+        "threadEvidence": {"$ref": "#/$defs/SlackThreadEvidence"}
+      }
+    },
+    "ActiveKnowledgeComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceNodeId",
+        "nodeType",
+        "status",
+        "activeAtSeal",
+        "content",
+        "validFrom",
+        "validTo",
+        "selectionReason",
+        "sourceReferences"
+      ],
+      "properties": {
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {"type": "string", "enum": ["REQUIREMENT", "DECISION", "CONSTRAINT"]},
+        "status": {"const": "ACTIVE"},
+        "activeAtSeal": {"const": true},
+        "content": {"$ref": "#/$defs/HistoricalText"},
+        "validFrom": {"$ref": "#/$defs/NullableDateTime"},
+        "validTo": {"type": "null"},
+        "selectionReason": {"$ref": "#/$defs/ShortString"},
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        }
+      }
+    },
+    "ActiveKnowledgeCollection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "items": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/ActiveKnowledgeComparison"}},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"const": "SEALED_EMPTY"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "ExistingCaseStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "precondition", "action", "expectedResult"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"oneOf": [{"$ref": "#/$defs/NonBlankString"}, {"type": "null"}]},
+        "action": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResult": {"oneOf": [{"$ref": "#/$defs/NonBlankString"}, {"type": "null"}]}
+      }
+    },
+    "ExistingCaseContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "precondition",
+        "steps",
+        "expectedResultMode",
+        "caseExpectedResult",
+        "priority",
+        "labels"
+      ],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "precondition": {"oneOf": [{"$ref": "#/$defs/NonBlankString"}, {"type": "null"}]},
+        "steps": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/ExistingCaseStep"}},
+        "expectedResultMode": {"$ref": "../../../state-enums.schema.json#/$defs/ExpectedResultMode"},
+        "caseExpectedResult": {"oneOf": [{"$ref": "#/$defs/NonBlankString"}, {"type": "null"}]},
+        "priority": {"$ref": "../../../state-enums.schema.json#/$defs/Priority"},
+        "labels": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}
+        }
+      }
+    },
+    "HistoricalExistingCaseContent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "PRESENT"},
+            "value": {"$ref": "#/$defs/ExistingCaseContent"},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "REDACTED"},
+            "value": {"type": "null"},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "MISSING_SOURCE"},
+            "value": {"type": "null"},
+            "reason": {"type": "string", "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "ExistingCaseComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceNodeId",
+        "testCaseId",
+        "testCaseVersionId",
+        "caseKey",
+        "status",
+        "content",
+        "selectionReason",
+        "sourceReferences"
+      ],
+      "properties": {
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "testCaseId": {"$ref": "#/$defs/Identifier"},
+        "testCaseVersionId": {"$ref": "#/$defs/Identifier"},
+        "caseKey": {"$ref": "#/$defs/HistoricalText"},
+        "status": {"const": "ACTIVE"},
+        "content": {"$ref": "#/$defs/HistoricalExistingCaseContent"},
+        "selectionReason": {"$ref": "#/$defs/ShortString"},
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        }
+      },
+      "description": "The immutable testCaseId/testCaseVersionId pair always identifies the historical comparison target. Missing display content never authorizes a lookup of the case's current version."
+    },
+    "ExistingCaseCollection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "items": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/ExistingCaseComparison"}},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"const": "SEALED_EMPTY"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "HistoricalSnapshot": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "PRESENT"},
+            "value": {"type": "object"},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "REDACTED"},
+            "value": {"type": "null"},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "value", "reason"],
+          "properties": {
+            "state": {"const": "MISSING_SOURCE"},
+            "value": {"type": "null"},
+            "reason": {"type": "string", "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "SupplementalEvidenceComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceNodeId", "kind", "title", "snapshot", "selectionReason", "sourceReferences"],
+      "properties": {
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "kind": {"type": "string", "enum": ["RISK_EXECUTION", "OPEN_ISSUE", "EXPLICIT_SOURCE", "OTHER_SEALED"]},
+        "title": {"$ref": "#/$defs/HistoricalText"},
+        "snapshot": {"$ref": "#/$defs/HistoricalSnapshot"},
+        "selectionReason": {"$ref": "#/$defs/ShortString"},
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        }
+      }
+    },
+    "SupplementalEvidenceCollection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "items": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/SupplementalEvidenceComparison"}},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"const": "SEALED_EMPTY"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "ReferenceSourceKind": {
+      "type": "string",
+      "enum": [
+        "SLACK_WORK_ITEM",
+        "ACTIVE_KNOWLEDGE",
+        "EXISTING_CASE",
+        "RISK_EXECUTION",
+        "OPEN_ISSUE",
+        "EXPLICIT_SOURCE",
+        "OTHER_SEALED",
+        "UNKNOWN"
+      ]
+    },
+    "ResolvedReferenceTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "sourceKind", "sourceId", "contextReferences", "reason"],
+      "properties": {
+        "state": {"const": "RESOLVED"},
+        "sourceKind": {
+          "type": "string",
+          "enum": ["SLACK_WORK_ITEM", "ACTIVE_KNOWLEDGE", "EXISTING_CASE", "RISK_EXECUTION", "OPEN_ISSUE", "EXPLICIT_SOURCE", "OTHER_SEALED"]
+        },
+        "sourceId": {"$ref": "#/$defs/Identifier"},
+        "contextReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceReference"}
+        },
+        "reason": {"type": "null"}
+      }
+    },
+    "UnavailableReferenceTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "sourceKind", "sourceId", "contextReferences", "reason"],
+      "properties": {
+        "state": {"type": "string", "enum": ["REDACTED", "MISSING_SOURCE"]},
+        "sourceKind": {"$ref": "#/$defs/ReferenceSourceKind"},
+        "sourceId": {"$ref": "#/$defs/Identifier"},
+        "contextReferences": {"type": "array", "maxItems": 0},
+        "reason": {
+          "type": "string",
+          "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY", "NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT", "UNRESOLVED_REFERENCE"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"state": {"const": "REDACTED"}}, "required": ["state"]},
+          "then": {"properties": {"reason": {"enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}}}
+        },
+        {
+          "if": {"properties": {"state": {"const": "MISSING_SOURCE"}}, "required": ["state"]},
+          "then": {"properties": {"reason": {"enum": ["NOT_SEALED", "SOURCE_INCOMPLETE", "LEGACY_CONTEXT", "UNRESOLVED_REFERENCE"]}}}
+        }
+      ]
+    },
+    "CandidateReferenceEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateIndex", "evidenceIndex", "evidenceNodeId", "relation", "target"],
+      "properties": {
+        "candidateIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "evidenceIndex": {"type": "integer", "minimum": 0, "maximum": 99},
+        "evidenceNodeId": {"$ref": "#/$defs/Identifier"},
+        "relation": {"const": "SUPPORTED_BY"},
+        "target": {
+          "oneOf": [
+            {"$ref": "#/$defs/ResolvedReferenceTarget"},
+            {"$ref": "#/$defs/UnavailableReferenceTarget"}
+          ]
+        }
+      },
+      "description": "One explicit edge for one generated evidenceNodeIds entry. Edges retain candidate order and per-candidate evidence order."
+    },
+    "ReferenceEdgeCollection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "items": {"type": "array", "minItems": 5, "maxItems": 1000, "items": {"$ref": "#/$defs/CandidateReferenceEdge"}},
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"const": "NO_GENERATED_CANDIDATES"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "items", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "items": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["RESULT_MISSING", "UNRESOLVED_REFERENCE", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "CandidateApplyLinkage": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "applyId", "outcome"],
+          "properties": {
+            "state": {"const": "NOT_APPLIED"},
+            "applyId": {"type": "null"},
+            "outcome": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "applyId", "outcome"],
+          "properties": {
+            "state": {"const": "APPLIED"},
+            "applyId": {"$ref": "#/$defs/Identifier"},
+            "outcome": {"$ref": "../../apply/1.0.0/schema.json#/$defs/CaseApplyOutcome"}
+          }
+        }
+      ]
+    },
+    "GeneratedCandidateComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "candidate", "apply"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0, "maximum": 9},
+        "candidate": {"$ref": "../../output/1.0.0/schema.json#/$defs/GeneratedTestCase"},
+        "apply": {"$ref": "#/$defs/CandidateApplyLinkage"}
+      }
+    },
+    "GenerationResultComparison": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "outputSchemaVersion", "resultDigest", "categoryCandidate", "candidates", "reason"],
+          "properties": {
+            "availability": {"const": "AVAILABLE"},
+            "outputSchemaVersion": {"const": "1.0.0"},
+            "resultDigest": {"$ref": "#/$defs/Sha256Hex"},
+            "categoryCandidate": {"$ref": "../../output/1.0.0/schema.json#/$defs/CategoryCandidate"},
+            "candidates": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 10,
+              "items": {"$ref": "#/$defs/GeneratedCandidateComparison"}
+            },
+            "reason": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "outputSchemaVersion", "resultDigest", "categoryCandidate", "candidates", "reason"],
+          "properties": {
+            "availability": {"const": "EMPTY"},
+            "outputSchemaVersion": {"const": "1.0.0"},
+            "resultDigest": {"type": "null"},
+            "categoryCandidate": {"type": "null"},
+            "candidates": {"type": "array", "maxItems": 0},
+            "reason": {"const": "JOB_NOT_SUCCEEDED"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "outputSchemaVersion", "resultDigest", "categoryCandidate", "candidates", "reason"],
+          "properties": {
+            "availability": {"const": "REDACTED"},
+            "outputSchemaVersion": {"const": "1.0.0"},
+            "resultDigest": {"$ref": "#/$defs/Sha256Hex"},
+            "categoryCandidate": {"type": "null"},
+            "candidates": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["SENSITIVE_DATA", "AUTHORIZATION_POLICY"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "outputSchemaVersion", "resultDigest", "categoryCandidate", "candidates", "reason"],
+          "properties": {
+            "availability": {"const": "MISSING_SOURCE"},
+            "outputSchemaVersion": {"const": "1.0.0"},
+            "resultDigest": {"type": "null"},
+            "categoryCandidate": {"type": "null"},
+            "candidates": {"type": "array", "maxItems": 0},
+            "reason": {"type": "string", "enum": ["RESULT_MISSING", "LEGACY_CONTEXT"]}
+          }
+        }
+      ]
+    },
+    "ApplyReceiptHeader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "generationJobId",
+        "contextDigest",
+        "resultDigest",
+        "placementDigest",
+        "transactionStatus",
+        "parent",
+        "counts",
+        "auditId",
+        "appliedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "generationJobId": {"$ref": "#/$defs/Identifier"},
+        "contextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "resultDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "placementDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "transactionStatus": {"const": "COMMITTED"},
+        "parent": {"$ref": "../../apply/1.0.0/schema.json#/$defs/ParentApplyOutcome"},
+        "counts": {"$ref": "../../apply/1.0.0/schema.json#/$defs/ApplyCounts"},
+        "auditId": {"$ref": "#/$defs/Identifier"},
+        "appliedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "ApplyComparison": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "receipt"],
+          "properties": {
+            "state": {"const": "NOT_APPLIED"},
+            "receipt": {"type": "null"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "receipt"],
+          "properties": {
+            "state": {"const": "APPLIED"},
+            "receipt": {"$ref": "#/$defs/ApplyReceiptHeader"}
+          }
+        }
+      ]
+    },
+    "ComparisonJobResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "slackWorkItemId", "status", "lineage", "context", "createdAt", "startedAt", "completedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "status": {"$ref": "../../../state-enums.schema.json#/$defs/GenerationJobStatus"},
+        "lineage": {"$ref": "../../job-api/1.0.0/schema.json#/$defs/GenerationJobLineage"},
+        "context": {"$ref": "../../job-api/1.0.0/schema.json#/$defs/GenerationContextProvenanceResource"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "startedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "ComparisonReadPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceBasis",
+        "readOnly",
+        "liveSourceSubstitution",
+        "generationInputReconstructed",
+        "providerCallAttempted",
+        "mutationPerformed"
+      ],
+      "properties": {
+        "sourceBasis": {"const": "SEALED_GENERATION_JOB"},
+        "readOnly": {"const": true},
+        "liveSourceSubstitution": {"const": false},
+        "generationInputReconstructed": {"const": false},
+        "providerCallAttempted": {"const": false},
+        "mutationPerformed": {"const": false}
+      },
+      "description": "Executable route invariants for GET /api/generation-jobs/{jobId}/comparison."
+    },
+    "GenerationComparisonResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparisonSchemaVersion",
+        "job",
+        "policy",
+        "slackSource",
+        "activeKnowledge",
+        "existingCases",
+        "supplementalEvidence",
+        "generation",
+        "referenceEdges",
+        "apply"
+      ],
+      "properties": {
+        "comparisonSchemaVersion": {"const": "1.0.0"},
+        "job": {"$ref": "#/$defs/ComparisonJobResource"},
+        "policy": {"$ref": "#/$defs/ComparisonReadPolicy"},
+        "slackSource": {"$ref": "#/$defs/SlackSourceComparison"},
+        "activeKnowledge": {"$ref": "#/$defs/ActiveKnowledgeCollection"},
+        "existingCases": {"$ref": "#/$defs/ExistingCaseCollection"},
+        "supplementalEvidence": {"$ref": "#/$defs/SupplementalEvidenceCollection"},
+        "generation": {"$ref": "#/$defs/GenerationResultComparison"},
+        "referenceEdges": {"$ref": "#/$defs/ReferenceEdgeCollection"},
+        "apply": {"$ref": "#/$defs/ApplyComparison"}
+      },
+      "description": "Authoritative response for GET /api/generation-jobs/{jobId}/comparison. Section and candidate arrays retain sealed/result/receipt order and are never resorted for desktop or mobile clients."
+    },
+    "GetGenerationComparisonResponse": {"$ref": "#/$defs/GenerationComparisonResponse"}
+  }
+}

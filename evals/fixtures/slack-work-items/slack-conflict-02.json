@@ -1,0 +1,73 @@
+{
+  "fixtureId": "slack-conflict-02",
+  "synthetic": true,
+  "category": "CONFLICT",
+  "description": "결제 실패 알림 채널이 이메일과 Slack으로 충돌하는 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787230800.000011",
+      "messageRevisionId": "rev_c02_root",
+      "authorId": "U_SYN_021",
+      "body": "개발건: 결제 실패 운영 알림\n요청 메뉴: 주문 > 결제\n기능 설명: 결제 처리 실패를 운영 담당자에게 알린다.\n요청내용: 결제 실패 시 즉시 운영 알림을 발송한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787230800000011",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787230860.000011",
+        "messageRevisionId": "rev_c02_reply_01",
+        "authorId": "U_SYN_022",
+        "body": "알림은 운영 메일함으로 이메일 발송해야 합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787230860000011",
+        "revision": 1
+      },
+      {
+        "messageTs": "1787230920.000011",
+        "messageRevisionId": "rev_c02_reply_02",
+        "authorId": "U_SYN_023",
+        "body": "이메일은 제외하고 운영 Slack 채널에만 보내야 합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787230920000011",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "결제 실패 운영 알림",
+      "requestedMenu": "주문 > 결제",
+      "featureDescription": "결제 처리 실패를 운영 담당자에게 알린다.",
+      "requestDetails": "결제 실패 시 즉시 운영 알림을 발송한다.",
+      "missingFields": [],
+      "confidence": 0.94,
+      "sourceMessageRevisions": ["rev_c02_root"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_c02_email",
+        "nodeType": "DECISION",
+        "content": "결제 실패 알림은 운영 메일함으로 이메일 발송한다.",
+        "status": "AMBIGUOUS",
+        "evidenceSourceMessageRevisions": ["rev_c02_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "Slack 전용 주장과 직접 충돌하고 결론이 없다."
+      },
+      {
+        "knowledgeId": "knowledge_c02_slack",
+        "nodeType": "DECISION",
+        "content": "결제 실패 알림은 운영 Slack 채널에만 발송한다.",
+        "status": "AMBIGUOUS",
+        "evidenceSourceMessageRevisions": ["rev_c02_reply_02"],
+        "supersedesKnowledgeIds": [],
+        "reason": "이메일 발송 주장과 직접 충돌하고 최종 확정이 없다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": false,
+      "activeKnowledgeIds": [],
+      "excludedKnowledgeIds": ["knowledge_c02_email", "knowledge_c02_slack"],
+      "openQuestions": ["결제 실패 알림을 이메일과 Slack 중 어디로 발송할지 확정되지 않았다."]
+    }
+  }
+}

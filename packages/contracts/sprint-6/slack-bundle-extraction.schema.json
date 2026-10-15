@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-6/slack-bundle-extraction.schema.json",
+  "title": "Sprint 6 Slack bundle ontology extraction",
+  "description": "Strict worker/API contracts for revision-aware Slack bundle extraction candidates, typed relations and deterministic extraction results.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "$ref": "knowledge-api.schema.json#/$defs/Identifier"
+    },
+    "NonBlankString": {
+      "$ref": "knowledge-api.schema.json#/$defs/NonBlankString"
+    },
+    "NullableIdentifier": {
+      "$ref": "knowledge-api.schema.json#/$defs/NullableIdentifier"
+    },
+    "NullableDateTime": {
+      "$ref": "knowledge-api.schema.json#/$defs/NullableDateTime"
+    },
+    "SlackRevisionKind": {
+      "type": "string",
+      "enum": ["CREATED", "EDITED", "DELETED"]
+    },
+    "SlackBundleMessageRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRevisionId",
+        "messageId",
+        "messageTs",
+        "revision",
+        "previousRevisionId",
+        "kind",
+        "authorId",
+        "body",
+        "permalink",
+        "occurredAt"
+      ],
+      "properties": {
+        "sourceRevisionId": {"$ref": "#/$defs/Identifier"},
+        "messageId": {"$ref": "#/$defs/Identifier"},
+        "messageTs": {"type": "string", "pattern": "^[0-9]{10,}\\.[0-9]{6}$", "maxLength": 32},
+        "revision": {"type": "integer", "minimum": 1},
+        "previousRevisionId": {"$ref": "#/$defs/NullableIdentifier"},
+        "kind": {"$ref": "#/$defs/SlackRevisionKind"},
+        "authorId": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[UW][A-Z0-9_]{2,}$", "maxLength": 64},
+            {"type": "null"}
+          ]
+        },
+        "body": {
+          "oneOf": [
+            {"$ref": "#/$defs/NonBlankString"},
+            {"type": "null"}
+          ]
+        },
+        "permalink": {"type": "string", "format": "uri", "maxLength": 2048},
+        "occurredAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"revision": {"const": 1}},
+            "required": ["revision"]
+          },
+          "then": {"properties": {"previousRevisionId": {"type": "null"}}},
+          "else": {"properties": {"previousRevisionId": {"$ref": "#/$defs/Identifier"}}}
+        },
+        {
+          "if": {
+            "properties": {"kind": {"const": "DELETED"}},
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "body": {"type": "null"},
+              "authorId": {"type": "null"}
+            }
+          },
+          "else": {"properties": {"body": {"$ref": "#/$defs/NonBlankString"}}}
+        }
+      ],
+      "description": "Append-only message revision. A DELETED revision contains no reconstructed body or author."
+    },
+    "SlackSourceBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundleId",
+        "workItemId",
+        "workspaceId",
+        "channelId",
+        "rootMessageTs",
+        "revisions",
+        "snapshotAt"
+      ],
+      "properties": {
+        "bundleId": {"$ref": "#/$defs/Identifier"},
+        "workItemId": {"$ref": "#/$defs/Identifier"},
+        "workspaceId": {"type": "string", "pattern": "^T[A-Z0-9_]{2,}$", "maxLength": 64},
+        "channelId": {"type": "string", "pattern": "^[CGD][A-Z0-9_]{2,}$", "maxLength": 64},
+        "rootMessageTs": {"type": "string", "pattern": "^[0-9]{10,}\\.[0-9]{6}$", "maxLength": 32},
+        "revisions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "items": {"$ref": "#/$defs/SlackBundleMessageRevision"}
+        },
+        "snapshotAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "ExtractionEvidenceSpan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRevisionId", "quote", "startOffset", "endOffset", "contentHash"],
+      "properties": {
+        "sourceRevisionId": {"$ref": "#/$defs/Identifier"},
+        "quote": {
+          "oneOf": [
+            {"$ref": "#/$defs/NonBlankString"},
+            {"type": "null"}
+          ]
+        },
+        "startOffset": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ]
+        },
+        "endOffset": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1},
+            {"type": "null"}
+          ]
+        },
+        "contentHash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      },
+      "description": "Quote offsets are required by evaluation for live content and are null only when the cited revision is a deletion tombstone."
+    },
+    "SlackBundleExtractionCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "operation",
+        "nodeType",
+        "content",
+        "status",
+        "validFrom",
+        "validTo",
+        "evidence",
+        "supersedesCandidateIds",
+        "confidence",
+        "reason"
+      ],
+      "properties": {
+        "candidateId": {"$ref": "#/$defs/Identifier"},
+        "operation": {"type": "string", "enum": ["UPSERT", "RETRACT"]},
+        "nodeType": {"type": "string", "enum": ["REQUIREMENT", "DECISION", "CONSTRAINT", "OPEN_QUESTION"]},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "validFrom": {"type": "string", "format": "date-time"},
+        "validTo": {"$ref": "#/$defs/NullableDateTime"},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/ExtractionEvidenceSpan"}
+        },
+        "supersedesCandidateIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reason": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"operation": {"const": "RETRACT"}},
+            "required": ["operation"]
+          },
+          "then": {
+            "properties": {
+              "status": {"const": "RETRACTED"},
+              "validTo": {"type": "string", "format": "date-time"}
+            }
+          },
+          "else": {
+            "properties": {
+              "status": {"enum": ["ACTIVE", "AMBIGUOUS", "SUPERSEDED"]}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "ACTIVE"}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"validTo": {"type": "null"}}}
+        }
+      ]
+    },
+    "SlackBundleExtractionEdgeCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "fromCandidateId",
+        "predicate",
+        "toCandidateId",
+        "status",
+        "evidence",
+        "confidence",
+        "reason"
+      ],
+      "properties": {
+        "candidateId": {"$ref": "#/$defs/Identifier"},
+        "fromCandidateId": {"$ref": "#/$defs/Identifier"},
+        "predicate": {"$ref": "../state-enums.schema.json#/$defs/KnowledgePredicate"},
+        "toCandidateId": {"$ref": "#/$defs/Identifier"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/ExtractionEvidenceSpan"}
+        },
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reason": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "RejectedExtractionCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "reason", "validationPath"],
+      "properties": {
+        "candidateId": {"$ref": "#/$defs/Identifier"},
+        "reason": {
+          "type": "string",
+          "enum": ["SCHEMA_INVALID", "EVIDENCE_MISSING", "EVIDENCE_REVISION_UNKNOWN", "EVIDENCE_QUOTE_MISMATCH", "ONTOLOGY_RELATION_INVALID"]
+        },
+        "validationPath": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "^/"}
+      }
+    },
+    "PriorKnowledgeSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {"$ref": "knowledge-api.schema.json#/$defs/KnowledgeNodeResource"}
+        },
+        "edges": {
+          "type": "array",
+          "items": {"$ref": "knowledge-api.schema.json#/$defs/KnowledgeEdgeResource"}
+        }
+      }
+    },
+    "SlackBundleExtractionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "bundle", "priorKnowledge"],
+      "properties": {
+        "schemaVersion": {"const": "1.0.0"},
+        "bundle": {"$ref": "#/$defs/SlackSourceBundle"},
+        "priorKnowledge": {"$ref": "#/$defs/PriorKnowledgeSnapshot"}
+      }
+    },
+    "SlackBundleExtractionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "bundleId",
+        "workItemId",
+        "inputRevisionIds",
+        "deterministicInputHash",
+        "candidates",
+        "edges",
+        "rejectedCandidates",
+        "generatedAt"
+      ],
+      "properties": {
+        "schemaVersion": {"const": "1.0.0"},
+        "bundleId": {"$ref": "#/$defs/Identifier"},
+        "workItemId": {"$ref": "#/$defs/Identifier"},
+        "inputRevisionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "deterministicInputHash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "candidates": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/SlackBundleExtractionCandidate"}
+        },
+        "edges": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/SlackBundleExtractionEdgeCandidate"}
+        },
+        "rejectedCandidates": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/RejectedExtractionCandidate"}
+        },
+        "generatedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Candidate order, edge order and inputRevisionIds are deterministic and validated by the shared eval harness."
+    },
+    "SlackBundleExtractionEvalCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evalId", "synthetic", "scenario", "description", "request", "expectedResult"],
+      "properties": {
+        "evalId": {"type": "string", "pattern": "^sprint6-(delete-retraction|evidence-revision)-[0-9]{2}$"},
+        "synthetic": {"const": true},
+        "scenario": {"type": "string", "enum": ["DELETE_RETRACTION", "EVIDENCE_REVISION"]},
+        "description": {"$ref": "#/$defs/NonBlankString"},
+        "request": {"$ref": "#/$defs/SlackBundleExtractionRequest"},
+        "expectedResult": {"$ref": "#/$defs/SlackBundleExtractionResult"}
+      }
+    }
+  }
+}

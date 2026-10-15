@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/output/1.0.0/schema.json",
+  "title": "Generation API output 1.0.0",
+  "description": "Provider-neutral generation result. The provider selects only context-supplied evidence and category IDs; the trusted adapter validates those references and attaches case keys, work-item IDs, source metadata, generation-job metadata and timestamps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputSchemaVersion", "cases", "categoryCandidate"],
+  "properties": {
+    "outputSchemaVersion": {
+      "const": "1.0.0",
+      "description": "Exact response contract version requested by the input payload."
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/GeneratedTestCase"}
+    },
+    "categoryCandidate": {"$ref": "#/$defs/CategoryCandidate"}
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "TestStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "GeneratedTestCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "steps",
+        "caseExpectedResult",
+        "priority",
+        "labels",
+        "evidenceNodeIds",
+        "generationReason",
+        "inferenceOnly",
+        "openQuestions"
+      ],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "steps": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/TestStep"}},
+        "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "../../../state-enums.schema.json#/$defs/Priority"},
+        "labels": {"type": "array", "maxItems": 50, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}},
+        "evidenceNodeIds": {"type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "generationReason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+        "inferenceOnly": {"type": "boolean"},
+        "openQuestions": {"type": "array", "maxItems": 50, "uniqueItems": true, "items": {"$ref": "#/$defs/NonBlankString"}}
+      }
+    },
+    "CategoryAlternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["categoryId", "score"],
+      "properties": {
+        "categoryId": {"type": "string", "minLength": 8, "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+        "score": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "CategoryCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["categoryId", "score", "alternatives"],
+      "properties": {
+        "categoryId": {"type": "string", "minLength": 8, "pattern": "^folder_[A-Za-z0-9_-]+$", "maxLength": 128},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "alternatives": {"type": "array", "maxItems": 99, "items": {"$ref": "#/$defs/CategoryAlternative"}}
+      }
+    }
+  }
+}

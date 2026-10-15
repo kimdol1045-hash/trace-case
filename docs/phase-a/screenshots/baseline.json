@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-08-24T19:10:00+09:00",
+  "browser": "Chromium desktop",
+  "baselines": [
+    {
+      "route": "/test-cases",
+      "viewport": "1280x900",
+      "file": "test-library-1280x900.jpg",
+      "pixelWidth": 1265,
+      "pixelHeight": 966,
+      "sha256": "a2bd3e306ca071aeb96ded093f783a70957fcb5c05e78dc0e01d0eb4c3774f1d"
+    },
+    {
+      "route": "/cycles",
+      "viewport": "1440x900",
+      "file": "cycles-1440x900.jpg",
+      "pixelWidth": 1425,
+      "pixelHeight": 900,
+      "sha256": "c4368ea1c623487906fa22c051b99648e6445730cc9fe6040fd6a465e7507a3e"
+    },
+    {
+      "route": "/issues",
+      "viewport": "1920x1080",
+      "file": "issues-1920x1080.jpg",
+      "pixelWidth": 1905,
+      "pixelHeight": 1080,
+      "sha256": "b293259d2a12061291d2ca181a8ccf672eabef5e96bec74d8b042ef5ec3dcd1d"
+    }
+  ]
+}

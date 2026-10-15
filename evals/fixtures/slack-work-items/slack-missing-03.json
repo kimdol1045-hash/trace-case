@@ -1,0 +1,55 @@
+{
+  "fixtureId": "slack-missing-03",
+  "synthetic": true,
+  "category": "MISSING",
+  "description": "요청내용이 없고 thread 질문에도 답이 없는 핵심 정보 누락 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787209200.000006",
+      "messageRevisionId": "rev_m03_root",
+      "authorId": "U_SYN_010",
+      "body": "개발건: 환불 화면 개선\n요청 메뉴: 주문 > 취소·환불\n기능 설명: 환불 진행 상태를 고객에게 보여주는 화면",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787209200000006",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787209260.000006",
+        "messageRevisionId": "rev_m03_reply_01",
+        "authorId": "U_SYN_011",
+        "body": "어떤 상태와 문구를 추가하는 건가요?",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787209260000006",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "환불 화면 개선",
+      "requestedMenu": "주문 > 취소·환불",
+      "featureDescription": "환불 진행 상태를 고객에게 보여주는 화면",
+      "missingFields": ["requestDetails"],
+      "confidence": 0.86,
+      "sourceMessageRevisions": ["rev_m03_root"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_m03_question",
+        "nodeType": "OPEN_QUESTION",
+        "content": "추가할 환불 상태와 표시 문구는 무엇인가?",
+        "status": "AMBIGUOUS",
+        "evidenceSourceMessageRevisions": ["rev_m03_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "질문에 대한 답이나 최종 결론이 없다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": false,
+      "activeKnowledgeIds": [],
+      "excludedKnowledgeIds": ["knowledge_m03_question"],
+      "openQuestions": ["추가할 환불 상태와 표시 문구가 제공되지 않았다."]
+    }
+  }
+}

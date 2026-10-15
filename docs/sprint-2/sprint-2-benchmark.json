@@ -1,0 +1,119 @@
+{
+  "database": {
+    "database_name": "tc_sprint2_test",
+    "server_version": "16.12 (Debian 16.12-1.pgdg12+1)",
+    "vector_version": "0.8.1"
+  },
+  "explain": {
+    "deepOffset": {
+      "executionMs": 28.74,
+      "nodeTypes": [
+        "Incremental Sort",
+        "Index Scan:test_cases",
+        "Limit"
+      ],
+      "offsetRows": 95000
+    },
+    "rareSummarySearch": {
+      "executionMs": 58.93,
+      "nodeTypes": [
+        "Gather Merge",
+        "Hash",
+        "Hash Join",
+        "Limit",
+        "Seq Scan:test_case_versions",
+        "Seq Scan:test_cases",
+        "Sort"
+      ]
+    }
+  },
+  "fixture": {
+    "active": 95000,
+    "cases": 100000,
+    "categories": 20,
+    "steps": 100000,
+    "tags": 20,
+    "versions": 100000,
+    "workItems": 1000
+  },
+  "indexSuggestions": [
+    "Enable pg_trgm and benchmark GIN indexes on lower(test_cases.case_key) and lower(test_case_versions.summary); because the predicate ORs columns across a join, also evaluate UNION-based candidate IDs or a transactionally maintained current-search projection.",
+    "Replace the encoded offset cursor with a keyset cursor carrying the selected sort tuple; OFFSET cost grows with page depth even when the first-page p95 target passes.",
+    "Keep the existing category/deleted, work-item/sort/deleted, version and tag join indexes; re-run EXPLAIN under production-like concurrent and cold-cache load before adding write-costly indexes."
+  ],
+  "limitations": [
+    "Warm-cache, single-process TestClient measurements are not production concurrency evidence.",
+    "Deep pagination is an EXPLAIN measurement and is excluded from the first-page p95 gate."
+  ],
+  "measurement": {
+    "allMeetTarget": true,
+    "runs": 30,
+    "scenarios": {
+      "compoundFilter": {
+        "maxMs": 123.02,
+        "meetsTarget": true,
+        "p50Ms": 76.97,
+        "p95Ms": 91.23,
+        "resultCount": 100,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "listUpdatedDesc": {
+        "maxMs": 159.55,
+        "meetsTarget": true,
+        "p50Ms": 133.79,
+        "p95Ms": 157.25,
+        "resultCount": 95000,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "listWorkItemOrder": {
+        "maxMs": 144.56,
+        "meetsTarget": true,
+        "p50Ms": 134.03,
+        "p95Ms": 143.21,
+        "resultCount": 95000,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "searchKeyRare": {
+        "maxMs": 176.56,
+        "meetsTarget": true,
+        "p50Ms": 77.66,
+        "p95Ms": 121.94,
+        "resultCount": 1,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "searchSummaryCommon": {
+        "maxMs": 253.47,
+        "meetsTarget": true,
+        "p50Ms": 225.19,
+        "p95Ms": 251.35,
+        "resultCount": 95000,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "searchSummaryRare": {
+        "maxMs": 91.15,
+        "meetsTarget": true,
+        "p50Ms": 78.06,
+        "p95Ms": 89.6,
+        "resultCount": 1,
+        "runs": 30,
+        "targetMs": 1000.0
+      },
+      "tree": {
+        "maxMs": 17.21,
+        "meetsTarget": true,
+        "p50Ms": 15.48,
+        "p95Ms": 17.13,
+        "resultCount": 21,
+        "runs": 30,
+        "targetMs": 1000.0
+      }
+    },
+    "targetMs": 1000.0,
+    "warmups": 3
+  }
+}

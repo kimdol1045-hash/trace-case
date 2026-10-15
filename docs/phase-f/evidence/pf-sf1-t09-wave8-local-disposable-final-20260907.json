@@ -1,0 +1,659 @@
+{
+  "auxiliary": {
+    "cutoverInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "c5ff251e4ce0abe0f289f35214cb6d6a209ba25ef6954fc298e835511e5bc6bb",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3117105c0c180b0d07f9b7e62e32c0a43e1dc4dc21a12fb0c5f5fc186e302bbd",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "38f5508108b8efd694a1784b3a28bb455357edc89c8944db080eaf1d91aa42a4",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "19a747cb1ea98f73f77c894b967899c7423d232f1d2a2cda5b70af8ddb26518a",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "48b75ddd53c557b197612610e57b8960c5977d8f513976ce4f8d9de50d7a4ef8",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "50ad8fcd03e5eb60a972dc528f807d5367c698ce3d644adaa955a141beef81b8",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "1c5a5e4601f4eb6e90b30798b5160171e93850947f21e6237ac929cd7fd64731",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27"
+    },
+    "emptyPreflight": {
+      "ageGraphCount": 0,
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t09_wave8_f8d5b2c7_aux_test_disposable",
+      "emptyTargetRequired": true,
+      "extensions": [
+        "age",
+        "vector"
+      ],
+      "publicTableCount": 0,
+      "serverVersionNum": 160010
+    },
+    "failedActivationInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "c5ff251e4ce0abe0f289f35214cb6d6a209ba25ef6954fc298e835511e5bc6bb",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3117105c0c180b0d07f9b7e62e32c0a43e1dc4dc21a12fb0c5f5fc186e302bbd",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "38f5508108b8efd694a1784b3a28bb455357edc89c8944db080eaf1d91aa42a4",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "19a747cb1ea98f73f77c894b967899c7423d232f1d2a2cda5b70af8ddb26518a",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "c93d946e6725b15fb491a74183161d01d1990eeb8f4da3d958e609159e1d141d",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "454a2736fde1144d6d4441343bc55577297d988c8361fec1deaf3bbadca1ca82",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "1c5a5e4601f4eb6e90b30798b5160171e93850947f21e6237ac929cd7fd64731",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-f8d5b2c7-9bf475496f72"
+    },
+    "priorInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "c5ff251e4ce0abe0f289f35214cb6d6a209ba25ef6954fc298e835511e5bc6bb",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3117105c0c180b0d07f9b7e62e32c0a43e1dc4dc21a12fb0c5f5fc186e302bbd",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "38f5508108b8efd694a1784b3a28bb455357edc89c8944db080eaf1d91aa42a4",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "19a747cb1ea98f73f77c894b967899c7423d232f1d2a2cda5b70af8ddb26518a",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "918d1e08ddf61d28dcd56c6c6bdddf952ca980a27eae0a03402b41ab1203f295",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "9ccdea2dc8019be32d33636eefe086dce39606caaf85de61c8a1a02658ede134",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "1c5a5e4601f4eb6e90b30798b5160171e93850947f21e6237ac929cd7fd64731",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2"
+    },
+    "retainedWorkspaces": {
+      "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27": true,
+      "pf-sf1-t09-wave8-f8d5b2c7-9bf475496f72": true,
+      "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2": true
+    },
+    "workspaceInventory": {
+      "digest": {
+        "sha256": "c004343430049637ffc76815d1bec80ee4f8b251c7366f67fb766ed5f686e886",
+        "version": "tc.lightrag.workspace-inventory.v1"
+      },
+      "graphCount": 3,
+      "workspaceCount": 3,
+      "workspaces": [
+        "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27",
+        "pf-sf1-t09-wave8-f8d5b2c7-9bf475496f72",
+        "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2"
+      ]
+    }
+  },
+  "cleanup": {
+    "evidenceBound": true,
+    "performed": false,
+    "required": true
+  },
+  "confirmationRequired": "RUN PF-SF1-T09 LOCAL-DISPOSABLE-NETWORK-FREE ON tc-phase-f-pf-sf1-t09-wave8-f8d5b2c7-disposable",
+  "contractDigest": {
+    "sha256": "71723d8970001765452aad6ffddc4e7c47039196542525279cd069c500586642",
+    "version": "tc.canonical-json.sha256.v1"
+  },
+  "controlPlane": {
+    "activationFailure": {
+      "injected": true,
+      "rollbackAttempted": true,
+      "rollbackSucceeded": true
+    },
+    "counterfeitProviderRejected": true,
+    "cutover": {
+      "activation": "ATOMIC_COMPARE_AND_SWAP",
+      "controlPlane": {
+        "authority": "TC_POSTGRESQL_GENERATION_LEDGER",
+        "committedPointerVersion": 2,
+        "credentialsOmitted": true,
+        "eventId": "e1fe8e1c-63d5-41b2-b7c7-98aeb018c58a",
+        "manualEnvironmentSwitch": false,
+        "operation": "ACTIVATE",
+        "outcome": "APPLIED",
+        "receiptDigest": "sha256:106dab0257ef732b528a0a8571c6eba90a61d703a2b6e5082db9a0b43d78c26c"
+      },
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "executionStatus": "SUCCEEDED",
+      "generationId": "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27",
+      "manifestDigest": "3cc0d9ba4c27691518ee17aa8c71a18c5c052148fdf78a44a0e54883d4c62481",
+      "pgvectorDigest": "4efc00e29dcecbc6bcac040d510069469111a7509bfe2ba871abed66d3b1e9b3",
+      "previousGenerationId": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2",
+      "projectionDigest": "9b5a56111d613f3ee3ea5b85c330bc68b2a344e69c80374a737c0b7f9a8822a1",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb"
+    },
+    "prior": {
+      "activation": "ATOMIC_COMPARE_AND_SWAP",
+      "controlPlane": {
+        "authority": "TC_POSTGRESQL_GENERATION_LEDGER",
+        "committedPointerVersion": 1,
+        "credentialsOmitted": true,
+        "eventId": "e0afd3ac-6805-4430-abd7-c4515fd213b7",
+        "manualEnvironmentSwitch": false,
+        "operation": "ACTIVATE",
+        "outcome": "APPLIED",
+        "receiptDigest": "sha256:c8d675aa7e4a0d5e92bd350c92920fec65c617e358c67fffca3edefe4491141d"
+      },
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "executionStatus": "SUCCEEDED",
+      "generationId": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2",
+      "manifestDigest": "f284672d91a21533d3966aa5db5db76d6df42985f11e19bd34ea74f0aaae15e7",
+      "pgvectorDigest": "4efc00e29dcecbc6bcac040d510069469111a7509bfe2ba871abed66d3b1e9b3",
+      "previousGenerationId": null,
+      "projectionDigest": "9b5a56111d613f3ee3ea5b85c330bc68b2a344e69c80374a737c0b7f9a8822a1",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb"
+    },
+    "rollback": {
+      "cutoverRetained": true,
+      "pointerVersion": 3,
+      "priorRetained": true,
+      "restoredGenerationId": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2"
+    },
+    "rollbackFailure": {
+      "injected": true,
+      "pointerUnchanged": true
+    },
+    "staleResult": {
+      "fallback": "typed_graph+pgvector",
+      "injection": "POINTER_CHANGED_AFTER_PROVIDER_RESULT",
+      "staleContextExposed": false,
+      "status": "unavailable"
+    }
+  },
+  "credentialsOmitted": true,
+  "dump": {
+    "bytes": 689165,
+    "fileIdentity": {
+      "ctimeNs": 1788743042428848092,
+      "device": 16777231,
+      "inode": 96525948,
+      "linkCount": 1,
+      "modeOctal": "0600",
+      "mtimeNs": 1788743042428848092,
+      "size": 689165
+    },
+    "restoreTarget": "tc_phase_f_pf_sf1_t09_wave8_f8d5b2c7_source_test_disposable",
+    "sha256": "02fb32110274b39730fd72aa105e88e81287b7cd20f669f8046c8cb0e04ee3af",
+    "sourceAccess": "READ_ONLY_PG_DUMP"
+  },
+  "dumpFile": "/private/tmp/pf-sf1-t09-wave8-f8d5b2c7/pf-sf1-t09-wave8-f8d5b2c7.dump",
+  "evidenceFile": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-final-20260907.json",
+  "mode": "LOCAL_DISPOSABLE_NETWORK_FREE_PASS",
+  "notRun": [
+    "staging credentials and bootstrap",
+    "live model provider calls",
+    "staging apply",
+    "production-like multiprocess networking/load/alerts",
+    "operator handoff",
+    "production RTO/RPO",
+    "PF-SF1-T09 release gate",
+    "Phase F release gate"
+  ],
+  "preservation": {
+    "afterDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "afterTcFingerprintDigest": {
+      "sha256": "5cb5704c43263e57dc1230e545b2a1a8ae755367d55304e2aca4bbb5acd0c54e",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "beforeDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "beforeDockerInventory": {
+      "counts": {
+        "containers": 8,
+        "images": 37,
+        "networks": 5,
+        "volumes": 5
+      },
+      "digest": {
+        "sha256": "2f8b63f57ab62e8bb4b07f3fbd5045e6932973d66d225b57455b86eadce97a33",
+        "version": "tc.docker-local-inventory.v1"
+      },
+      "version": "tc.docker-local-inventory.v1"
+    },
+    "beforeTcFingerprintDigest": {
+      "sha256": "5cb5704c43263e57dc1230e545b2a1a8ae755367d55304e2aca4bbb5acd0c54e",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "currentTcFingerprintEqual": true,
+    "priorEvidence": {
+      "count": 23,
+      "digest": {
+        "sha256": "250f02c5af301d6379b813ea3750616e91e190e40fc051a54dab5c2080e8fef7",
+        "version": "tc.phase-f.prior-evidence-inventory.v1"
+      },
+      "entries": [
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856-r2.json",
+          "sha256": "7a4acb6a8395082ef04ed482e7e7faacc2c1b68e6358caf8576f100a507696f0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856.json",
+          "sha256": "b3b3a6b738c145e2cce97500e8657a652d65b585cd7b562cbd2c33e4c9573e16"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-backup.json",
+          "sha256": "4dbe36c55ad7d20db700097acf3d8dbe3b1f6c9af5aace135463660eac5c07d2"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-restore.json",
+          "sha256": "ee85ca0ed0969e9ff9693350c47d8b3e86f2be6ca499eef77b99219ebd65cde7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-seed.json",
+          "sha256": "bf32440ff186a2458d3310ccc63501b07a93b20f4a6b8e111c5059a49783e5d6"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup-r2.json",
+          "sha256": "d557297dd7dc6f69f396e62268c72be1d448d9b17a24b1ade7a219efe791b9d9"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup.json",
+          "sha256": "c0c634ac26d15ab781f415c9704ecd4d210b66fa59753f41a257ca7e1c571cd7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-restore-r2.json",
+          "sha256": "7255f643c5b9bf60807c95b8fa4edfc7fa17c8583a24aab0957c3f2b7fdbe1ac"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-seed.json",
+          "sha256": "be3fc0afce6774fc234652a5befa0bc1df8d0af4e19bb873e12dcfcc73049ab0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-backup.json",
+          "sha256": "c49a8c52fe6fb10674f8f8a6a591b229c1c6271a81669094fd942459c1705cc7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-restore.json",
+          "sha256": "0e197c1796ad39be92cf2254bfbd92e5bb91fbe0ce2a05edca1ea09cd3b37f4b"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-seed.json",
+          "sha256": "d3984780a8b3cc841f5c8124ed391e1ef2bc6feaaae070a408af63de9316eb91"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-backup.json",
+          "sha256": "3f735a01279f6d0250706481210a1da8afae1ddc25d791f72bd114c4e12ce0c3"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-seed.json",
+          "sha256": "b57da068e6c51f7a7342e8865fe5d1d2398dd4f566f3810f96dcf1b97abfa179"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-backup.json",
+          "sha256": "20081fff77b0ac8b7c57b340f328134b2362a91778ed4f4d8825342bb9e85ffd"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-restore.json",
+          "sha256": "849e1fb76a08721e9dd1d1b9e777f9abc32b63d8e6dd3073da43eb92355be1ad"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-cleanup.json",
+          "sha256": "34e72df84d23848062b2649bb3e19d76748f32bffcfd1a75c13345a16043a000"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-manifest.json",
+          "sha256": "0ae1658cb4b731008f050bc55e191f22fadf0d68d2a65d941c51e7471a1c97fc"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-recovery.json",
+          "sha256": "8d2c0a0d9a5a18867f2aa81c3684cc1ee25dba58fe781fdd1852f9424f153976"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-d31c8e7a-retry1-failure.json",
+          "sha256": "1c673b8f9ead029d1656a9ccf08f9e8b4a1b95996751d2586e71f427c8c17593"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-e29f6c4b-retry2-failure.json",
+          "sha256": "87e6d9a901aa36c5389bb13cb16986efbe63ac77766c5438cbf56ff6ae070872"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-20260907.json",
+          "sha256": "3b25f4e2b255be02ddaefdda17503fb2930b7f002561295d424e3986305d7970"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-20260907.json",
+          "sha256": "db303df0de3c1e692f21a65f3bc3b2c596b01830329c6e16f40ced009f7e3efa"
+        }
+      ],
+      "version": "tc.phase-f.prior-evidence-inventory.v1"
+    },
+    "priorEvidenceHashesPreserved": true
+  },
+  "provider": {
+    "distribution": "lightrag-hku",
+    "id": "official-lightrag-postgresql",
+    "networkFreeBootstrap": "tc_backend.knowledge.lightrag_local_rehearsal:build_network_free_components",
+    "runtimeConfigDigest": "sha256:c80acdbcc2ec416e27d7e18077dc3d8081b555ad2aaf0b5d24bdb71f38cc0c08",
+    "storage": [
+      "PGKVStorage",
+      "PGVectorStorage",
+      "PGDocStatusStorage",
+      "PGGraphStorage"
+    ],
+    "version": "1.5.6"
+  },
+  "rawCorpusOmitted": true,
+  "releaseGate": "NOT_RUN",
+  "runtime": {
+    "activeGenerationSmoke": {
+      "api": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "2cbd75969bdeeabe4465edeb822d20602c7b4084db7e04fb11ba832104a3e064",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "570ff072f01e55a8579b66e461219afa7429523ae585859a451a42298cfaf12a",
+        "generationId": "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27",
+        "rawContextOmitted": true,
+        "status": "ok"
+      },
+      "worker": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "2cbd75969bdeeabe4465edeb822d20602c7b4084db7e04fb11ba832104a3e064",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "570ff072f01e55a8579b66e461219afa7429523ae585859a451a42298cfaf12a",
+        "generationId": "pf-sf1-t09-wave8-f8d5b2c7-3cc0d9ba4c27",
+        "rawContextOmitted": true,
+        "status": "ok"
+      }
+    },
+    "childProcessFailureFallback": {
+      "degradationReasons": [
+        "LIGHTRAG_UNAVAILABLE"
+      ],
+      "degraded": true,
+      "matchCount": 2,
+      "rawResultsOmitted": true,
+      "typedGraphAndPgvector": true
+    },
+    "failureInjections": [
+      "CHILD_PROCESS_SIGKILL",
+      "AUXILIARY_POSTGRESQL_STOP"
+    ],
+    "processCleanup": [
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      },
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      },
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      }
+    ],
+    "providerRestartRecovered": true,
+    "providerStorageFailureFallback": {
+      "degradationReasons": [
+        "LIGHTRAG_UNAVAILABLE"
+      ],
+      "degraded": true,
+      "matchCount": 2,
+      "rawResultsOmitted": true,
+      "typedGraphAndPgvector": true
+    },
+    "rollbackGenerationSmoke": {
+      "api": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "2cbd75969bdeeabe4465edeb822d20602c7b4084db7e04fb11ba832104a3e064",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "570ff072f01e55a8579b66e461219afa7429523ae585859a451a42298cfaf12a",
+        "generationId": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2",
+        "rawContextOmitted": true,
+        "status": "ok"
+      },
+      "worker": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "2cbd75969bdeeabe4465edeb822d20602c7b4084db7e04fb11ba832104a3e064",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "570ff072f01e55a8579b66e461219afa7429523ae585859a451a42298cfaf12a",
+        "generationId": "pf-sf1-t09-wave8-f8d5b2c7-f284672d91a2",
+        "rawContextOmitted": true,
+        "status": "ok"
+      }
+    },
+    "runtimeDirectoriesEmpty": true,
+    "separateResolverInstances": [
+      "api",
+      "worker"
+    ]
+  },
+  "schemaVersion": "tc.phase-f.lightrag-wave8-evidence.v1",
+  "source": {
+    "beforeAfterSnapshotEqual": true,
+    "currentTcAccess": "READ_ONLY",
+    "currentTcCorpusDocumentCount": 0,
+    "fixtureCounts": {
+      "edges": 1,
+      "embeddings": 2,
+      "evidence": 3,
+      "nodes": 2,
+      "sources": 3
+    },
+    "fixtureVersion": "pf-sf1-t09-wave8-local-corpus-v1",
+    "preflight": {
+      "ageGraphCount": 0,
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t09_wave8_f8d5b2c7_source_test_disposable",
+      "emptyTargetRequired": false,
+      "extensions": [
+        "vector"
+      ],
+      "publicTableCount": 78,
+      "serverVersionNum": 160012
+    },
+    "rawCorpusOmitted": true,
+    "restoreAttestation": {
+      "logicalColumnCount": 945,
+      "logicalColumnDigest": {
+        "sha256": "824392080bc6b2523621c2b96ad5d86ea39e82070c61b58cfb183bc7ffae5d30",
+        "version": "tc.postgresql.logical-columns.v1"
+      },
+      "logicalDataExact": true,
+      "logicalSchemaExact": true,
+      "rawPhysicalDifference": "DROPPED_COLUMN_ATTRIBUTE_SLOTS_COMPACTED_BY_PG_DUMP",
+      "rawPhysicalFingerprintEqual": false
+    },
+    "restoredCopyEqualBeforeFixture": true,
+    "snapshot": {
+      "corpusDigest": "202c5cbbffbb0023f53d4b2375d80890f29fee821763d344cc236d87ffb33394",
+      "documentCount": 2,
+      "pgvectorDigest": "4efc00e29dcecbc6bcac040d510069469111a7509bfe2ba871abed66d3b1e9b3",
+      "pgvectorDimension": 1024,
+      "pgvectorModel": "bge-m3",
+      "projectionDigest": "9b5a56111d613f3ee3ea5b85c330bc68b2a344e69c80374a737c0b7f9a8822a1",
+      "rawCorpusOmitted": true,
+      "schemaVersion": "tc-lightrag-full-reindex/v1",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb",
+      "sourceTargetDigest": "eac670144e68243fcd8ae99a5fa58037a4a7083904435b6eb946334fde250b2a",
+      "totalContentBytes": 106
+    }
+  },
+  "subGate": "LOCAL_DISPOSABLE_NETWORK_FREE",
+  "target": {
+    "auxiliaryDatabaseComment": "tc-phase-f-lightrag-auxiliary:disposable:tc-phase-f-pf-sf1-t09-wave8-f8d5b2c7-disposable",
+    "containers": [
+      "tc-pf-sf1-t09-wave8-f8d5b2c7-source-postgres-disposable",
+      "tc-pf-sf1-t09-wave8-f8d5b2c7-aux-postgres-disposable"
+    ],
+    "network": "tc-pf-sf1-t09-wave8-f8d5b2c7-network-disposable",
+    "ports": {
+      "auxiliaryLoopback": 55449,
+      "sourceLoopback": 55448
+    },
+    "project": "tc-pf-sf1-t09-wave8-f8d5b2c7",
+    "runId": "f8d5b2c7",
+    "seedWorkspace": "pf-sf1-t09-wave8-f8d5b2c7-seed",
+    "sourceDatabaseComment": "tc-phase-f-rehearsal:disposable:tc-phase-f-pf-sf1-t09-wave8-f8d5b2c7-disposable",
+    "target": {
+      "activeWorkspace": "pf-sf1-t09-wave8-f8d5b2c7-seed",
+      "authoritativeDatabase": "tc_phase_f_pf_sf1_t09_wave8_f8d5b2c7_source_test_disposable",
+      "authoritativeTargetDigest": "eac670144e68243fcd8ae99a5fa58037a4a7083904435b6eb946334fde250b2a",
+      "auxiliaryDatabase": "tc_phase_f_pf_sf1_t09_wave8_f8d5b2c7_aux_test_disposable",
+      "auxiliaryTargetDigest": "2aca7ccdf5a2e4e589c86de2a72fa61d17c3d5b422817616739afbfa3a14cfd8",
+      "class": "disposable",
+      "name": "tc-phase-f-pf-sf1-t09-wave8-f8d5b2c7-disposable"
+    },
+    "volumes": [
+      "tc-pf-sf1-t09-wave8-f8d5b2c7-source-data-disposable",
+      "tc-pf-sf1-t09-wave8-f8d5b2c7-aux-data-disposable"
+    ]
+  },
+  "task": "PF-SF1-T09",
+  "tempDirectory": "/private/tmp/pf-sf1-t09-wave8-f8d5b2c7",
+  "timing": {
+    "finishedAtUtc": "2026-09-07T01:04:25.151831+00:00",
+    "localMeasuredSeconds": 28.827614,
+    "productionRtoRpo": "NOT_RUN",
+    "startedAtUtc": "2026-09-07T01:03:56.323932+00:00"
+  }
+}

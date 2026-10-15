@@ -1,0 +1,728 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/apply/1.0.0/schema.json",
+  "title": "Generation apply API 1.0.0",
+  "description": "Provider-neutral contract for atomically applying one SUCCEEDED generation job to the QA ledger. The client selects placement only; the server revalidates the sealed stored result and owns all case content, IDs, keys, provenance and timestamps.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "GenerationJobId": {
+      "type": "string",
+      "pattern": "^generation_job_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "GenerationApplyId": {
+      "type": "string",
+      "pattern": "^generation_apply_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "WorkItemId": {
+      "type": "string",
+      "pattern": "^work_item_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "CategoryId": {
+      "type": "string",
+      "pattern": "^folder_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseId": {
+      "type": "string",
+      "pattern": "^case_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseVersionId": {
+      "type": "string",
+      "pattern": "^case_version_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "AuditId": {
+      "type": "string",
+      "pattern": "^audit_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseKey": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{1,15}-[0-9]{6,}$",
+      "maxLength": 64
+    },
+    "WorkItemKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "\\S"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "ShortString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "Canonical Idempotency-Key header/body value. The key, job ID, digests and normalized placement together identify one replayable apply request."
+    },
+    "NullableScore": {
+      "oneOf": [
+        {"type": "number", "minimum": 0, "maximum": 1},
+        {"type": "null"}
+      ]
+    },
+    "CategoryMappingMethod": {
+      "type": "string",
+      "enum": ["EXACT_NAME", "EXACT_ALIAS", "SEMANTIC", "UNCATEGORIZED_FALLBACK"]
+    },
+    "ParentReuseMethod": {
+      "type": "string",
+      "enum": ["SLACK_SOURCE_IDENTITY", "EXACT_KEY", "EXACT_TITLE", "EXACT_ALIAS", "SEMANTIC"]
+    },
+    "CategoryPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["categoryId", "expectedResourceVersion", "method", "score"],
+      "properties": {
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "expectedResourceVersion": {"type": "integer", "minimum": 1},
+        "method": {"$ref": "#/$defs/CategoryMappingMethod"},
+        "score": {"$ref": "#/$defs/NullableScore"}
+      },
+      "description": "Optimistic snapshot of the existing active category selected by the trusted placement planner. The server locks and rechecks the version before any write."
+    },
+    "ReuseParentPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "workItemId",
+        "expectedResourceVersion",
+        "expectedCategoryId",
+        "method",
+        "score"
+      ],
+      "properties": {
+        "decision": {"const": "REUSE_EXISTING"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "expectedResourceVersion": {"type": "integer", "minimum": 1},
+        "expectedCategoryId": {"$ref": "#/$defs/CategoryId"},
+        "method": {"$ref": "#/$defs/ParentReuseMethod"},
+        "score": {"$ref": "#/$defs/NullableScore"}
+      }
+    },
+    "CreateParentPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "expectedWorkItemKey", "expectedSummary", "categoryId", "method"],
+      "properties": {
+        "decision": {"const": "CREATE_NEW"},
+        "expectedWorkItemKey": {"$ref": "#/$defs/WorkItemKey"},
+        "expectedSummary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "method": {"const": "CREATE_NEW_PARENT"}
+      }
+    },
+    "ParentPlacement": {
+      "oneOf": [
+        {"$ref": "#/$defs/ReuseParentPlacement"},
+        {"$ref": "#/$defs/CreateParentPlacement"}
+      ],
+      "description": "The only parent mutations are reuse without modification or creation from trusted Slack identity. No update decision exists."
+    },
+    "CreateCasePlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generatedCaseIndex", "exactContentKey", "decision"],
+      "properties": {
+        "generatedCaseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "exactContentKey": {"$ref": "#/$defs/Sha256Hex"},
+        "decision": {"const": "CREATE_NEW"}
+      }
+    },
+    "ReuseCasePlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generatedCaseIndex",
+        "exactContentKey",
+        "decision",
+        "testCaseId",
+        "expectedResourceVersion",
+        "expectedCurrentVersionId",
+        "expectedCurrentVersion",
+        "matchReason"
+      ],
+      "properties": {
+        "generatedCaseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "exactContentKey": {"$ref": "#/$defs/Sha256Hex"},
+        "decision": {"const": "REUSE_EXISTING"},
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "expectedResourceVersion": {"type": "integer", "minimum": 1},
+        "expectedCurrentVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "expectedCurrentVersion": {"type": "integer", "minimum": 1},
+        "matchReason": {"type": "string", "enum": ["EXACT", "SEMANTIC"]}
+      }
+    },
+    "CasePlacement": {
+      "oneOf": [
+        {"$ref": "#/$defs/CreateCasePlacement"},
+        {"$ref": "#/$defs/ReuseCasePlacement"}
+      ],
+      "description": "One decision for one stored generated case. Reuse points to the locked current version and never authorizes an update, restore or appended version."
+    },
+    "GenerationPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["placementSchemaVersion", "category", "parent", "cases"],
+      "properties": {
+        "placementSchemaVersion": {"const": "1.0.0"},
+        "category": {"$ref": "#/$defs/CategoryPlacement"},
+        "parent": {"$ref": "#/$defs/ParentPlacement"},
+        "cases": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/CasePlacement"}
+        }
+      },
+      "description": "Must contain exactly one case decision for every stored generated case in original zero-based order. The server reproduces the plan against locked current ledger projections before writing."
+    },
+    "ApplyGenerationJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "expectedContextDigest", "expectedResultDigest", "placement"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "expectedContextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "expectedResultDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "placement": {"$ref": "#/$defs/GenerationPlacement"}
+      },
+      "description": "POST /api/generation-jobs/{jobId}/apply. The path job must be SUCCEEDED. Provider controls and generated case content are forbidden: authoritative content is rebuilt from the sealed job and revalidated before any QA-ledger write."
+    },
+    "AppliedTestStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "precondition", "action"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {
+          "oneOf": [
+            {"$ref": "#/$defs/NonBlankString"},
+            {"type": "null"}
+          ]
+        },
+        "action": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "GenerationSourceProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceType",
+        "slackWorkItemId",
+        "generationJobId",
+        "contextDigest",
+        "resultDigest",
+        "outputSchemaVersion",
+        "generationVersion",
+        "evidenceNodeIds",
+        "sourceRevisionIds",
+        "inferenceOnly",
+        "openQuestions"
+      ],
+      "properties": {
+        "sourceType": {"const": "SLACK_AI"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "generationJobId": {"$ref": "#/$defs/GenerationJobId"},
+        "contextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "resultDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "outputSchemaVersion": {"const": "1.0.0"},
+        "generationVersion": {"type": "integer", "minimum": 1},
+        "evidenceNodeIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "sourceRevisionIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "inferenceOnly": {"type": "boolean"},
+        "openQuestions": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/NonBlankString"}
+        }
+      },
+      "description": "Immutable server-owned provenance. Evidence IDs preserve generated order; source revision IDs preserve sealed context rank and source order with first-occurrence de-duplication."
+    },
+    "AppliedTestCaseVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "summary",
+        "precondition",
+        "expectedResultMode",
+        "caseExpectedResult",
+        "priority",
+        "labels",
+        "steps",
+        "generationReason",
+        "source",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseVersionId"},
+        "version": {"const": 1},
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResultMode": {"const": "CASE"},
+        "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "../../../state-enums.schema.json#/$defs/Priority"},
+        "labels": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/AppliedTestStep"}
+        },
+        "generationReason": {"$ref": "#/$defs/ShortString"},
+        "source": {"$ref": "#/$defs/GenerationSourceProvenance"},
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "CreatedTestCaseResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "workItemId",
+        "categoryId",
+        "status",
+        "resourceVersion",
+        "currentVersion"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseId"},
+        "key": {"$ref": "#/$defs/TestCaseKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "status": {"const": "ACTIVE"},
+        "resourceVersion": {"const": 1},
+        "currentVersion": {"$ref": "#/$defs/AppliedTestCaseVersion"}
+      }
+    },
+    "CreatedCaseOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generatedCaseIndex", "exactContentKey", "outcome", "ledgerMutation", "case"],
+      "properties": {
+        "generatedCaseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "exactContentKey": {"$ref": "#/$defs/Sha256Hex"},
+        "outcome": {"const": "CREATED"},
+        "ledgerMutation": {"const": "CREATED_CASE_AND_VERSION"},
+        "case": {"$ref": "#/$defs/CreatedTestCaseResource"}
+      }
+    },
+    "ReusedCaseReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "workItemId",
+        "categoryId",
+        "status",
+        "resourceVersion",
+        "currentVersionId",
+        "currentVersion"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseId"},
+        "key": {"$ref": "#/$defs/TestCaseKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "status": {"const": "ACTIVE"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "currentVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "currentVersion": {"type": "integer", "minimum": 1}
+      }
+    },
+    "ReusedCaseOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generatedCaseIndex",
+        "exactContentKey",
+        "outcome",
+        "ledgerMutation",
+        "preserved",
+        "matchReason",
+        "case"
+      ],
+      "properties": {
+        "generatedCaseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "exactContentKey": {"$ref": "#/$defs/Sha256Hex"},
+        "outcome": {"const": "REUSED"},
+        "ledgerMutation": {"const": "NONE"},
+        "preserved": {"const": true},
+        "matchReason": {"type": "string", "enum": ["EXACT", "SEMANTIC"]},
+        "case": {"$ref": "#/$defs/ReusedCaseReference"}
+      },
+      "description": "Records the relationship to the existing current case. The apply transaction creates no TestCaseVersion, tag, step, audit mutation or outbox mutation for this case."
+    },
+    "CaseApplyOutcome": {
+      "oneOf": [
+        {"$ref": "#/$defs/CreatedCaseOutcome"},
+        {"$ref": "#/$defs/ReusedCaseOutcome"}
+      ]
+    },
+    "CreatedParentOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "ledgerMutation", "workItemId", "key", "categoryId", "resourceVersion"],
+      "properties": {
+        "outcome": {"const": "CREATED"},
+        "ledgerMutation": {"const": "CREATED_WORK_ITEM"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "key": {"$ref": "#/$defs/WorkItemKey"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "resourceVersion": {"const": 1}
+      }
+    },
+    "ReusedParentOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "ledgerMutation", "workItemId", "key", "categoryId", "resourceVersion"],
+      "properties": {
+        "outcome": {"const": "REUSED"},
+        "ledgerMutation": {"const": "NONE"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "key": {"$ref": "#/$defs/WorkItemKey"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "resourceVersion": {"type": "integer", "minimum": 1}
+      }
+    },
+    "ParentApplyOutcome": {
+      "oneOf": [
+        {"$ref": "#/$defs/CreatedParentOutcome"},
+        {"$ref": "#/$defs/ReusedParentOutcome"}
+      ]
+    },
+    "ApplyCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generated", "created", "reused"],
+      "properties": {
+        "generated": {"type": "integer", "minimum": 5, "maximum": 10},
+        "created": {"type": "integer", "minimum": 0, "maximum": 10},
+        "reused": {"type": "integer", "minimum": 0, "maximum": 10}
+      }
+    },
+    "GenerationApplyReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "generationJobId",
+        "jobStatus",
+        "contextDigest",
+        "resultDigest",
+        "placementDigest",
+        "transactionStatus",
+        "parent",
+        "cases",
+        "counts",
+        "auditId",
+        "appliedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/GenerationApplyId"},
+        "generationJobId": {"$ref": "#/$defs/GenerationJobId"},
+        "jobStatus": {"const": "SUCCEEDED"},
+        "contextDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "resultDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "placementDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "transactionStatus": {"const": "COMMITTED"},
+        "parent": {"$ref": "#/$defs/ParentApplyOutcome"},
+        "cases": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/CaseApplyOutcome"}
+        },
+        "counts": {"$ref": "#/$defs/ApplyCounts"},
+        "auditId": {"$ref": "#/$defs/AuditId"},
+        "appliedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Immutable commit receipt. The generation job remains SUCCEEDED; applying does not add an APPLIED job status. Idempotent replay returns this original receipt byte-for-byte at the semantic JSON level."
+    },
+    "ApplyGenerationJobResponse": {"$ref": "#/$defs/GenerationApplyReceipt"},
+    "GenerationApplyStateConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_JOB_STATE_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "operation", "actualStatus", "allowedStatuses", "ledgerWriteStarted"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/GenerationJobId"},
+                "operation": {"const": "APPLY"},
+                "actualStatus": {"$ref": "../../../state-enums.schema.json#/$defs/GenerationJobStatus"},
+                "allowedStatuses": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": {"const": "SUCCEEDED"}
+                },
+                "ledgerWriteStarted": {"const": false}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "StoredResultInvalidReason": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_INVALID",
+        "OUTPUT_VERSION_MISMATCH",
+        "EVIDENCE_NOT_IN_SEALED_CONTEXT",
+        "EVIDENCE_NOT_ACTIVE",
+        "CATEGORY_NOT_IN_SEALED_CONTEXT",
+        "NON_CONTIGUOUS_STEPS",
+        "DUPLICATE_NORMALIZED_CONTENT",
+        "UNSUPPORTED_CLAIM_REJECTED",
+        "NOT_MATERIALIZABLE"
+      ]
+    },
+    "GenerationStoredResultInvalidError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_STORED_RESULT_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "stage", "reason", "ledgerWriteStarted"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/GenerationJobId"},
+                "stage": {"type": "string", "enum": ["SCHEMA", "GROUNDING", "MATERIALIZATION"]},
+                "reason": {"$ref": "#/$defs/StoredResultInvalidReason"},
+                "ledgerWriteStarted": {"const": false}
+              }
+            }
+          }
+        }
+      ],
+      "description": "Redacted trust-boundary failure. No stored provider content or provider-native error text is echoed."
+    },
+    "PlacementConflictReason": {
+      "type": "string",
+      "enum": [
+        "CONTEXT_DIGEST_MISMATCH",
+        "RESULT_DIGEST_MISMATCH",
+        "CASE_COUNT_MISMATCH",
+        "CASE_ORDER_MISMATCH",
+        "EXACT_CONTENT_KEY_MISMATCH",
+        "CATEGORY_STALE",
+        "PARENT_STALE",
+        "PARENT_CONFLICT",
+        "REUSE_CANDIDATE_STALE",
+        "REUSE_CANDIDATE_NOT_ELIGIBLE",
+        "PLACEMENT_NOT_REPRODUCIBLE"
+      ]
+    },
+    "GenerationPlacementConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_PLACEMENT_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "reason", "ledgerWriteStarted"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/GenerationJobId"},
+                "reason": {"$ref": "#/$defs/PlacementConflictReason"},
+                "generatedCaseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+                "resourceType": {"type": "string", "enum": ["CATEGORY", "WORK_ITEM", "TEST_CASE"]},
+                "resourceId": {"$ref": "#/$defs/Identifier"},
+                "ledgerWriteStarted": {"const": false}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "GenerationJobAlreadyAppliedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_JOB_ALREADY_APPLIED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "applyId"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/GenerationJobId"},
+                "applyId": {"$ref": "#/$defs/GenerationApplyId"}
+              }
+            }
+          }
+        }
+      ],
+      "description": "Returned when the job already has a committed receipt but the caller did not replay the original idempotency key and normalized request."
+    },
+    "RollbackRowDeltas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workItems",
+        "testCases",
+        "testCaseVersions",
+        "testSteps",
+        "testCaseTags",
+        "testCaseVersionTags",
+        "generationApplyReceipts",
+        "generationApplyOutcomes",
+        "keyAllocations",
+        "auditLogs",
+        "outboxEvents"
+      ],
+      "properties": {
+        "workItems": {"const": 0},
+        "testCases": {"const": 0},
+        "testCaseVersions": {"const": 0},
+        "testSteps": {"const": 0},
+        "testCaseTags": {"const": 0},
+        "testCaseVersionTags": {"const": 0},
+        "generationApplyReceipts": {"const": 0},
+        "generationApplyOutcomes": {"const": 0},
+        "keyAllocations": {"const": 0},
+        "auditLogs": {"const": 0},
+        "outboxEvents": {"const": 0}
+      }
+    },
+    "RollbackEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transactionStatus", "rowDeltas"],
+      "properties": {
+        "transactionStatus": {"const": "ROLLED_BACK"},
+        "rowDeltas": {"$ref": "#/$defs/RollbackRowDeltas"}
+      },
+      "description": "Test-only fault-injection evidence is measured as committed before/after row-count deltas in an isolated database. Every apply-owned and side-effect table must remain unchanged; this observation is not an API response."
+    },
+    "GenerationApplyTransactionFailedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "GENERATION_APPLY_TRANSACTION_FAILED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "stage", "transactionStatus"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/GenerationJobId"},
+                "stage": {
+                  "type": "string",
+                  "enum": [
+                    "CREATE_PARENT",
+                    "CREATE_CASE",
+                    "CREATE_VERSION",
+                    "CREATE_STEPS",
+                    "RECORD_OUTCOME",
+                    "AUDIT",
+                    "OUTBOX"
+                  ]
+                },
+                "transactionStatus": {"const": "ROLLED_BACK"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "GenerationApplyErrorResponse": {
+      "oneOf": [
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/ValidationError"},
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"},
+        {"$ref": "../../../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/GenerationApplyStateConflictError"},
+        {"$ref": "#/$defs/GenerationStoredResultInvalidError"},
+        {"$ref": "#/$defs/GenerationPlacementConflictError"},
+        {"$ref": "#/$defs/GenerationJobAlreadyAppliedError"},
+        {"$ref": "#/$defs/GenerationApplyTransactionFailedError"}
+      ]
+    }
+  }
+}

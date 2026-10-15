@@ -1,0 +1,65 @@
+{
+  "fixtureId": "slack-normal-03",
+  "synthetic": true,
+  "category": "NORMAL",
+  "description": "내보내기 권한과 파일 형식을 명시한 정상 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787198400.000003",
+      "messageRevisionId": "rev_n03_root",
+      "authorId": "U_SYN_005",
+      "body": "[일감]\n개발건: 사용자 목록 내보내기\n요청 메뉴: 회원 > 권한\n기능 설명: 사용자 목록을 파일로 내려받는 기능\n요청내용: 관리자에게만 CSV 내보내기 버튼을 제공한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787198400000003",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787198460.000003",
+        "messageRevisionId": "rev_n03_reply_01",
+        "authorId": "U_SYN_006",
+        "body": "파일은 UTF-8 CSV로 확정하고 헤더 행을 포함합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787198460000003",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "사용자 목록 내보내기",
+      "requestedMenu": "회원 > 권한",
+      "featureDescription": "사용자 목록을 파일로 내려받는 기능",
+      "requestDetails": "관리자에게만 UTF-8 CSV 내보내기 버튼을 제공하고 헤더 행을 포함한다.",
+      "missingFields": [],
+      "confidence": 0.98,
+      "sourceMessageRevisions": ["rev_n03_root", "rev_n03_reply_01"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_n03_role",
+        "nodeType": "CONSTRAINT",
+        "content": "CSV 내보내기는 관리자만 사용할 수 있다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_n03_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "일감에 권한 제한이 명시되어 있다."
+      },
+      {
+        "knowledgeId": "knowledge_n03_format",
+        "nodeType": "DECISION",
+        "content": "내보내기 파일은 헤더 행을 포함한 UTF-8 CSV다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_n03_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "thread에서 파일 형식을 확정했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_n03_role", "knowledge_n03_format"],
+      "excludedKnowledgeIds": [],
+      "openQuestions": []
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "fixtureId": "slack-reversal-01",
+  "synthetic": true,
+  "category": "REVERSAL",
+  "description": "인증번호 유효시간 10분 결정을 이후 5분으로 명시적으로 번복한 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787212800.000007",
+      "messageRevisionId": "rev_r01_root",
+      "authorId": "U_SYN_012",
+      "body": "개발건: 인증번호 만료 처리\n요청 메뉴: 회원 > 계정관리 > 비밀번호\n기능 설명: 비밀번호 재설정 인증번호의 유효성을 검사한다.\n요청내용: 인증번호 유효시간을 10분으로 변경한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787212800000007",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787212860.000007",
+        "messageRevisionId": "rev_r01_reply_01",
+        "authorId": "U_SYN_013",
+        "body": "10분으로 진행하는 것 맞습니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787212860000007",
+        "revision": 1
+      },
+      {
+        "messageTs": "1787216400.000007",
+        "messageRevisionId": "rev_r01_reply_02",
+        "authorId": "U_SYN_013",
+        "body": "앞 결정은 취소합니다. 보안 검토 결과 유효시간 5분으로 최종 확정합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787216400000007",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "인증번호 만료 처리",
+      "requestedMenu": "회원 > 계정관리 > 비밀번호",
+      "featureDescription": "비밀번호 재설정 인증번호의 유효성을 검사한다.",
+      "requestDetails": "인증번호 유효시간을 5분으로 변경한다.",
+      "missingFields": [],
+      "confidence": 0.98,
+      "sourceMessageRevisions": ["rev_r01_root", "rev_r01_reply_02"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_r01_ten",
+        "nodeType": "DECISION",
+        "content": "인증번호 유효시간은 10분이다.",
+        "status": "SUPERSEDED",
+        "evidenceSourceMessageRevisions": ["rev_r01_root", "rev_r01_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "뒤의 명시적 최종 결정이 이 결정을 대체했다."
+      },
+      {
+        "knowledgeId": "knowledge_r01_five",
+        "nodeType": "DECISION",
+        "content": "인증번호 유효시간은 5분이다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_r01_reply_02"],
+        "supersedesKnowledgeIds": ["knowledge_r01_ten"],
+        "reason": "가장 나중 메시지가 앞 결정을 취소하고 최종 확정했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_r01_five"],
+      "excludedKnowledgeIds": ["knowledge_r01_ten"],
+      "openQuestions": []
+    }
+  }
+}

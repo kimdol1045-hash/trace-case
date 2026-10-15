@@ -1,0 +1,67 @@
+{
+  "fixtureKind": "MANIFEST",
+  "schemaVersion": "1.1.0",
+  "datasetId": "synthetic_knowledge_retrieval_v1",
+  "synthetic": true,
+  "description": "Deterministic synthetic golden set for Sprint 6 ontology retrieval quality. It is not evidence of production Slack or LightRAG behavior.",
+  "fixtureSchema": "retrieval-eval.schema.json",
+  "kValues": [1, 3],
+  "fallbackK": 3,
+  "expectedMetrics": {
+    "recallAtK": {
+      "1": 0.625,
+      "3": 1.0
+    },
+    "rationale": "Macro recall across four queries: three queries have two relevant ACTIVE nodes (recall@1=0.5) and one has one relevant ACTIVE node (recall@1=1.0); every relevant node must appear by rank 3."
+  },
+  "defaultGates": {
+    "minRecallAtK": {
+      "1": 0.625,
+      "3": 1.0
+    },
+    "minActiveEvidenceCoverage": 1.0,
+    "maxInactiveMisuseCount": 0,
+    "minCitationSourceRevisionLinkRate": 1.0,
+    "maxDuplicateCount": 0,
+    "minReasonRankCompleteness": 1.0,
+    "minDegradedFallbackRetention": 1.0,
+    "maxFallbackContractFailures": 0
+  },
+  "thresholdProfiles": {
+    "candidate": {
+      "minRecallAtK": {
+        "1": 0.625,
+        "3": 1.0
+      },
+      "minActiveEvidenceCoverage": 1.0,
+      "maxInactiveMisuseCount": 0,
+      "minCitationSourceRevisionLinkRate": 1.0,
+      "maxDuplicateCount": 0,
+      "minReasonRankCompleteness": 1.0,
+      "minDegradedFallbackRetention": 1.0,
+      "maxFallbackContractFailures": 0,
+      "requiredRelevanceCategories": [],
+      "minRequiredCategoryRecall": 0.0
+    },
+    "release": {
+      "minRecallAtK": {
+        "1": 0.625,
+        "3": 1.0
+      },
+      "minActiveEvidenceCoverage": 1.0,
+      "maxInactiveMisuseCount": 0,
+      "minCitationSourceRevisionLinkRate": 1.0,
+      "maxDuplicateCount": 0,
+      "minReasonRankCompleteness": 1.0,
+      "minDegradedFallbackRetention": 1.0,
+      "maxFallbackContractFailures": 0,
+      "requiredRelevanceCategories": [
+        "EXISTING_TEST_CASE",
+        "FAILED_EXECUTION",
+        "ISSUE"
+      ],
+      "minRequiredCategoryRecall": 1.0
+    }
+  },
+  "fixtures": ["golden-v1.json"]
+}

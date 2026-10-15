@@ -1,0 +1,95 @@
+{
+  "artifactKind": "AUTOMATIC_GENERATION_QUALITY_EVALUATION_REPORT",
+  "contractVersion": "automatic-generation-quality-gate/1.0.0",
+  "profile": "CANDIDATE",
+  "datasetId": "synthetic_generation_quality_v1",
+  "datasetKind": "SYNTHETIC_FIXTURE",
+  "synthetic": true,
+  "datasetFingerprint": "sha256:45d83c2187a46d78342d6a0fa01425c0d4e0921689d6fff8d271f74f9ed79d49",
+  "snapshotFingerprint": "sha256:791a4841dfa4ad4279f9ca8cbc7283bcf8a28d357d2ab405744fde2ecd75b8a7",
+  "versionPins": {
+    "generationPolicyVersion": "generation-policy-v1",
+    "generationPolicyDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "promptVersion": "prompt-v1",
+    "promptDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "providerId": "deterministic-fixture-provider",
+    "modelId": "fixture-model",
+    "modelRevision": "fixture-model-revision-1",
+    "embeddingProviderId": "deterministic-fixture-embedding",
+    "embeddingModelId": "fixture-embedding-model",
+    "embeddingRevision": "fixture-embedding-revision-1",
+    "embeddingDimensions": 4,
+    "semanticDuplicateThreshold": 0.85,
+    "semanticDuplicateAlgorithmVersion": "cosine-cluster-v1",
+    "semanticDuplicatePolicyDigest": "sha256:30a172e871708bd39bc535bdf45a0c43e8f3d35bfa1037ace795f99d155c861b",
+    "exactDuplicateAlgorithmVersion": "generation-exact-content-v1",
+    "inputSchemaVersion": "1.0.0",
+    "outputSchemaVersion": "1.0.0",
+    "suggestionSchemaVersion": "1.0.0",
+    "qualityGateSchemaVersion": "automatic-generation-quality-gate/1.0.0",
+    "ontologySchemaVersion": "ontology-v1"
+  },
+  "evaluatorVersion": "automatic-generation-quality-evaluator-v1",
+  "deterministicOfflineReplay": true,
+  "evaluatedCounts": {
+    "generationRoots": 1,
+    "generationJobs": 1,
+    "generationResults": 1,
+    "generatedCases": 5,
+    "generatedSteps": 5,
+    "evidenceReferences": 10
+  },
+  "metrics": {
+    "evidenceCoverage": {"numerator": 10, "denominator": 10, "rate": 1},
+    "retiredKnowledgeMisuse": {
+      "total": 0,
+      "SUPERSEDED": 0,
+      "RETRACTED": 0,
+      "DELETED": 0,
+      "REJECTED": 0,
+      "UNAVAILABLE": 0
+    },
+    "duplicates": {
+      "total": 0,
+      "exactKey": 0,
+      "semanticCluster": 0,
+      "categoryCollision": 0,
+      "parentCollision": 0
+    },
+    "unresolvedAuthorityCount": 0,
+    "provenanceFailureCount": 0,
+    "invalidOrBlankResultCount": 0,
+    "orderingFailureCount": 0,
+    "eligibilityFailureCount": 0
+  },
+  "checks": [
+    {"code": "evidenceCoverage", "actual": 1, "operator": "==", "threshold": 1, "passed": true},
+    {"code": "retiredKnowledgeMisuseCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "duplicateCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "unresolvedAuthorityCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "provenanceFailureCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "invalidOrBlankResultCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "orderingFailureCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true},
+    {"code": "releaseEligibilityFailureCount", "actual": 0, "operator": "==", "threshold": 0, "passed": true}
+  ],
+  "gate": {"passed": true, "allOrNothing": true},
+  "certification": {
+    "releaseCertified": false,
+    "status": "NOT_CERTIFIED_SYNTHETIC",
+    "reasonCodes": ["SYNTHETIC_ONLY"],
+    "liveRunId": null
+  },
+  "privacy": {
+    "containsRawSourceText": false,
+    "containsProductionData": false,
+    "secretsScan": "CLEAN",
+    "piiScan": "CLEAN",
+    "redactionPolicyVersion": "redaction-v1"
+  },
+  "artifacts": {
+    "json": "artifacts/automatic-generation-quality.json",
+    "junit": "artifacts/automatic-generation-quality.junit.xml",
+    "markdown": "artifacts/automatic-generation-quality.md"
+  },
+  "retention": {"retentionDays": 30, "immutable": true, "legalHold": false}
+}

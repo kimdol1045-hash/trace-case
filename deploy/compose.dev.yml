@@ -1,0 +1,136 @@
+name: tc-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.1-pg16
+    restart: unless-stopped
+    # Concurrent 100k-case scans can launch multiple PostgreSQL parallel
+    # workers. Docker's 64 MiB default /dev/shm is too small for that profile.
+    shm_size: "256mb"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tc}
+      POSTGRES_USER: ${POSTGRES_USER:-tc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tc_dev_only_change_me}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-tc_local_access}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-tc_local_secret_change_me}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN:-http://localhost:5173,http://127.0.0.1:5173}
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-59000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-59001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks:
+      - backend
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-tc_local_access}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-tc_local_secret_change_me}
+      MINIO_BUCKET: ${MINIO_BUCKET:-tc-attachments}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        mc alias set tc-local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        mc mb --ignore-existing "tc-local/$${MINIO_BUCKET}"
+        mc anonymous set none "tc-local/$${MINIO_BUCKET}"
+    restart: "no"
+    networks:
+      - backend
+
+  clamav:
+    image: clamav/clamav-debian:1.4.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CLAMAV_PORT:-53310}:3310"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - backend
+
+  ollama:
+    image: ollama/ollama:0.30.11
+    # Native Ollama is faster on Apple silicon. Enable this profile on Linux
+    # or after assigning enough memory to the Docker VM.
+    profiles: ["container-ai", "models"]
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-5m}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
+    ports:
+      # 11435 avoids colliding with a host-native Ollama on macOS/Linux.
+      - "127.0.0.1:${OLLAMA_CONTAINER_PORT:-11435}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    networks:
+      - backend
+
+  ollama-models:
+    image: ollama/ollama:0.30.11
+    profiles: ["models"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-qwen3:8b}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-bge-m3}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        ollama pull "$${OLLAMA_GENERATION_MODEL}"
+        ollama pull "$${OLLAMA_EMBEDDING_MODEL}"
+        ollama show "$${OLLAMA_GENERATION_MODEL}"
+        ollama show "$${OLLAMA_EMBEDDING_MODEL}"
+    restart: "no"
+    networks:
+      - backend
+
+volumes:
+  postgres-data:
+  minio-data:
+  ollama-data:
+
+networks:
+  backend:
+    driver: bridge

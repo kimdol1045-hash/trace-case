@@ -1,0 +1,772 @@
+{
+  "synthetic": true,
+  "description": "Synthetic Sprint 3 wire examples only. They contain no production or customer data.",
+  "cases": [
+    {
+      "name": "create work-item cycle request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CreateCycleRequest",
+      "expectedValid": true,
+      "payload": {
+        "name": "Checkout regression",
+        "description": "Validate the checkout release candidate.",
+        "startDate": "2026-08-21",
+        "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"}
+      }
+    },
+    {
+      "name": "create multi-label union cycle request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CreateCycleRequest",
+      "expectedValid": true,
+      "payload": {
+        "name": "Smoke or payment regression",
+        "description": "Union of two label case sets.",
+        "startDate": "2026-08-21",
+        "scope": {"type": "LABEL", "label": "smoke", "labels": ["smoke", "payment"]}
+      }
+    },
+    {
+      "name": "incremental step result request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RecordStepResultsRequest",
+      "expectedValid": true,
+      "payload": {
+        "results": [
+          {"sequence": 1, "status": "PASS", "note": "Account was ready."},
+          {"sequence": 2, "status": "BLOCKED", "note": "Payment sandbox unavailable."}
+        ],
+        "executorLabel": "QA Kim"
+      }
+    },
+    {
+      "name": "step execution returns all pinned steps and derived BLOCKED",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RecordStepResultsResponse",
+      "expectedValid": true,
+      "payload": {
+        "cycleId": "cycle_checkout",
+        "cycleItemId": "cycle_item_checkout",
+        "pinnedVersionId": "case_version_checkout_2",
+        "platform": "WEB",
+        "attemptId": "attempt_checkout_web_1",
+        "attemptNo": 1,
+        "status": "BLOCKED",
+        "executorLabel": "QA Kim",
+        "startedAt": "2026-08-21T01:00:00Z",
+        "completedAt": "2026-08-21T01:02:00Z",
+        "recordedStepCount": 2,
+        "totalStepCount": 2,
+        "steps": [
+          {"testStepId": "test_step_checkout_1", "sequence": 1, "precondition": "An active account exists.", "action": "Open checkout.", "expectedResult": "Checkout opens.", "status": "PASS", "note": "Account was ready.", "recordedAt": "2026-08-21T01:01:00Z", "updatedAt": "2026-08-21T01:01:00Z"},
+          {"testStepId": "test_step_checkout_2", "sequence": 2, "precondition": "The sandbox is reachable.", "action": "Submit payment.", "expectedResult": "Order is created.", "status": "BLOCKED", "note": "Payment sandbox unavailable.", "recordedAt": "2026-08-21T01:02:00Z", "updatedAt": "2026-08-21T01:02:00Z"}
+        ]
+      }
+    },
+    {
+      "name": "cycle scope rejects work item and label together",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CreateCycleRequest",
+      "expectedValid": false,
+      "payload": {
+        "name": "Ambiguous scope",
+        "description": "Must select exactly one scope kind.",
+        "startDate": "2026-08-21",
+        "scope": {
+          "type": "WORK_ITEM",
+          "workItemId": "work_item_checkout",
+          "workItemKey": "WORK-466",
+          "label": "regression"
+        }
+      }
+    },
+    {
+      "name": "create response is canonical PLANNED",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CreateCycleResponse",
+      "expectedValid": true,
+      "payload": {
+        "id": "cycle_checkout",
+        "name": "Checkout regression",
+        "description": "Validate the checkout release candidate.",
+        "startDate": "2026-08-21",
+        "status": "PLANNED",
+        "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"},
+        "scopeLocked": false,
+        "resourceVersion": 1,
+        "itemCount": 1,
+        "createdAt": "2026-08-20T01:00:00Z",
+        "updatedAt": "2026-08-20T01:00:00Z",
+        "startedAt": null,
+        "completedAt": null,
+        "deletedAt": null
+      }
+    },
+    {
+      "name": "cycle list compound filter and cursor",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CycleListQuery",
+      "expectedValid": true,
+      "payload": {
+        "search": "checkout",
+        "statuses": ["IN_PROGRESS", "COMPLETED"],
+        "scopeTypes": ["WORK_ITEM"],
+        "workItemIds": ["work_item_checkout"],
+        "startDateFrom": "2026-08-01",
+        "startDateTo": "2026-08-31",
+        "sort": "UPDATED_AT_DESC",
+        "cursor": "cursor_cycle_checkout_02",
+        "limit": 25
+      }
+    },
+    {
+      "name": "cycle list page",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ListCyclesResponse",
+      "expectedValid": true,
+      "payload": {
+        "items": [
+          {
+            "id": "cycle_checkout",
+            "name": "Checkout regression",
+            "startDate": "2026-08-21",
+            "status": "IN_PROGRESS",
+            "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"},
+            "resourceVersion": 2,
+            "itemCount": 1,
+            "platformResultCount": 3,
+            "updatedAt": "2026-08-20T02:00:00Z",
+            "deletedAt": null
+          }
+        ],
+        "nextCursor": null,
+        "total": 1,
+        "statusCounts": {"PLANNED": 0, "IN_PROGRESS": 1, "COMPLETED": 0}
+      }
+    },
+    {
+      "name": "get in-progress cycle",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/GetCycleResponse",
+      "expectedValid": true,
+      "payload": {
+        "id": "cycle_checkout",
+        "name": "Checkout regression",
+        "description": "Validate the checkout release candidate.",
+        "startDate": "2026-08-21",
+        "status": "IN_PROGRESS",
+        "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"},
+        "scopeLocked": true,
+        "resourceVersion": 2,
+        "itemCount": 1,
+        "createdAt": "2026-08-20T01:00:00Z",
+        "updatedAt": "2026-08-20T02:00:00Z",
+        "startedAt": "2026-08-20T02:00:00Z",
+        "completedAt": null,
+        "deletedAt": null
+      }
+    },
+    {
+      "name": "update cycle metadata request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/UpdateCycleRequest",
+      "expectedValid": true,
+      "payload": {"baseResourceVersion": 2, "name": "Checkout RC regression", "description": "RC2 coverage."}
+    },
+    {
+      "name": "update metadata cannot mutate scope",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/UpdateCycleRequest",
+      "expectedValid": false,
+      "payload": {
+        "baseResourceVersion": 2,
+        "scope": {"type": "LABEL", "label": "regression"}
+      }
+    },
+    {
+      "name": "delete planned cycle response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/DeleteCycleResponse",
+      "expectedValid": true,
+      "payload": {
+        "operation": "DELETE",
+        "cycleId": "cycle_old_plan",
+        "deletedAt": "2026-08-20T03:00:00Z",
+        "auditId": "audit_cycle_delete"
+      }
+    },
+    {
+      "name": "work-item and label scope options page",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ScopeOptionPageResponse",
+      "expectedValid": true,
+      "payload": {
+        "items": [
+          {
+            "type": "WORK_ITEM",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-466",
+            "summary": "Checkout renewal",
+            "ownerLabel": "QA Kim",
+            "caseCount": 1
+          },
+          {"type": "LABEL", "label": "regression", "caseCount": 7}
+        ],
+        "nextCursor": null,
+        "total": 2
+      }
+    },
+    {
+      "name": "scope preview de-duplicates current cases",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ScopePreviewResponse",
+      "expectedValid": true,
+      "semanticRules": ["UNIQUE_SCOPE_CASES"],
+      "payload": {
+        "scope": {"type": "LABEL", "label": "regression"},
+        "resolvedAt": "2026-08-20T01:30:00Z",
+        "items": [
+          {
+            "testCaseId": "case_checkout",
+            "caseKey": "TC-000001",
+            "summary": "Card authorization succeeds",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-466",
+            "ownerLabel": "QA Kim",
+            "labels": ["regression"],
+            "currentVersionId": "case_version_checkout_2",
+            "currentVersion": 2
+          }
+        ],
+        "nextCursor": null,
+        "total": 1
+      }
+    },
+    {
+      "name": "scope preview rejects duplicate case identity semantically",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ScopePreviewResponse",
+      "expectedValid": false,
+      "semanticRules": ["UNIQUE_SCOPE_CASES"],
+      "payload": {
+        "scope": {"type": "LABEL", "label": "regression"},
+        "resolvedAt": "2026-08-20T01:30:00Z",
+        "items": [
+          {
+            "testCaseId": "case_checkout",
+            "caseKey": "TC-000001",
+            "summary": "Card authorization succeeds",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-466",
+            "ownerLabel": "QA Kim",
+            "labels": ["regression"],
+            "currentVersionId": "case_version_checkout_2",
+            "currentVersion": 2
+          },
+          {
+            "testCaseId": "case_checkout",
+            "caseKey": "TC-000001",
+            "summary": "Card authorization succeeds",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-466",
+            "ownerLabel": "QA Kim",
+            "labels": ["regression"],
+            "currentVersionId": "case_version_checkout_2",
+            "currentVersion": 2
+          }
+        ],
+        "nextCursor": null,
+        "total": 2
+      }
+    },
+    {
+      "name": "planned scope mutation request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/UpdateCycleScopeRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseResourceVersion": 1,
+        "scope": {"type": "LABEL", "label": "regression"},
+        "reason": "Broaden the pre-start regression set."
+      }
+    },
+    {
+      "name": "execution before start typed error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/CycleMutationLockedError",
+      "expectedValid": true,
+      "payload": {
+        "code": "CYCLE_EXECUTION_NOT_STARTED",
+        "message": "Start the cycle before recording execution.",
+        "details": {"cycleId": "cycle_checkout", "status": "PLANNED", "operation": "START_ATTEMPT"},
+        "traceId": "trace_execution_gate"
+      }
+    },
+    {
+      "name": "scope mutation after start typed error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/CycleMutationLockedError",
+      "expectedValid": true,
+      "payload": {
+        "code": "CYCLE_SCOPE_LOCKED",
+        "message": "The cycle scope was locked at start.",
+        "details": {"cycleId": "cycle_checkout", "status": "IN_PROGRESS", "operation": "UPDATE_SCOPE"},
+        "traceId": "trace_scope_gate"
+      }
+    },
+    {
+      "name": "start cycle pins one immutable case version",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/StartCycleResponse",
+      "expectedValid": true,
+      "semanticRules": ["UNIQUE_CYCLE_CASES", "PINNED_VERSION_CONSISTENCY"],
+      "payload": {
+        "cycle": {
+          "id": "cycle_checkout",
+          "name": "Checkout regression",
+          "description": "Validate the checkout release candidate.",
+          "startDate": "2026-08-21",
+          "status": "IN_PROGRESS",
+          "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"},
+          "scopeLocked": true,
+          "resourceVersion": 2,
+          "itemCount": 1,
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T02:00:00Z",
+          "startedAt": "2026-08-20T02:00:00Z",
+          "completedAt": null,
+          "deletedAt": null
+        },
+        "items": [
+          {
+            "id": "cycle_item_checkout",
+            "cycleId": "cycle_checkout",
+            "testCaseId": "case_checkout",
+            "caseKey": "TC-000001",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-466",
+            "ownerLabel": "QA Kim",
+            "labels": ["regression"],
+            "sortOrder": 0,
+            "pinnedVersionId": "case_version_checkout_2",
+            "pinnedVersion": {
+              "id": "case_version_checkout_2",
+              "testCaseId": "case_checkout",
+              "version": 2,
+              "summary": "Card authorization succeeds",
+              "precondition": "A valid card and cart exist.",
+              "expectedResultMode": "PER_STEP",
+              "priority": "HIGH",
+              "ownerLabel": "QA Kim",
+              "labels": ["regression"],
+              "steps": [{"sequence": 1, "action": "Submit payment.", "expectedResult": "Authorization succeeds."}],
+              "source": {"type": "UI", "actorLabel": "QA Kim"},
+              "changeReason": "Clarify authorization result.",
+              "createdAt": "2026-08-20T00:30:00Z"
+            },
+            "latestVersion": {
+              "versionId": "case_version_checkout_2",
+              "version": 2,
+              "updatedAt": "2026-08-20T00:30:00Z"
+            },
+            "isLatestVersion": true,
+            "platformExecutions": [
+              {"platform": "WEB", "status": "UNEXECUTED", "latestAttempt": null},
+              {"platform": "AOS", "status": "UNEXECUTED", "latestAttempt": null},
+              {"platform": "IOS", "status": "UNEXECUTED", "latestAttempt": null}
+            ],
+            "createdAt": "2026-08-20T02:00:00Z"
+          }
+        ],
+        "auditId": "audit_cycle_start"
+      }
+    },
+    {
+      "name": "explicit snapshot refresh request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RefreshCycleItemSnapshotRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseResourceVersion": 2,
+        "expectedPinnedVersionId": "case_version_checkout_2",
+        "targetVersionId": "case_version_checkout_3",
+        "confirm": true,
+        "reason": "Adopt the reviewed 3DS scenario."
+      }
+    },
+    {
+      "name": "snapshot refresh cannot be implicit",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RefreshCycleItemSnapshotRequest",
+      "expectedValid": false,
+      "payload": {
+        "baseResourceVersion": 2,
+        "expectedPinnedVersionId": "case_version_checkout_2",
+        "targetVersionId": "case_version_checkout_3",
+        "confirm": false,
+        "reason": "Background sync must not move a pin."
+      }
+    },
+    {
+      "name": "start WEB attempt request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/StartExecutionAttemptRequest",
+      "expectedValid": true,
+      "payload": {"platform": "WEB", "executorLabel": "QA Kim"}
+    },
+    {
+      "name": "unsupported execution platform rejected",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/StartExecutionAttemptRequest",
+      "expectedValid": false,
+      "payload": {"platform": "ANDROID", "executorLabel": "QA Kim"}
+    },
+    {
+      "name": "first execution attempt starts UNEXECUTED",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/StartExecutionAttemptResponse",
+      "expectedValid": true,
+      "payload": {
+        "id": "attempt_checkout_web_1",
+        "cycleId": "cycle_checkout",
+        "cycleItemId": "cycle_item_checkout",
+        "pinnedVersionId": "case_version_checkout_2",
+        "platform": "WEB",
+        "attemptNo": 1,
+        "status": "UNEXECUTED",
+        "actualResult": null,
+        "note": null,
+        "executorLabel": "QA Kim",
+        "startedAt": "2026-08-20T02:10:00Z",
+        "completedAt": null,
+        "isLatest": true
+      }
+    },
+    {
+      "name": "FAIL result requires and accepts actualResult",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CompleteExecutionAttemptRequest",
+      "expectedValid": true,
+      "payload": {"status": "FAIL", "actualResult": "Authorization returned HTTP 500.", "note": "Reproduced twice."}
+    },
+    {
+      "name": "FAIL result rejects missing actualResult",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CompleteExecutionAttemptRequest",
+      "expectedValid": false,
+      "payload": {"status": "FAIL", "note": "Reproduced twice."}
+    },
+    {
+      "name": "BLOCKED result accepts optional note",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CompleteExecutionAttemptRequest",
+      "expectedValid": true,
+      "payload": {"status": "BLOCKED", "note": "The payment sandbox is unavailable."}
+    },
+    {
+      "name": "BLOCKED result accepts missing note",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CompleteExecutionAttemptRequest",
+      "expectedValid": true,
+      "payload": {"status": "BLOCKED", "actualResult": "No response."}
+    },
+    {
+      "name": "retry appends a new latest UNEXECUTED attempt",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RetryExecutionAttemptResponse",
+      "expectedValid": true,
+      "semanticRules": ["APPEND_ONLY_RETRY"],
+      "payload": {
+        "previousAttempt": {
+          "id": "attempt_checkout_web_1",
+          "cycleId": "cycle_checkout",
+          "cycleItemId": "cycle_item_checkout",
+          "pinnedVersionId": "case_version_checkout_2",
+          "platform": "WEB",
+          "attemptNo": 1,
+          "status": "FAIL",
+          "actualResult": "Authorization returned HTTP 500.",
+          "note": "Reproduced twice.",
+          "executorLabel": "QA Kim",
+          "startedAt": "2026-08-20T02:10:00Z",
+          "completedAt": "2026-08-20T02:15:00Z",
+          "isLatest": false
+        },
+        "attempt": {
+          "id": "attempt_checkout_web_2",
+          "cycleId": "cycle_checkout",
+          "cycleItemId": "cycle_item_checkout",
+          "pinnedVersionId": "case_version_checkout_2",
+          "platform": "WEB",
+          "attemptNo": 2,
+          "status": "UNEXECUTED",
+          "actualResult": null,
+          "note": null,
+          "executorLabel": "QA Kim",
+          "startedAt": "2026-08-20T02:20:00Z",
+          "completedAt": null,
+          "isLatest": true
+        }
+      }
+    },
+    {
+      "name": "retry rejects overwritten attempt number semantically",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/RetryExecutionAttemptResponse",
+      "expectedValid": false,
+      "semanticRules": ["APPEND_ONLY_RETRY"],
+      "payload": {
+        "previousAttempt": {
+          "id": "attempt_checkout_web_1",
+          "cycleId": "cycle_checkout",
+          "cycleItemId": "cycle_item_checkout",
+          "pinnedVersionId": "case_version_checkout_2",
+          "platform": "WEB",
+          "attemptNo": 1,
+          "status": "FAIL",
+          "actualResult": "Authorization returned HTTP 500.",
+          "note": null,
+          "executorLabel": "QA Kim",
+          "startedAt": "2026-08-20T02:10:00Z",
+          "completedAt": "2026-08-20T02:15:00Z",
+          "isLatest": false
+        },
+        "attempt": {
+          "id": "attempt_checkout_web_1",
+          "cycleId": "cycle_checkout",
+          "cycleItemId": "cycle_item_checkout",
+          "pinnedVersionId": "case_version_checkout_2",
+          "platform": "WEB",
+          "attemptNo": 1,
+          "status": "UNEXECUTED",
+          "actualResult": null,
+          "note": null,
+          "executorLabel": "QA Kim",
+          "startedAt": "2026-08-20T02:20:00Z",
+          "completedAt": null,
+          "isLatest": true
+        }
+      }
+    },
+    {
+      "name": "attempt history identifies greatest attempt number as latest",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ExecutionAttemptHistoryPageResponse",
+      "expectedValid": true,
+      "semanticRules": ["LATEST_ATTEMPT_SEMANTICS"],
+      "payload": {
+        "items": [
+          {
+            "id": "attempt_checkout_web_2",
+            "cycleId": "cycle_checkout",
+            "cycleItemId": "cycle_item_checkout",
+            "pinnedVersionId": "case_version_checkout_2",
+            "platform": "WEB",
+            "attemptNo": 2,
+            "status": "PASS",
+            "actualResult": null,
+            "note": null,
+            "executorLabel": "QA Kim",
+            "startedAt": "2026-08-20T02:20:00Z",
+            "completedAt": "2026-08-20T02:24:00Z",
+            "isLatest": true
+          },
+          {
+            "id": "attempt_checkout_web_1",
+            "cycleId": "cycle_checkout",
+            "cycleItemId": "cycle_item_checkout",
+            "pinnedVersionId": "case_version_checkout_2",
+            "platform": "WEB",
+            "attemptNo": 1,
+            "status": "FAIL",
+            "actualResult": "Authorization returned HTTP 500.",
+            "note": null,
+            "executorLabel": "QA Kim",
+            "startedAt": "2026-08-20T02:10:00Z",
+            "completedAt": "2026-08-20T02:15:00Z",
+            "isLatest": false
+          }
+        ],
+        "nextCursor": null,
+        "total": 2,
+        "latestAttemptIds": ["attempt_checkout_web_2"]
+      }
+    },
+    {
+      "name": "typed ACTUAL_RESULT_REQUIRED error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/ActualResultRequiredError",
+      "expectedValid": true,
+      "payload": {
+        "code": "ACTUAL_RESULT_REQUIRED",
+        "message": "FAIL requires an actual result.",
+        "details": {"attemptId": "attempt_checkout_web_1", "status": "FAIL", "field": "actualResult"},
+        "traceId": "trace_actual_result"
+      }
+    },
+    {
+      "name": "incomplete completion warning is confirmable",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/CycleIncompleteWarningError",
+      "expectedValid": true,
+      "payload": {
+        "code": "CYCLE_INCOMPLETE_WARNING",
+        "message": "The cycle has unfinished latest platform executions.",
+        "details": {
+          "cycleId": "cycle_checkout",
+          "unexecutedCount": 2,
+          "requiresConfirmation": true
+        },
+        "traceId": "trace_cycle_incomplete"
+      }
+    },
+    {
+      "name": "acknowledged incomplete cycle completes with warning",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CompleteCycleResponse",
+      "expectedValid": true,
+      "payload": {
+        "cycle": {
+          "id": "cycle_checkout",
+          "name": "Checkout regression",
+          "description": "Validate the checkout release candidate.",
+          "startDate": "2026-08-21",
+          "status": "COMPLETED",
+          "scope": {"type": "WORK_ITEM", "workItemId": "work_item_checkout", "workItemKey": "WORK-466"},
+          "scopeLocked": true,
+          "resourceVersion": 3,
+          "itemCount": 1,
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T03:00:00Z",
+          "startedAt": "2026-08-20T02:00:00Z",
+          "completedAt": "2026-08-20T03:00:00Z",
+          "deletedAt": null
+        },
+        "warnings": [{"code": "INCOMPLETE_EXECUTIONS", "unexecutedCount": 2}],
+        "auditId": "audit_cycle_complete"
+      }
+    },
+    {
+      "name": "reopen requires an audit reason",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/ReopenCycleRequest",
+      "expectedValid": true,
+      "payload": {"baseResourceVersion": 3, "reason": "Verify the server-side fix.", "actorLabel": "QA Kim"}
+    },
+    {
+      "name": "progress uses latest attempts across every dimension",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CycleProgressResponse",
+      "expectedValid": true,
+      "semanticRules": ["PROGRESS_TOTALS"],
+      "payload": {
+        "cycleId": "cycle_checkout",
+        "calculatedAt": "2026-08-20T03:15:00Z",
+        "excludesPlanned": true,
+        "latestAttemptOnly": true,
+        "overall": {
+          "dimension": "OVERALL",
+          "key": "ALL",
+          "label": "All platforms",
+          "values": {
+            "counts": {"UNEXECUTED": 0, "PASS": 2, "FAIL": 1, "BLOCKED": 0, "total": 3},
+            "executedCount": 3,
+            "passRate": 0.6666666667,
+            "aggregateStatus": "FAIL"
+          }
+        },
+        "byPlatform": [
+          {
+            "dimension": "PLATFORM",
+            "key": "WEB",
+            "label": "WEB",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 1, "FAIL": 0, "BLOCKED": 0, "total": 1},
+              "executedCount": 1,
+              "passRate": 1,
+              "aggregateStatus": "PASS"
+            }
+          },
+          {
+            "dimension": "PLATFORM",
+            "key": "AOS",
+            "label": "AOS",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 0, "FAIL": 1, "BLOCKED": 0, "total": 1},
+              "executedCount": 1,
+              "passRate": 0,
+              "aggregateStatus": "FAIL"
+            }
+          },
+          {
+            "dimension": "PLATFORM",
+            "key": "IOS",
+            "label": "iOS",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 1, "FAIL": 0, "BLOCKED": 0, "total": 1},
+              "executedCount": 1,
+              "passRate": 1,
+              "aggregateStatus": "PASS"
+            }
+          }
+        ],
+        "byOwner": [
+          {
+            "dimension": "OWNER",
+            "key": "QA Kim",
+            "label": "QA Kim",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 2, "FAIL": 1, "BLOCKED": 0, "total": 3},
+              "executedCount": 3,
+              "passRate": 0.6666666667,
+              "aggregateStatus": "FAIL"
+            }
+          }
+        ],
+        "byWorkItem": [
+          {
+            "dimension": "WORK_ITEM",
+            "key": "work_item_checkout",
+            "label": "WORK-466",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 2, "FAIL": 1, "BLOCKED": 0, "total": 3},
+              "executedCount": 3,
+              "passRate": 0.6666666667,
+              "aggregateStatus": "FAIL"
+            }
+          }
+        ],
+        "byLabel": [
+          {
+            "dimension": "LABEL",
+            "key": "regression",
+            "label": "regression",
+            "values": {
+              "counts": {"UNEXECUTED": 0, "PASS": 2, "FAIL": 1, "BLOCKED": 0, "total": 3},
+              "executedCount": 3,
+              "passRate": 0.6666666667,
+              "aggregateStatus": "FAIL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "progress cannot include planned or non-latest attempts",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json#/$defs/CycleProgressResponse",
+      "expectedValid": false,
+      "payload": {
+        "cycleId": "cycle_checkout",
+        "calculatedAt": "2026-08-20T03:15:00Z",
+        "excludesPlanned": false,
+        "latestAttemptOnly": false,
+        "overall": {
+          "dimension": "OVERALL",
+          "key": "ALL",
+          "label": "All platforms",
+          "values": {
+            "counts": {"UNEXECUTED": 0, "PASS": 0, "FAIL": 0, "BLOCKED": 0, "total": 0},
+            "executedCount": 0,
+            "passRate": 0,
+            "aggregateStatus": "UNEXECUTED"
+          }
+        },
+        "byPlatform": [],
+        "byOwner": [],
+        "byWorkItem": [],
+        "byLabel": []
+      }
+    },
+    {
+      "name": "cycle transition typed error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/CycleStateTransitionError",
+      "expectedValid": true,
+      "payload": {
+        "code": "CYCLE_STATE_TRANSITION_INVALID",
+        "message": "PLANNED cannot transition directly to COMPLETED.",
+        "details": {
+          "cycleId": "cycle_checkout",
+          "currentStatus": "PLANNED",
+          "requestedStatus": "COMPLETED",
+          "allowedTransitions": ["IN_PROGRESS"]
+        },
+        "traceId": "trace_cycle_transition"
+      }
+    },
+    {
+      "name": "cursor invalid error remains typed",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-3/error-contract.schema.json#/$defs/CursorInvalidError",
+      "expectedValid": true,
+      "payload": {
+        "code": "CURSOR_INVALID",
+        "message": "Cursor does not match the supplied filter.",
+        "details": {"cursor": "cursor_cycle_checkout_bad"},
+        "traceId": "trace_cycle_cursor"
+      }
+    }
+  ]
+}

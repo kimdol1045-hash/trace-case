@@ -1,0 +1,9 @@
+{
+  "name": "@tc/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ../../scripts/python.mjs -m tc_worker.main --poll-interval 1"
+  }
+}
+

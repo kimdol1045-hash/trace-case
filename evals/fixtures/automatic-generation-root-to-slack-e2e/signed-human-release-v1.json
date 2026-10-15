@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "pe-se2-t11-human-release/1.0.0",
+  "signingSecret": "pe-se2-t11-signing-secret",
+  "workspaceId": "TPESE2T11",
+  "channelId": "CPESE2T11",
+  "rootTs": "1891000000.000100",
+  "permalink": "https://fake.slack.invalid/archives/CPESE2T11/p1891000000000100",
+  "initialEvents": [
+    {
+      "type": "event_callback",
+      "event_id": "EvPeSe2T11Root001",
+      "team_id": "TPESE2T11",
+      "event_time": 1891000000,
+      "event": {
+        "type": "message",
+        "channel": "CPESE2T11",
+        "channel_type": "channel",
+        "user": "UPESE2T11ROOT",
+        "text": "개발건: 결제 승인 회귀\n요청 메뉴: 결제 > 승인\n기능 설명: 카드 승인 실패 잠금\n요청 내용: 승인 실패 흐름을 자동 케이스로 관리한다.",
+        "ts": "1891000000.000100",
+        "event_ts": "1891000000.000100"
+      }
+    },
+    {
+      "type": "event_callback",
+      "event_id": "EvPeSe2T11Reply001",
+      "team_id": "TPESE2T11",
+      "event_time": 1891000001,
+      "event": {
+        "type": "message",
+        "channel": "CPESE2T11",
+        "channel_type": "channel",
+        "user": "UPESE2T11REPLY",
+        "text": "결제 승인은 실패 잠금 정책을 따라야 한다.",
+        "ts": "1891000001.000100",
+        "thread_ts": "1891000000.000100",
+        "event_ts": "1891000001.000100"
+      }
+    }
+  ],
+  "semanticChangeEvent": {
+    "type": "event_callback",
+    "event_id": "EvPeSe2T11RootChanged001",
+    "team_id": "TPESE2T11",
+    "event_time": 1891000010,
+    "event": {
+      "type": "message",
+      "subtype": "message_changed",
+      "hidden": true,
+      "channel": "CPESE2T11",
+      "channel_type": "channel",
+      "ts": "1891000010.000100",
+      "event_ts": "1891000010.000100",
+      "message": {
+        "type": "message",
+        "user": "UPESE2T11ROOT",
+        "text": "개발건: 결제 승인 회귀\n요청 메뉴: 결제 > 승인\n기능 설명: 카드 승인 실패 잠금\n요청 내용: 승인 실패가 5회면 계정을 잠그고 감사 사유를 기록한다.",
+        "ts": "1891000000.000100",
+        "edited": {
+          "user": "UPESE2T11ROOT",
+          "ts": "1891000010.000100"
+        }
+      },
+      "previous_message": {
+        "type": "message",
+        "user": "UPESE2T11ROOT",
+        "text": "개발건: 결제 승인 회귀\n요청 메뉴: 결제 > 승인\n기능 설명: 카드 승인 실패 잠금\n요청 내용: 승인 실패 흐름을 자동 케이스로 관리한다.",
+        "ts": "1891000000.000100"
+      }
+    }
+  }
+}

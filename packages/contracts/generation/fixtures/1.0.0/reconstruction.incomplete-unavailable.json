@@ -1,0 +1,27 @@
+{
+  "reconstructionSchemaVersion": "1.0.0",
+  "jobId": "generation_job_incomplete_001",
+  "availability": "UNAVAILABLE",
+  "reason": "SEALED_INPUT_INCOMPLETE",
+  "recordedInputSchemaVersion": "1.0.0",
+  "input": null,
+  "provenance": {
+    "sealedContextDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "sealedAt": "2026-08-26T02:00:00Z",
+    "inputDigest": null
+  },
+  "policy": {
+    "sourceBasis": "SEALED_GENERATION_INPUT",
+    "readOnly": true,
+    "sealedSnapshotsOnly": true,
+    "liveSlackConsulted": false,
+    "liveKnowledgeConsulted": false,
+    "liveCasesConsulted": false,
+    "liveIssuesConsulted": false,
+    "liveCategoriesConsulted": false,
+    "providerCallAttempted": false,
+    "mutationPerformed": false,
+    "arrayOrderPreserved": true,
+    "nullEmptyDistinctionsPreserved": true
+  }
+}

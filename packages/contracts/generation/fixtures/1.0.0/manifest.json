@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "description": "Synthetic Generation API and reconstruction 1.0.0 fixtures. No production Slack, QA, issue or provider data is present.",
+  "input": "input.full-context.json",
+  "output": "output.grounded.json",
+  "reconstruction": {
+    "available": "reconstruction.available.json",
+    "legacy": "reconstruction.legacy-unavailable.json",
+    "incomplete": "reconstruction.incomplete-unavailable.json",
+    "unsupportedVersion": "reconstruction.unsupported-version.json"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@tc/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json",
+    "test:unit": "vitest run"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.10",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "@types/react-dom": "19.1.7"
+  }
+}
+

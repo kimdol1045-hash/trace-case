@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-2/error-contract.schema.json",
+  "title": "Sprint 2 test case API error contract",
+  "description": "Strict test case error payloads. Shared Sprint 1 error shapes, especially VERSION_CONFLICT, remain the canonical backward-compatible definitions.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "TestCaseId": {
+      "type": "string",
+      "pattern": "^case_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "WorkItemId": {
+      "type": "string",
+      "pattern": "^work_item_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "ValidationError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/ValidationError"
+    },
+    "ResourceNotFoundError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"
+    },
+    "VersionConflictError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/VersionConflictError"
+    },
+    "IdempotencyConflictError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"
+    },
+    "KeyAllocationError": {
+      "$ref": "../sprint-1/error-contract.schema.json#/$defs/KeyAllocationError"
+    },
+    "LabelConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "LABEL_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["labels", "normalizedLabel"],
+              "properties": {
+                "labels": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 50,
+                  "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}
+                },
+                "normalizedLabel": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ExpectedResultModeError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "EXPECTED_RESULT_MODE_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["expectedResultMode", "sourceType"],
+              "properties": {
+                "expectedResultMode": {"$ref": "../state-enums.schema.json#/$defs/ExpectedResultMode"},
+                "sourceType": {"$ref": "../state-enums.schema.json#/$defs/TestCaseVersionSourceType"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TestCaseMutationConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "TEST_CASE_MOVE_CONFLICT",
+                "TEST_CASE_COPY_CONFLICT",
+                "TEST_CASE_RESTORE_CONFLICT",
+                "TEST_CASE_ALREADY_DELETED",
+                "TEST_CASE_NOT_DELETED"
+              ]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["testCaseId"],
+              "properties": {
+                "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+                "targetWorkItemId": {"$ref": "#/$defs/WorkItemId"},
+                "sourceVersion": {"type": "integer", "minimum": 1},
+                "deletedAt": {"type": "string", "format": "date-time"},
+                "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CursorInvalidError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "CURSOR_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cursor"],
+              "properties": {
+                "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "PermanentDeleteConflictError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "PERMANENT_DELETE_CONFLICT"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resourceType", "resourceId", "reason", "references"],
+              "properties": {
+                "resourceType": {"type": "string", "enum": ["TEST_CASE", "TEST_CYCLE", "ISSUE"]},
+                "resourceId": {"type": "string", "pattern": "^(case|cycle|issue)_[A-Za-z0-9_-]+$", "maxLength": 128},
+                "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+                "references": {
+                  "type": "object",
+                  "additionalProperties": {"type": "integer", "minimum": 1}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ErrorResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/ValidationError"},
+        {"$ref": "#/$defs/ResourceNotFoundError"},
+        {"$ref": "#/$defs/VersionConflictError"},
+        {"$ref": "#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/KeyAllocationError"},
+        {"$ref": "#/$defs/LabelConflictError"},
+        {"$ref": "#/$defs/ExpectedResultModeError"},
+        {"$ref": "#/$defs/TestCaseMutationConflictError"},
+        {"$ref": "#/$defs/CursorInvalidError"},
+        {"$ref": "#/$defs/PermanentDeleteConflictError"}
+      ]
+    }
+  }
+}

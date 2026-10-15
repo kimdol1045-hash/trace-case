@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/suggestion/1.0.0/schema.json",
+  "title": "Generation suggestion provider exchange 1.0.0",
+  "description": "A separate provider-neutral exchange for proposing updates to released generated cases. The provider may only echo an opaque server-issued suggestionTargetRef; it cannot select a case by ID, similarity, candidate index, or claimed lineage.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "SuggestionTargetRef": {
+      "type": "string",
+      "minLength": 61,
+      "maxLength": 157,
+      "pattern": "^generation_suggestion_target_[A-Za-z0-9_-]{32,128}$",
+      "description": "Opaque, single-job reference issued and persisted by the trusted server. Echoing it is a nomination, never overwrite authority."
+    },
+    "SuggestionTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suggestionTargetRef",
+        "testCaseId",
+        "testCaseVersionId",
+        "generationLineageId",
+        "targetDigest"
+      ],
+      "properties": {
+        "suggestionTargetRef": {"$ref": "#/$defs/SuggestionTargetRef"},
+        "testCaseId": {
+          "type": "string",
+          "pattern": "^case_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "testCaseVersionId": {
+          "type": "string",
+          "pattern": "^case_version_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "generationLineageId": {
+          "type": "string",
+          "pattern": "^generation_lineage_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "targetDigest": {"$ref": "#/$defs/Sha256Hex"}
+      },
+      "description": "The visible IDs help the provider relate this target to baseGenerationInput.existingCases. Only suggestionTargetRef is accepted back."
+    },
+    "GenerationSuggestionInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSchemaVersion",
+        "requestedOutputSchemaVersion",
+        "generationJobId",
+        "generationChangeAssessmentId",
+        "baseGenerationInput",
+        "suggestionTargets"
+      ],
+      "properties": {
+        "inputSchemaVersion": {"const": "generation-suggestion/1.0.0"},
+        "requestedOutputSchemaVersion": {"const": "generation-suggestion/1.0.0"},
+        "generationJobId": {
+          "type": "string",
+          "pattern": "^generation_job_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "generationChangeAssessmentId": {
+          "type": "string",
+          "pattern": "^generation_change_assessment_[A-Za-z0-9_-]+$",
+          "maxLength": 160
+        },
+        "baseGenerationInput": {
+          "$ref": "https://qa-tool.local/schemas/generation/input/1.0.0/schema.json"
+        },
+        "suggestionTargets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SuggestionTarget"}
+        }
+      }
+    },
+    "GeneratedSuggestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["suggestionTargetRef", "candidate"],
+      "properties": {
+        "suggestionTargetRef": {"$ref": "#/$defs/SuggestionTargetRef"},
+        "candidate": {
+          "$ref": "https://qa-tool.local/schemas/generation/output/1.0.0/schema.json#/$defs/GeneratedTestCase"
+        }
+      }
+    },
+    "GenerationSuggestionOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputSchemaVersion", "suggestions"],
+      "properties": {
+        "outputSchemaVersion": {"const": "generation-suggestion/1.0.0"},
+        "suggestions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/GeneratedSuggestion"}
+        }
+      }
+    }
+  }
+}

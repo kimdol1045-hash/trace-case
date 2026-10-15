@@ -1,0 +1,673 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-4/issue-api.schema.json",
+  "title": "Sprint 4 internal issue API payloads",
+  "description": "Strict public contracts for issue CRUD, deleted-detail reads, restore and permanent deletion, execution-attempt snapshot creation, cycle filters, many-to-many case/item/attempt links, comments and immutable history. Consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "IssueId": {
+      "type": "string",
+      "pattern": "^issue_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "IssueKey": {
+      "type": "string",
+      "pattern": "^ISSUE-[1-9][0-9]*$",
+      "maxLength": 32
+    },
+    "IssueLinkId": {
+      "type": "string",
+      "pattern": "^issue_link_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "IssueCommentId": {
+      "type": "string",
+      "pattern": "^issue_comment_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "IssueHistoryId": {
+      "type": "string",
+      "pattern": "^issue_history_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "AttachmentId": {
+      "type": "string",
+      "pattern": "^attachment_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/TestCaseId"
+    },
+    "TestCaseVersionId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/TestCaseVersionId"
+    },
+    "CycleId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/CycleId"
+    },
+    "CycleItemId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/CycleItemId"
+    },
+    "ExecutionAttemptId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/ExecutionAttemptId"
+    },
+    "AuditId": {
+      "$ref": "../sprint-3/cycle-execution-api.schema.json#/$defs/AuditId"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "Summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "LongText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "DisplayLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "NullableDisplayLabel": {
+      "oneOf": [
+        {"$ref": "#/$defs/DisplayLabel"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "NullableNonBlankString": {
+      "oneOf": [
+        {"$ref": "#/$defs/NonBlankString"},
+        {"type": "null"}
+      ]
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "The canonical value of the Idempotency-Key request header. Reuse with a different normalized payload returns IDEMPOTENCY_CONFLICT."
+    },
+    "IssueStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action", "expectedResult"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "action": {"$ref": "#/$defs/LongText"},
+        "expectedResult": {"$ref": "#/$defs/LongText"}
+      }
+    },
+    "IssueSteps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {"$ref": "#/$defs/IssueStep"},
+      "description": "sequence values are unique and contiguous from 1; semantic fixtures make the rule normative."
+    },
+    "ExecutionIssueSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAttemptId",
+        "sourceAttemptStatus",
+        "cycleId",
+        "cycleItemId",
+        "testCaseId",
+        "pinnedVersionId",
+        "pinnedVersion",
+        "platform",
+        "summary",
+        "precondition",
+        "steps",
+        "expectedResult",
+        "actualResult",
+        "note",
+        "attachmentIds",
+        "capturedAt"
+      ],
+      "properties": {
+        "sourceAttemptId": {"$ref": "#/$defs/ExecutionAttemptId"},
+        "sourceAttemptStatus": {"type": "string", "enum": ["FAIL", "BLOCKED"]},
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "cycleItemId": {"$ref": "#/$defs/CycleItemId"},
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "pinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "pinnedVersion": {"type": "integer", "minimum": 1},
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/LongText"},
+        "steps": {"$ref": "#/$defs/IssueSteps"},
+        "expectedResult": {"$ref": "#/$defs/LongText"},
+        "actualResult": {"$ref": "#/$defs/LongText"},
+        "note": {"$ref": "#/$defs/NullableNonBlankString"},
+        "attachmentIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/AttachmentId"}
+        },
+        "capturedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Server-captured immutable reproduction data. It is copied from the attempt's pinned case version and terminal actual result; later library or attempt changes never rewrite it."
+    },
+    "ManualIssueOrigin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {"type": {"const": "MANUAL"}}
+    },
+    "ExecutionAttemptIssueOrigin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "executionAttemptId"],
+      "properties": {
+        "type": {"const": "EXECUTION_ATTEMPT"},
+        "executionAttemptId": {"$ref": "#/$defs/ExecutionAttemptId"}
+      }
+    },
+    "IssueOrigin": {
+      "oneOf": [
+        {"$ref": "#/$defs/ManualIssueOrigin"},
+        {"$ref": "#/$defs/ExecutionAttemptIssueOrigin"}
+      ]
+    },
+    "IssueStatusTransition": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "OPEN"}, "to": {"const": "IN_PROGRESS"}}},
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "IN_PROGRESS"}, "to": {"const": "RESOLVED"}}},
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "RESOLVED"}, "to": {"const": "CLOSED"}}},
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "RESOLVED"}, "to": {"const": "REOPENED"}}},
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "CLOSED"}, "to": {"const": "REOPENED"}}},
+        {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"const": "REOPENED"}, "to": {"const": "IN_PROGRESS"}}}
+      ],
+      "description": "Canonical forward triage flow with explicit reopen edges; clients cannot skip directly from OPEN to RESOLVED or CLOSED."
+    },
+    "IssueResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "summary",
+        "precondition",
+        "steps",
+        "expectedResult",
+        "actualResult",
+        "status",
+        "severity",
+        "assigneeLabel",
+        "origin",
+        "reproductionSnapshot",
+        "resourceVersion",
+        "createdAt",
+        "updatedAt",
+        "deletedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/IssueId"},
+        "key": {"$ref": "#/$defs/IssueKey"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/LongText"},
+        "steps": {"$ref": "#/$defs/IssueSteps"},
+        "expectedResult": {"$ref": "#/$defs/LongText"},
+        "actualResult": {"$ref": "#/$defs/LongText"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"},
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "assigneeLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "origin": {"$ref": "#/$defs/IssueOrigin"},
+        "reproductionSnapshot": {
+          "oneOf": [
+            {"$ref": "#/$defs/ExecutionIssueSnapshot"},
+            {"type": "null"}
+          ]
+        },
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {"$ref": "#/$defs/NullableDateTime"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "required": ["origin"],
+            "properties": {"origin": {"type": "object", "required": ["type"], "properties": {"type": {"const": "MANUAL"}}}}
+          },
+          "then": {"type": "object", "required": ["reproductionSnapshot"], "properties": {"reproductionSnapshot": {"type": "null"}}}
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["origin"],
+            "properties": {"origin": {"type": "object", "required": ["type"], "properties": {"type": {"const": "EXECUTION_ATTEMPT"}}}}
+          },
+          "then": {"type": "object", "required": ["reproductionSnapshot"], "properties": {"reproductionSnapshot": {"$ref": "#/$defs/ExecutionIssueSnapshot"}}}
+        }
+      ]
+    },
+    "CreateIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "summary", "precondition", "steps", "expectedResult", "actualResult", "severity"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/LongText"},
+        "steps": {"$ref": "#/$defs/IssueSteps"},
+        "expectedResult": {"$ref": "#/$defs/LongText"},
+        "actualResult": {"$ref": "#/$defs/LongText"},
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "assigneeLabel": {"$ref": "#/$defs/DisplayLabel"},
+        "initialLinks": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 200,
+          "items": {"$ref": "#/$defs/IssueLinkTarget"}
+        }
+      },
+      "description": "Manual creation always produces OPEN with resourceVersion 1. The Idempotency-Key value is part of this normalized wire contract."
+    },
+    "CreateIssueResponse": {
+      "allOf": [
+        {"$ref": "#/$defs/IssueResource"},
+        {
+          "type": "object",
+          "required": ["status", "origin", "reproductionSnapshot", "resourceVersion", "deletedAt"],
+          "properties": {
+            "status": {"const": "OPEN"},
+            "origin": {"$ref": "#/$defs/ManualIssueOrigin"},
+            "reproductionSnapshot": {"type": "null"},
+            "resourceVersion": {"const": 1},
+            "deletedAt": {"type": "null"}
+          }
+        }
+      ]
+    },
+    "CreateIssueFromExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "severity"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "assigneeLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "description": "The attemptId is supplied by the route. Only terminal FAIL or BLOCKED attempts are eligible. Snapshot fields are server-owned and cannot be supplied or overridden by clients."
+    },
+    "CreateIssueFromExecutionAttemptResponse": {
+      "allOf": [
+        {"$ref": "#/$defs/IssueResource"},
+        {
+          "type": "object",
+          "required": ["status", "origin", "reproductionSnapshot", "resourceVersion", "deletedAt"],
+          "properties": {
+            "status": {"const": "OPEN"},
+            "origin": {"$ref": "#/$defs/ExecutionAttemptIssueOrigin"},
+            "reproductionSnapshot": {"$ref": "#/$defs/ExecutionIssueSnapshot"},
+            "resourceVersion": {"const": 1},
+            "deletedAt": {"type": "null"}
+          }
+        }
+      ],
+      "description": "Creates the issue, immutable reproduction snapshot and test-case/cycle-item/attempt links atomically."
+    },
+    "IssueListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "statuses": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"}},
+        "severities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"}},
+        "cycleIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/CycleId"}},
+        "testCaseIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/TestCaseId"}},
+        "cycleItemIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/CycleItemId"}},
+        "executionAttemptIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ExecutionAttemptId"}},
+        "assigneeLabels": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/DisplayLabel"}},
+        "includeDeleted": {"type": "boolean", "default": false},
+        "deletedOnly": {"type": "boolean", "default": false},
+        "sort": {"type": "string", "enum": ["UPDATED_AT_DESC", "UPDATED_AT_ASC", "SEVERITY_DESC", "KEY_ASC"], "default": "UPDATED_AT_DESC"},
+        "cursor": {"$ref": "#/$defs/Cursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "Different supplied filters are ANDed; members within an array are ORed. deletedOnly selects only soft-deleted rows and takes precedence over includeDeleted. cycleIds match any linked cycle through cycle-item or attempt links. Cursor identity includes normalized filters and sort."
+    },
+    "IssueListItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "key", "summary", "status", "severity", "assigneeLabel", "linkedCycleIds", "resourceVersion", "updatedAt", "deletedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/IssueId"},
+        "key": {"$ref": "#/$defs/IssueKey"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"},
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "assigneeLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "linkedCycleIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/CycleId"}},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "ListIssuesResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/IssueListItem"}},
+        "nextCursor": {"oneOf": [{"$ref": "#/$defs/Cursor"}, {"type": "null"}]},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "GetIssueResponse": {"$ref": "#/$defs/IssueResource"},
+    "UpdateIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 2,
+      "required": ["baseResourceVersion"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/LongText"},
+        "steps": {"$ref": "#/$defs/IssueSteps"},
+        "expectedResult": {"$ref": "#/$defs/LongText"},
+        "actualResult": {"$ref": "#/$defs/LongText"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/IssueStatus"},
+        "severity": {"$ref": "../state-enums.schema.json#/$defs/IssueSeverity"},
+        "assigneeLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      },
+      "description": "Optimistic concurrency uses baseResourceVersion. origin and reproductionSnapshot are immutable and cannot be included. Status follows the canonical OPEN → IN_PROGRESS → RESOLVED → CLOSED and REOPENED transitions."
+    },
+    "UpdateIssueResponse": {"$ref": "#/$defs/IssueResource"},
+    "DeleteIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      },
+      "description": "Soft-deletes the issue while preserving attempt, case, item, comment and history links."
+    },
+    "DeleteIssueResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "issueId", "resourceVersion", "deletedAt", "auditId"],
+      "properties": {
+        "operation": {"const": "SOFT_DELETE"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "resourceVersion": {"type": "integer", "minimum": 2},
+        "deletedAt": {"type": "string", "format": "date-time"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "RestoreIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      }
+    },
+    "RestoreIssueResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "issue", "auditId"],
+      "properties": {
+        "operation": {"const": "RESTORE"},
+        "issue": {"$ref": "#/$defs/IssueResource"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "PermanentDeleteIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      },
+      "description": "Permanently deletes only a previously soft-deleted issue after fail-closed attachment object deletion."
+    },
+    "PermanentDeleteIssueResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "issueId", "deletedAttachmentCount", "auditId"],
+      "properties": {
+        "operation": {"const": "PERMANENT_DELETE"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "deletedAttachmentCount": {"type": "integer", "minimum": 0},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "TestCaseIssueLinkTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "testCaseId"],
+      "properties": {"type": {"const": "TEST_CASE"}, "testCaseId": {"$ref": "#/$defs/TestCaseId"}}
+    },
+    "CycleItemIssueLinkTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "cycleItemId"],
+      "properties": {"type": {"const": "CYCLE_ITEM"}, "cycleItemId": {"$ref": "#/$defs/CycleItemId"}}
+    },
+    "ExecutionAttemptIssueLinkTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "executionAttemptId"],
+      "properties": {"type": {"const": "EXECUTION_ATTEMPT"}, "executionAttemptId": {"$ref": "#/$defs/ExecutionAttemptId"}}
+    },
+    "IssueLinkTarget": {
+      "oneOf": [
+        {"$ref": "#/$defs/TestCaseIssueLinkTarget"},
+        {"$ref": "#/$defs/CycleItemIssueLinkTarget"},
+        {"$ref": "#/$defs/ExecutionAttemptIssueLinkTarget"}
+      ]
+    },
+    "IssueLinkResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "issueId", "target", "createdByLabel", "createdAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/IssueLinkId"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "target": {"$ref": "#/$defs/IssueLinkTarget"},
+        "createdByLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "CreateIssueLinkRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "target"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "target": {"$ref": "#/$defs/IssueLinkTarget"}
+      }
+    },
+    "CreateIssueLinkResponse": {"$ref": "#/$defs/IssueLinkResource"},
+    "IssueLinkListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "targetTypes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["TEST_CASE", "CYCLE_ITEM", "EXECUTION_ATTEMPT"]}},
+        "includeDeleted": {"type": "boolean", "default": false},
+        "cursor": {"$ref": "#/$defs/Cursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      }
+    },
+    "IssueLinkPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/IssueLinkResource"}},
+        "nextCursor": {"oneOf": [{"$ref": "#/$defs/Cursor"}, {"type": "null"}]},
+        "total": {"type": "integer", "minimum": 0}
+      },
+      "description": "The relation ledger is many-to-many: each issue and each test case, cycle item or attempt may participate in multiple preserved links."
+    },
+    "DeleteIssueLinkRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseIssueResourceVersion", "reason"],
+      "properties": {
+        "baseIssueResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      }
+    },
+    "DeleteIssueLinkResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "issueId", "issueLinkId", "issueResourceVersion", "deletedAt", "auditId"],
+      "properties": {
+        "operation": {"const": "UNLINK"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "issueLinkId": {"$ref": "#/$defs/IssueLinkId"},
+        "issueResourceVersion": {"type": "integer", "minimum": 2},
+        "deletedAt": {"type": "string", "format": "date-time"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "IssueCommentResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "issueId", "body", "authorLabel", "createdAt", "editedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/IssueCommentId"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "body": {"$ref": "#/$defs/LongText"},
+        "authorLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "editedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "CreateIssueCommentRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "body"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "body": {"$ref": "#/$defs/LongText"}
+      }
+    },
+    "CreateIssueCommentResponse": {"$ref": "#/$defs/IssueCommentResource"},
+    "IssueCommentListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "includeDeleted": {"type": "boolean", "default": false},
+        "cursor": {"$ref": "#/$defs/Cursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "Stable order is createdAt then comment ID; cursor identity includes issue ID."
+    },
+    "IssueCommentPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/IssueCommentResource"}},
+        "nextCursor": {"oneOf": [{"$ref": "#/$defs/Cursor"}, {"type": "null"}]},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "HistoryValue": {
+      "oneOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      ]
+    },
+    "IssueHistoryChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "before", "after"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[A-Za-z][A-Za-z0-9.]*$"},
+        "before": {"$ref": "#/$defs/HistoryValue"},
+        "after": {"$ref": "#/$defs/HistoryValue"}
+      }
+    },
+    "IssueHistoryEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "issueId", "eventType", "actorLabel", "changes", "relatedResourceId", "occurredAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/IssueHistoryId"},
+        "issueId": {"$ref": "#/$defs/IssueId"},
+        "eventType": {"type": "string", "enum": ["CREATED", "UPDATED", "STATUS_CHANGED", "LINK_ADDED", "LINK_REMOVED", "COMMENT_ADDED", "ATTACHMENT_ADDED", "ATTACHMENT_DELETED", "DELETED"]},
+        "actorLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "changes": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/IssueHistoryChange"}},
+        "relatedResourceId": {"oneOf": [{"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S"}, {"type": "null"}]},
+        "occurredAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Append-only issue ledger event. Closing or deleting an issue never erases its link, comment or history events."
+    },
+    "IssueHistoryQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventTypes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["CREATED", "UPDATED", "STATUS_CHANGED", "LINK_ADDED", "LINK_REMOVED", "COMMENT_ADDED", "ATTACHMENT_ADDED", "ATTACHMENT_DELETED", "DELETED"]}},
+        "includeDeleted": {"type": "boolean", "default": false},
+        "cursor": {"$ref": "#/$defs/Cursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      }
+    },
+    "IssueHistoryPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/IssueHistoryEvent"}},
+        "nextCursor": {"oneOf": [{"$ref": "#/$defs/Cursor"}, {"type": "null"}]},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "IssueSnapshotImmutabilityProof": {
+      "$comment": "Synthetic semantic-test carrier, not an HTTP endpoint payload.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshotAtCreation", "snapshotAfterSourceMutation", "mutatedSource"],
+      "properties": {
+        "snapshotAtCreation": {"$ref": "#/$defs/ExecutionIssueSnapshot"},
+        "snapshotAfterSourceMutation": {"$ref": "#/$defs/ExecutionIssueSnapshot"},
+        "mutatedSource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "actualResult", "changedAt"],
+          "properties": {
+            "summary": {"$ref": "#/$defs/Summary"},
+            "actualResult": {"$ref": "#/$defs/LongText"},
+            "changedAt": {"type": "string", "format": "date-time"}
+          }
+        }
+      }
+    }
+  }
+}

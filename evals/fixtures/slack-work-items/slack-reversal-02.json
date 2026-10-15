@@ -1,0 +1,65 @@
+{
+  "fixtureId": "slack-reversal-02",
+  "synthetic": true,
+  "category": "REVERSAL",
+  "description": "로그인 실패 잠금 횟수를 3회에서 5회로 번복한 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787220000.000008",
+      "messageRevisionId": "rev_r02_root",
+      "authorId": "U_SYN_014",
+      "body": "[일감]\n개발건: 로그인 잠금 정책 적용\n요청 메뉴: 회원 > 로그인\n기능 설명: 반복 로그인 실패 시 계정을 보호한다.\n요청내용: 비밀번호 3회 실패 시 계정을 잠근다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787220000000008",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787220060.000008",
+        "messageRevisionId": "rev_r02_reply_01",
+        "authorId": "U_SYN_015",
+        "body": "고객지원 부담을 반영해 3회안은 철회하고 5회 실패 시 잠금으로 변경 확정합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787220060000008",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "로그인 잠금 정책 적용",
+      "requestedMenu": "회원 > 로그인",
+      "featureDescription": "반복 로그인 실패 시 계정을 보호한다.",
+      "requestDetails": "비밀번호 5회 실패 시 계정을 잠근다.",
+      "missingFields": [],
+      "confidence": 0.99,
+      "sourceMessageRevisions": ["rev_r02_root", "rev_r02_reply_01"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_r02_three",
+        "nodeType": "DECISION",
+        "content": "비밀번호 3회 실패 시 계정을 잠근다.",
+        "status": "SUPERSEDED",
+        "evidenceSourceMessageRevisions": ["rev_r02_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "thread의 변경 확정으로 대체되었다."
+      },
+      {
+        "knowledgeId": "knowledge_r02_five",
+        "nodeType": "DECISION",
+        "content": "비밀번호 5회 실패 시 계정을 잠근다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_r02_reply_01"],
+        "supersedesKnowledgeIds": ["knowledge_r02_three"],
+        "reason": "이전 횟수를 철회하고 새 횟수를 변경 확정했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_r02_five"],
+      "excludedKnowledgeIds": ["knowledge_r02_three"],
+      "openQuestions": []
+    }
+  }
+}

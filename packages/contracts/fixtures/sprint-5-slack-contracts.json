@@ -1,0 +1,676 @@
+{
+  "synthetic": true,
+  "description": "Synthetic Sprint 5 Slack ingress, ledger, access, revision, parsing, synchronization and job examples only. No production workspace, channel, message or credential data is present.",
+  "cases": [
+    {
+      "name": "Slack URL verification request accepts the exact ingress wire",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/SlackUrlVerificationRequest",
+      "expectedValid": true,
+      "payload": {
+        "token": "synthetic-ingress-verification-value",
+        "challenge": "synthetic-challenge-001",
+        "type": "url_verification"
+      }
+    },
+    {
+      "name": "URL verification response rejects every non-challenge field",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/SlackUrlVerificationResponse",
+      "expectedValid": false,
+      "payload": {
+        "challenge": "synthetic-challenge-001",
+        "unexpectedField": "forbidden-response-field"
+      }
+    },
+    {
+      "name": "HTTP verification records bounded timestamp skew without raw authentication material",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/SlackHttpVerificationResult",
+      "expectedValid": true,
+      "payload": {
+        "authenticated": true,
+        "signatureVersion": "v0",
+        "requestTimestamp": 1787270400,
+        "receivedAt": "2026-08-21T00:00:03Z",
+        "timestampSkewSeconds": 3,
+        "maximumSkewSeconds": 300
+      }
+    },
+    {
+      "name": "HTTP verification rejects requests older than five minutes",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/SlackHttpVerificationResult",
+      "expectedValid": false,
+      "payload": {
+        "authenticated": true,
+        "signatureVersion": "v0",
+        "requestTimestamp": 1787270000,
+        "receivedAt": "2026-08-21T00:06:00Z",
+        "timestampSkewSeconds": 360,
+        "maximumSkewSeconds": 300
+      }
+    },
+    {
+      "name": "event_callback envelope carries a strict root message event",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/SlackEventCallbackEnvelope",
+      "expectedValid": true,
+      "payload": {
+        "token": "synthetic-ingress-verification-value",
+        "team_id": "TABCDE1",
+        "api_app_id": "AABCDE1",
+        "event": {
+          "type": "message",
+          "user": "UABCDE1",
+          "text": "비밀번호 재설정 화면 개선 요청",
+          "ts": "1787270400.000001",
+          "event_ts": "1787270400.000001",
+          "channel": "CABCDE1",
+          "channel_type": "channel"
+        },
+        "type": "event_callback",
+        "event_id": "EvROOT001",
+        "event_time": 1787270400,
+        "event_context": "synthetic-event-context",
+        "authorizations": [
+          {
+            "enterprise_id": null,
+            "team_id": "TABCDE1",
+            "user_id": "UAPPBOT1",
+            "is_bot": true,
+            "is_enterprise_install": false
+          }
+        ],
+        "is_ext_shared_channel": false,
+        "context_team_id": "TABCDE1",
+        "context_enterprise_id": null
+      }
+    },
+    {
+      "name": "normalized root pins thread identity",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json#/$defs/NormalizedRootMessageEvent",
+      "expectedValid": true,
+      "semanticRules": ["ROOT_THREAD_IDENTITY"],
+      "payload": {
+        "eventId": "EvROOT001",
+        "workspaceId": "TABCDE1",
+        "channelId": "CABCDE1",
+        "messageTs": "1787270400.000001",
+        "threadTs": "1787270400.000001",
+        "action": "ROOT",
+        "position": "ROOT",
+        "authorId": "UABCDE1",
+        "text": "비밀번호 재설정 화면 개선 요청",
+        "sourceEventTime": 1787270400,
+        "occurredAt": "2026-08-21T00:00:00Z",
+        "normalizedAt": "2026-08-21T00:00:01Z"
+      }
+    },
+    {
+      "name": "private channel is denied by default",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackChannelAccessResource",
+      "expectedValid": true,
+      "semanticRules": ["PRIVATE_DEFAULT_DENY"],
+      "payload": {
+        "workspaceId": "TABCDE1",
+        "channelId": "GPRIVATE1",
+        "channelName": "release-private",
+        "visibility": "PRIVATE",
+        "collectionAllowed": false,
+        "policySource": "PRIVATE_DEFAULT_DENY",
+        "appMembership": "UNKNOWN",
+        "updatedAt": "2026-08-21T00:01:00Z"
+      }
+    },
+    {
+      "name": "private allowlist entry requires whole-team confirmation",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackAllowlistChannelInput",
+      "expectedValid": false,
+      "payload": {
+        "channelId": "GPRIVATE1",
+        "visibility": "PRIVATE"
+      }
+    },
+    {
+      "name": "allowlist update rejects duplicate channel identities",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/UpdateSlackAllowlistRequest",
+      "expectedValid": false,
+      "semanticRules": ["UNIQUE_ALLOWLIST_CHANNELS"],
+      "payload": {
+        "idempotencyKey": "slack-allowlist-0001",
+        "workspaceId": "TABCDE1",
+        "expectedVersion": 1,
+        "channels": [
+          {"channelId": "CABCDE1", "visibility": "PUBLIC"},
+          {"channelId": "CABCDE1", "visibility": "PUBLIC"}
+        ]
+      }
+    },
+    {
+      "name": "same event delivered three times creates one ledger item work item and job",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/EventDeliveryReplayProof",
+      "expectedValid": true,
+      "semanticRules": ["EVENT_ID_REPLAY"],
+      "payload": {
+        "eventId": "EvREPLAY1",
+        "deliveries": [
+          {
+            "attempt": 1,
+            "ack": {
+              "httpStatus": 200,
+              "acknowledged": true,
+              "outcome": "ACCEPTED",
+              "eventLogId": "slack_event_replay_1",
+              "duplicateOfEventLogId": null,
+              "ignoredReason": null,
+              "enqueuedJobIds": ["slack_job_replay_1"]
+            }
+          },
+          {
+            "attempt": 2,
+            "ack": {
+              "httpStatus": 200,
+              "acknowledged": true,
+              "outcome": "DUPLICATE_EVENT_ID",
+              "eventLogId": null,
+              "duplicateOfEventLogId": "slack_event_replay_1",
+              "ignoredReason": null,
+              "enqueuedJobIds": []
+            }
+          },
+          {
+            "attempt": 3,
+            "ack": {
+              "httpStatus": 200,
+              "acknowledged": true,
+              "outcome": "DUPLICATE_EVENT_ID",
+              "eventLogId": null,
+              "duplicateOfEventLogId": "slack_event_replay_1",
+              "ignoredReason": null,
+              "enqueuedJobIds": []
+            }
+          }
+        ],
+        "eventLogIds": ["slack_event_replay_1"],
+        "workItemIds": ["slack_work_item_replay_1"],
+        "jobIds": ["slack_job_replay_1"]
+      }
+    },
+    {
+      "name": "workspace channel timestamp duplicate uses message identity fallback",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/MessageIdentityDedupProof",
+      "expectedValid": true,
+      "semanticRules": ["MESSAGE_IDENTITY_DEDUP"],
+      "payload": {
+        "events": [
+          {
+            "eventId": "EvIDENTITY1",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270460.000001",
+            "threadTs": "1787270460.000001",
+            "action": "ROOT",
+            "position": "ROOT",
+            "authorId": "UABCDE1",
+            "text": "중복 방지 테스트",
+            "sourceEventTime": 1787270460,
+            "occurredAt": "2026-08-21T00:01:00Z",
+            "normalizedAt": "2026-08-21T00:01:01Z"
+          },
+          {
+            "eventId": "EvIDENTITY2",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270460.000001",
+            "threadTs": "1787270460.000001",
+            "action": "ROOT",
+            "position": "ROOT",
+            "authorId": "UABCDE1",
+            "text": "중복 방지 테스트",
+            "sourceEventTime": 1787270460,
+            "occurredAt": "2026-08-21T00:01:00Z",
+            "normalizedAt": "2026-08-21T00:01:02Z"
+          }
+        ],
+        "acks": [
+          {
+            "httpStatus": 200,
+            "acknowledged": true,
+            "outcome": "ACCEPTED",
+            "eventLogId": "slack_event_identity_1",
+            "duplicateOfEventLogId": null,
+            "ignoredReason": null,
+            "enqueuedJobIds": ["slack_job_identity_1"]
+          },
+          {
+            "httpStatus": 200,
+            "acknowledged": true,
+            "outcome": "DUPLICATE_MESSAGE_IDENTITY",
+            "eventLogId": null,
+            "duplicateOfEventLogId": "slack_event_identity_1",
+            "ignoredReason": null,
+            "enqueuedJobIds": []
+          }
+        ],
+        "revisionIds": ["slack_revision_identity_1"],
+        "jobIds": ["slack_job_identity_1"]
+      }
+    },
+    {
+      "name": "reply arriving before root is reconciled into one complete thread",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/ReplyBeforeRootProof",
+      "expectedValid": true,
+      "semanticRules": ["REPLY_BEFORE_ROOT"],
+      "payload": {
+        "arrivalEvents": [
+          {
+            "eventId": "EvREPLYFIRST1",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270525.000002",
+            "threadTs": "1787270520.000001",
+            "action": "REPLY",
+            "position": "REPLY",
+            "authorId": "UABCDE2",
+            "text": "상세 조건을 먼저 남깁니다.",
+            "sourceEventTime": 1787270525,
+            "occurredAt": "2026-08-21T00:02:05Z",
+            "normalizedAt": "2026-08-21T00:02:06Z"
+          },
+          {
+            "eventId": "EvROOTLATE1",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270520.000001",
+            "threadTs": "1787270520.000001",
+            "action": "ROOT",
+            "position": "ROOT",
+            "authorId": "UABCDE1",
+            "text": "늦게 관찰된 루트",
+            "sourceEventTime": 1787270520,
+            "occurredAt": "2026-08-21T00:02:00Z",
+            "normalizedAt": "2026-08-21T00:02:07Z"
+          }
+        ],
+        "workItem": {
+          "id": "slack_work_item_reply_first",
+          "workspaceId": "TABCDE1",
+          "channelId": "CABCDE1",
+          "rootMessageTs": "1787270520.000001",
+          "threadId": "slack_thread_reply_first",
+          "status": "ACTIVE",
+          "latestParseId": null,
+          "createdAt": "2026-08-21T00:02:06Z",
+          "updatedAt": "2026-08-21T00:02:07Z"
+        },
+        "thread": {
+          "id": "slack_thread_reply_first",
+          "workItemId": "slack_work_item_reply_first",
+          "rootMessageTs": "1787270520.000001",
+          "rootResolved": true,
+          "messageCount": 2,
+          "latestChangedAt": "2026-08-21T00:02:05Z",
+          "lastSyncedAt": null,
+          "syncCursor": null,
+          "parseState": "QUIET_WINDOW"
+        },
+        "messages": [
+          {
+            "id": "slack_message_root_late",
+            "threadId": "slack_thread_reply_first",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270520.000001",
+            "threadTs": "1787270520.000001",
+            "position": "ROOT",
+            "currentRevisionId": "slack_revision_root_late_1",
+            "revisionCount": 1,
+            "deleted": false,
+            "firstObservedAt": "2026-08-21T00:02:07Z",
+            "latestChangedAt": "2026-08-21T00:02:00Z"
+          },
+          {
+            "id": "slack_message_reply_first",
+            "threadId": "slack_thread_reply_first",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270525.000002",
+            "threadTs": "1787270520.000001",
+            "position": "REPLY",
+            "currentRevisionId": "slack_revision_reply_first_1",
+            "revisionCount": 1,
+            "deleted": false,
+            "firstObservedAt": "2026-08-21T00:02:06Z",
+            "latestChangedAt": "2026-08-21T00:02:05Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete arriving before edit is ordered by source chronology",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/ReversedMutationOrderProof",
+      "expectedValid": true,
+      "semanticRules": ["REVISION_CHRONOLOGY"],
+      "payload": {
+        "arrivalEvents": [
+          {
+            "eventId": "EvDELETEFIRST1",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270580.000001",
+            "threadTs": "1787270580.000001",
+            "action": "DELETE",
+            "position": "ROOT",
+            "authorId": null,
+            "text": null,
+            "sourceEventTime": 1787270600,
+            "occurredAt": "2026-08-21T00:03:20Z",
+            "normalizedAt": "2026-08-21T00:03:21Z"
+          },
+          {
+            "eventId": "EvEDITLATE1",
+            "workspaceId": "TABCDE1",
+            "channelId": "CABCDE1",
+            "messageTs": "1787270580.000001",
+            "threadTs": "1787270580.000001",
+            "action": "EDIT",
+            "position": "ROOT",
+            "authorId": "UABCDE1",
+            "text": "삭제 전에 편집된 내용",
+            "sourceEventTime": 1787270590,
+            "occurredAt": "2026-08-21T00:03:10Z",
+            "normalizedAt": "2026-08-21T00:03:22Z"
+          }
+        ],
+        "message": {
+          "id": "slack_message_reversed_1",
+          "threadId": "slack_thread_reversed_1",
+          "workspaceId": "TABCDE1",
+          "channelId": "CABCDE1",
+          "messageTs": "1787270580.000001",
+          "threadTs": "1787270580.000001",
+          "position": "ROOT",
+          "currentRevisionId": "slack_revision_reversed_delete",
+          "revisionCount": 2,
+          "deleted": true,
+          "firstObservedAt": "2026-08-21T00:03:21Z",
+          "latestChangedAt": "2026-08-21T00:03:20Z"
+        },
+        "chronologicalRevisions": [
+          {
+            "id": "slack_revision_reversed_edit",
+            "messageId": "slack_message_reversed_1",
+            "revision": 1,
+            "kind": "EDITED",
+            "body": "삭제 전에 편집된 내용",
+            "authorId": "UABCDE1",
+            "sourceEventId": "EvEDITLATE1",
+            "sourceEventTime": 1787270590,
+            "occurredAt": "2026-08-21T00:03:10Z",
+            "observedAt": "2026-08-21T00:03:22Z",
+            "previousRevisionId": null
+          },
+          {
+            "id": "slack_revision_reversed_delete",
+            "messageId": "slack_message_reversed_1",
+            "revision": 2,
+            "kind": "DELETED",
+            "body": null,
+            "authorId": null,
+            "sourceEventId": "EvDELETEFIRST1",
+            "sourceEventTime": 1787270600,
+            "occurredAt": "2026-08-21T00:03:20Z",
+            "observedAt": "2026-08-21T00:03:21Z",
+            "previousRevisionId": "slack_revision_reversed_edit"
+          }
+        ]
+      }
+    },
+    {
+      "name": "free form parser observes all four work item fields",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackParseResource",
+      "expectedValid": true,
+      "semanticRules": ["PARSE_FIELD_COMPLETENESS"],
+      "payload": {
+        "id": "slack_parse_complete_1",
+        "workItemId": "slack_work_item_parse_1",
+        "status": "COMPLETE",
+        "result": {
+          "developmentItem": "비밀번호 재설정 기능 개선",
+          "requestedMenu": "회원 > 계정관리 > 비밀번호",
+          "featureDescription": "이메일 인증 후 비밀번호 변경",
+          "requestDetails": "인증번호 유효시간 5분, 5회 오류 시 잠금",
+          "missingFields": [],
+          "confidence": 0.96,
+          "sourceMessageRevisions": ["slack_revision_parse_root_1", "slack_revision_parse_reply_1"]
+        },
+        "openQuestions": [],
+        "sourceRevisionIds": ["slack_revision_parse_root_1", "slack_revision_parse_reply_1"],
+        "createdAt": "2026-08-21T00:14:00Z",
+        "completedAt": "2026-08-21T00:14:02Z",
+        "errorCode": null
+      }
+    },
+    {
+      "name": "missing parser observations are absent and generate open questions",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackParseResource",
+      "expectedValid": true,
+      "semanticRules": ["PARSE_FIELD_COMPLETENESS"],
+      "payload": {
+        "id": "slack_parse_missing_1",
+        "workItemId": "slack_work_item_parse_2",
+        "status": "NEEDS_INPUT",
+        "result": {
+          "developmentItem": "검색 개선",
+          "featureDescription": "검색 결과 정렬",
+          "missingFields": ["requestedMenu", "requestDetails"],
+          "confidence": 0.62,
+          "sourceMessageRevisions": ["slack_revision_parse_missing_1"]
+        },
+        "openQuestions": ["어느 메뉴의 검색인가요?", "구체적인 정렬 기준은 무엇인가요?"],
+        "sourceRevisionIds": ["slack_revision_parse_missing_1"],
+        "createdAt": "2026-08-21T00:15:00Z",
+        "completedAt": "2026-08-21T00:15:02Z",
+        "errorCode": null
+      }
+    },
+    {
+      "name": "quiet window job schedules exactly ten minutes after latest change",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/QuietWindowJobResource",
+      "expectedValid": true,
+      "semanticRules": ["QUIET_WINDOW_SCHEDULE"],
+      "payload": {
+        "id": "slack_job_quiet_1",
+        "workspaceId": "TABCDE1",
+        "channelId": "CABCDE1",
+        "workItemId": "slack_work_item_parse_1",
+        "jobType": "QUIET_WINDOW_PARSE",
+        "state": "PENDING",
+        "attempt": 0,
+        "maxAttempts": 5,
+        "runAfter": "2026-08-21T00:24:00Z",
+        "retry": null,
+        "createdAt": "2026-08-21T00:14:00Z",
+        "updatedAt": "2026-08-21T00:14:00Z",
+        "completedAt": null,
+        "quietWindowSeconds": 600,
+        "lastThreadChangedAt": "2026-08-21T00:14:00Z",
+        "generation": 1,
+        "sourceRevisionId": "slack_revision_parse_reply_1"
+      }
+    },
+    {
+      "name": "thread resync reports recovered replies and deduplicated revisions",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/ThreadSyncResponse",
+      "expectedValid": true,
+      "semanticRules": ["THREAD_SYNC_TOTALS"],
+      "payload": {
+        "syncId": "slack_sync_recent_1",
+        "mode": "RECENT_RESYNC",
+        "threadsScanned": 3,
+        "messagesObserved": 7,
+        "revisionsInserted": 2,
+        "duplicateRevisions": 5,
+        "missingRepliesRecovered": 1,
+        "nextCursor": "cursor_slack_sync_recent_2",
+        "startedAt": "2026-08-21T01:00:00Z",
+        "completedAt": "2026-08-21T01:00:04Z"
+      }
+    },
+    {
+      "name": "rate limit creates a visible RETRY_WAIT job",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/BackgroundJobResource",
+      "expectedValid": true,
+      "semanticRules": ["RETRY_STATE"],
+      "payload": {
+        "id": "slack_job_rate_limit_1",
+        "workspaceId": "TABCDE1",
+        "channelId": "CABCDE1",
+        "workItemId": "slack_work_item_parse_1",
+        "jobType": "THREAD_INCREMENTAL_SYNC",
+        "state": "RETRY_WAIT",
+        "attempt": 2,
+        "maxAttempts": 5,
+        "runAfter": "2026-08-21T01:01:30Z",
+        "retry": {
+          "attempt": 2,
+          "maxAttempts": 5,
+          "reason": "RATE_LIMIT",
+          "lastHttpStatus": 429,
+          "retryAfterSeconds": 30,
+          "nextAttemptAt": "2026-08-21T01:01:30Z",
+          "lastErrorCode": "SLACK_RATE_LIMITED",
+          "lastErrorMessage": "Slack requested a bounded retry delay."
+        },
+        "createdAt": "2026-08-21T01:00:00Z",
+        "updatedAt": "2026-08-21T01:01:00Z",
+        "completedAt": null
+      }
+    },
+    {
+      "name": "exhausted retries create a visible DEAD job",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/BackgroundJobResource",
+      "expectedValid": true,
+      "semanticRules": ["RETRY_STATE"],
+      "payload": {
+        "id": "slack_job_dead_1",
+        "workspaceId": "TABCDE1",
+        "channelId": "CABCDE1",
+        "workItemId": "slack_work_item_parse_1",
+        "jobType": "THREAD_RECENT_RESYNC",
+        "state": "DEAD",
+        "attempt": 5,
+        "maxAttempts": 5,
+        "runAfter": null,
+        "retry": {
+          "attempt": 5,
+          "maxAttempts": 5,
+          "reason": "TIMEOUT",
+          "lastHttpStatus": null,
+          "retryAfterSeconds": null,
+          "nextAttemptAt": null,
+          "lastErrorCode": "SLACK_SYNC_TIMEOUT",
+          "lastErrorMessage": "The final synchronization attempt timed out."
+        },
+        "createdAt": "2026-08-21T01:00:00Z",
+        "updatedAt": "2026-08-21T01:05:00Z",
+        "completedAt": "2026-08-21T01:05:00Z"
+      }
+    },
+    {
+      "name": "event log cursor is coupled to explicit filters",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackEventLogListQuery",
+      "expectedValid": true,
+      "payload": {
+        "workspaceId": "TABCDE1",
+        "channelIds": ["CABCDE1"],
+        "eventIds": [],
+        "actions": ["EDIT", "DELETE"],
+        "deliveryOutcomes": ["ACCEPTED"],
+        "processingStates": ["FAILED_RETRYABLE", "DEAD"],
+        "receivedFrom": "2026-08-20T00:00:00Z",
+        "receivedTo": "2026-08-21T00:00:00Z",
+        "cursor": "cursor_event_log_failure_page_2",
+        "limit": 50
+      }
+    },
+    {
+      "name": "job list exposes retry and dead filters with a cursor",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json#/$defs/SlackJobListQuery",
+      "expectedValid": true,
+      "payload": {
+        "workspaceId": "TABCDE1",
+        "channelIds": ["CABCDE1"],
+        "workItemIds": [],
+        "jobTypes": ["THREAD_INCREMENTAL_SYNC", "THREAD_RECENT_RESYNC"],
+        "states": ["RETRY_WAIT", "DEAD"],
+        "failureReasons": ["RATE_LIMIT", "TIMEOUT"],
+        "updatedFrom": "2026-08-20T00:00:00Z",
+        "updatedTo": "2026-08-21T00:00:00Z",
+        "cursor": "cursor_slack_jobs_failure_page_2",
+        "limit": 50
+      }
+    },
+    {
+      "name": "forged Slack signature is rejected without echoing signature material",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/error-contract.schema.json#/$defs/SlackSignatureInvalidError",
+      "expectedValid": true,
+      "payload": {
+        "code": "SLACK_SIGNATURE_INVALID",
+        "message": "Slack request authentication failed.",
+        "details": {
+          "reason": "MISMATCH",
+          "signatureVersion": "v0"
+        },
+        "traceId": "trace_slack_signature_mismatch_1"
+      }
+    },
+    {
+      "name": "stale Slack request timestamp is rejected at the five-minute boundary",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/error-contract.schema.json#/$defs/SlackRequestTimestampInvalidError",
+      "expectedValid": true,
+      "payload": {
+        "code": "SLACK_REQUEST_TIMESTAMP_INVALID",
+        "message": "Slack request timestamp is outside the accepted window.",
+        "details": {
+          "reason": "STALE",
+          "requestTimestamp": 1787270000,
+          "serverTimestamp": 1787270360,
+          "maximumSkewSeconds": 300
+        },
+        "traceId": "trace_slack_timestamp_stale_1"
+      }
+    },
+    {
+      "name": "rate limit error exposes retry timing but no authentication material",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/error-contract.schema.json#/$defs/SlackRateLimitedError",
+      "expectedValid": true,
+      "payload": {
+        "code": "SLACK_RATE_LIMITED",
+        "message": "Slack requested a retry delay.",
+        "details": {
+          "jobId": "slack_job_rate_limit_1",
+          "httpStatus": 429,
+          "attempt": 2,
+          "maxAttempts": 5,
+          "retryAfterSeconds": 30,
+          "nextAttemptAt": "2026-08-21T01:01:30Z"
+        },
+        "traceId": "trace_slack_rate_limit_1"
+      }
+    },
+    {
+      "name": "private access denial is a typed default-deny error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-5/error-contract.schema.json#/$defs/SlackChannelAccessDeniedError",
+      "expectedValid": true,
+      "payload": {
+        "code": "SLACK_CHANNEL_ACCESS_DENIED",
+        "message": "Private channel collection is denied by default.",
+        "details": {
+          "workspaceId": "TABCDE1",
+          "channelId": "GPRIVATE1",
+          "visibility": "PRIVATE",
+          "policy": "PRIVATE_DEFAULT_DENY",
+          "collectionAllowed": false
+        },
+        "traceId": "trace_slack_private_deny_1"
+      }
+    }
+  ]
+}

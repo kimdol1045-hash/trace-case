@@ -1,0 +1,32 @@
+{
+  "reconstructionSchemaVersion": "1.0.0",
+  "jobId": "generation_job_future_001",
+  "availability": "UNAVAILABLE",
+  "reason": "UNSUPPORTED_INPUT_SCHEMA_VERSION",
+  "recordedInputSchemaVersion": "2.0.0",
+  "input": null,
+  "provenance": {
+    "sealedContextDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "sealedAt": "2026-08-26T03:00:00Z",
+    "inputDigest": {
+      "algorithm": "SHA-256",
+      "canonicalization": "RFC8785",
+      "value": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "canonicalByteLength": 2048
+    }
+  },
+  "policy": {
+    "sourceBasis": "SEALED_GENERATION_INPUT",
+    "readOnly": true,
+    "sealedSnapshotsOnly": true,
+    "liveSlackConsulted": false,
+    "liveKnowledgeConsulted": false,
+    "liveCasesConsulted": false,
+    "liveIssuesConsulted": false,
+    "liveCategoriesConsulted": false,
+    "providerCallAttempted": false,
+    "mutationPerformed": false,
+    "arrayOrderPreserved": true,
+    "nullEmptyDistinctionsPreserved": true
+  }
+}

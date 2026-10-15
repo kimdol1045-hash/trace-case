@@ -1,0 +1,638 @@
+{
+  "auxiliary": {
+    "cutoverInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "44caf192959f1a8889bf646743fda69cc640063dff607379fc3ab9bb759b8710",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3bdba0048997da558f625aa2574f124f29f766628c6343888711f36306f06fa6",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "3b26cfbe742d4d3f72cf2ffa68f85a3f0e064ae02de2cb87005528518e9b0dd5",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "794f61cce41a3dfc3d145676479ad7fd4e481e6d6b4461c3d45df613d15e9aba",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "613c7d7abe226caf153eaa40ccd246ff7e5c3f429e4be29ad9250c4f1d160faa",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "946fc2930dc35874ed32ac2fdf8cccb44a438ae698d62734c18f363e827b355e",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "845917f3c80c0aeceb2bf7ce1b2a5ec5ac214a4fece0648cfdbc779859d21c86",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740"
+    },
+    "emptyPreflight": {
+      "ageGraphCount": 0,
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t09_wave8_e7c4a91b_aux_test_disposable",
+      "emptyTargetRequired": true,
+      "extensions": [
+        "age",
+        "vector"
+      ],
+      "publicTableCount": 0,
+      "serverVersionNum": 160010
+    },
+    "failedActivationInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "44caf192959f1a8889bf646743fda69cc640063dff607379fc3ab9bb759b8710",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3bdba0048997da558f625aa2574f124f29f766628c6343888711f36306f06fa6",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "3b26cfbe742d4d3f72cf2ffa68f85a3f0e064ae02de2cb87005528518e9b0dd5",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "794f61cce41a3dfc3d145676479ad7fd4e481e6d6b4461c3d45df613d15e9aba",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "8491cebd664017eb12e2ebc8667ae815cf18e2c01ad33ecfa44f90772808dc8b",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "5160f690a9c430d455ebaf3b6e0776415318f2c6ea3800fc6e7ea0fa5812ba3f",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "845917f3c80c0aeceb2bf7ce1b2a5ec5ac214a4fece0648cfdbc779859d21c86",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-e7c4a91b-8c34734f670c"
+    },
+    "priorInspection": {
+      "chunk": {
+        "count": 2,
+        "digest": {
+          "sha256": "44caf192959f1a8889bf646743fda69cc640063dff607379fc3ab9bb759b8710",
+          "version": "tc.lightrag.chunks.v1"
+        },
+        "pages": 2
+      },
+      "citationCanonicalization": "UUID_BASENAME_OF_CANONICAL_POSTGRESQL_URI",
+      "citationDigest": {
+        "sha256": "3bdba0048997da558f625aa2574f124f29f766628c6343888711f36306f06fa6",
+        "version": "tc.lightrag.citations.v1"
+      },
+      "contentDigest": {
+        "sha256": "3b26cfbe742d4d3f72cf2ffa68f85a3f0e064ae02de2cb87005528518e9b0dd5",
+        "version": "tc.lightrag.full-content.v1"
+      },
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "documentIdentitySetDigest": {
+        "sha256": "794f61cce41a3dfc3d145676479ad7fd4e481e6d6b4461c3d45df613d15e9aba",
+        "version": "tc.lightrag.document-identities.v1"
+      },
+      "failedCount": 0,
+      "graph": {
+        "digest": {
+          "sha256": "bf9183195c87703cd792357f7f1534ff728b7d36a9d75010441de399d12b2288",
+          "version": "tc.lightrag.age-graph.v1"
+        },
+        "edgeCount": 1,
+        "identitySetsMatchVectors": true,
+        "nameSha256": "45f3a8c203c823f9b1f46c0d7cc21e438ad1929233072eba73a9f42da934f517",
+        "nodeCount": 2
+      },
+      "pagination": {
+        "chunkPages": 2,
+        "cursorMonotonic": true,
+        "entityPages": 2,
+        "fullDocumentPages": 2,
+        "pageSize": 1,
+        "relationPages": 1,
+        "statusPages": 2,
+        "vectorChunkPages": 2
+      },
+      "processedCount": 2,
+      "rawCorpusOmitted": true,
+      "vectors": {
+        "chunkCount": 2,
+        "digest": {
+          "sha256": "845917f3c80c0aeceb2bf7ce1b2a5ec5ac214a4fece0648cfdbc779859d21c86",
+          "version": "tc.lightrag.vectors.v1"
+        },
+        "dimension": 1024,
+        "entityCount": 2,
+        "relationCount": 1
+      },
+      "workspace": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80"
+    },
+    "retainedWorkspaces": {
+      "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80": true,
+      "pf-sf1-t09-wave8-e7c4a91b-8c34734f670c": true,
+      "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740": true
+    },
+    "workspaceInventory": {
+      "digest": {
+        "sha256": "acb52881a51d7c93405eed957be1e2f6ff7bc473196a00d51ac64f31566f3018",
+        "version": "tc.lightrag.workspace-inventory.v1"
+      },
+      "graphCount": 3,
+      "workspaceCount": 3,
+      "workspaces": [
+        "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80",
+        "pf-sf1-t09-wave8-e7c4a91b-8c34734f670c",
+        "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740"
+      ]
+    }
+  },
+  "cleanup": {
+    "evidenceBound": true,
+    "performed": false,
+    "required": true
+  },
+  "confirmationRequired": "RUN PF-SF1-T09 LOCAL-DISPOSABLE-NETWORK-FREE ON tc-phase-f-pf-sf1-t09-wave8-e7c4a91b-disposable",
+  "contractDigest": {
+    "sha256": "dcd04357899230b389b54ac63609dcb93a51515cc10ebce0f631122edc8abec0",
+    "version": "tc.canonical-json.sha256.v1"
+  },
+  "controlPlane": {
+    "activationFailure": {
+      "injected": true,
+      "rollbackAttempted": true,
+      "rollbackSucceeded": true
+    },
+    "counterfeitProviderRejected": true,
+    "cutover": {
+      "activation": "ATOMIC_COMPARE_AND_SWAP",
+      "controlPlane": {
+        "authority": "TC_POSTGRESQL_GENERATION_LEDGER",
+        "committedPointerVersion": 2,
+        "credentialsOmitted": true,
+        "eventId": "9f7a2e17-c8a1-44f6-a9b3-a26a6634a466",
+        "manualEnvironmentSwitch": false,
+        "operation": "ACTIVATE",
+        "outcome": "APPLIED",
+        "receiptDigest": "sha256:a985699732692e47160241f74b16c9aa3bff86be66337fbf4753bc60ed7bd260"
+      },
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "executionStatus": "SUCCEEDED",
+      "generationId": "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740",
+      "manifestDigest": "f2c99b573740111f6b7cd41d6d5e3afeabad110386424f965c6aa00fe1bef40c",
+      "pgvectorDigest": "07ab12b0c1aedb9ac21916cf88d86ea9c7d470171e2c6fa2216775c23a87bcf4",
+      "previousGenerationId": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80",
+      "projectionDigest": "ad573533fed85ead404626c493f63d5441caafa912e5901a584d63f494c6fb8d",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb"
+    },
+    "prior": {
+      "activation": "ATOMIC_COMPARE_AND_SWAP",
+      "controlPlane": {
+        "authority": "TC_POSTGRESQL_GENERATION_LEDGER",
+        "committedPointerVersion": 1,
+        "credentialsOmitted": true,
+        "eventId": "e88670e5-0e91-4701-b902-274a738f2706",
+        "manualEnvironmentSwitch": false,
+        "operation": "ACTIVATE",
+        "outcome": "APPLIED",
+        "receiptDigest": "sha256:57c8db440b6cf02c7a228421f480bafcd9ded81d0ec5896b2c08f2621c5f55a6"
+      },
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "executionStatus": "SUCCEEDED",
+      "generationId": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80",
+      "manifestDigest": "01abe1725e80927b1706f337d12a2743256ac4e24aee1fb1dc592dac656e7395",
+      "pgvectorDigest": "07ab12b0c1aedb9ac21916cf88d86ea9c7d470171e2c6fa2216775c23a87bcf4",
+      "previousGenerationId": null,
+      "projectionDigest": "ad573533fed85ead404626c493f63d5441caafa912e5901a584d63f494c6fb8d",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb"
+    },
+    "rollback": {
+      "cutoverRetained": true,
+      "pointerVersion": 3,
+      "priorRetained": true,
+      "restoredGenerationId": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80"
+    },
+    "rollbackFailure": {
+      "injected": true,
+      "pointerUnchanged": true
+    },
+    "staleResult": {
+      "fallback": "typed_graph+pgvector",
+      "injection": "POINTER_CHANGED_AFTER_PROVIDER_RESULT",
+      "staleContextExposed": false,
+      "status": "unavailable"
+    }
+  },
+  "credentialsOmitted": true,
+  "dump": {
+    "bytes": 689165,
+    "fileIdentity": {
+      "ctimeNs": 1788742789173887364,
+      "device": 16777231,
+      "inode": 96511061,
+      "linkCount": 1,
+      "modeOctal": "0600",
+      "mtimeNs": 1788742789173887364,
+      "size": 689165
+    },
+    "restoreTarget": "tc_phase_f_pf_sf1_t09_wave8_e7c4a91b_source_test_disposable",
+    "sha256": "0a8d0473dee933751d53e0cf634a8083290f06401108c32ec0ec2e207d98ff3f",
+    "sourceAccess": "READ_ONLY_PG_DUMP"
+  },
+  "dumpFile": "/private/tmp/pf-sf1-t09-wave8-e7c4a91b/pf-sf1-t09-wave8-e7c4a91b.dump",
+  "evidenceFile": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-20260907.json",
+  "mode": "LOCAL_DISPOSABLE_NETWORK_FREE_PASS",
+  "notRun": [
+    "staging credentials and bootstrap",
+    "live model provider calls",
+    "staging apply",
+    "production-like multiprocess networking/load/alerts",
+    "operator handoff",
+    "production RTO/RPO",
+    "PF-SF1-T09 release gate",
+    "Phase F release gate"
+  ],
+  "preservation": {
+    "afterDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "afterTcFingerprintDigest": {
+      "sha256": "5cb5704c43263e57dc1230e545b2a1a8ae755367d55304e2aca4bbb5acd0c54e",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "beforeDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "beforeDockerInventory": {
+      "counts": {
+        "containers": 8,
+        "images": 37,
+        "networks": 5,
+        "volumes": 5
+      },
+      "digest": {
+        "sha256": "2f8b63f57ab62e8bb4b07f3fbd5045e6932973d66d225b57455b86eadce97a33",
+        "version": "tc.docker-local-inventory.v1"
+      },
+      "version": "tc.docker-local-inventory.v1"
+    },
+    "beforeTcFingerprintDigest": {
+      "sha256": "5cb5704c43263e57dc1230e545b2a1a8ae755367d55304e2aca4bbb5acd0c54e",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "currentTcFingerprintEqual": true,
+    "priorEvidence": {
+      "count": 21,
+      "digest": {
+        "sha256": "fc5543072bdb9688c8ce6783b25c659a50a92ce18149a254db32e6da7b397414",
+        "version": "tc.phase-f.prior-evidence-inventory.v1"
+      },
+      "entries": [
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856-r2.json",
+          "sha256": "7a4acb6a8395082ef04ed482e7e7faacc2c1b68e6358caf8576f100a507696f0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856.json",
+          "sha256": "b3b3a6b738c145e2cce97500e8657a652d65b585cd7b562cbd2c33e4c9573e16"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-backup.json",
+          "sha256": "4dbe36c55ad7d20db700097acf3d8dbe3b1f6c9af5aace135463660eac5c07d2"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-restore.json",
+          "sha256": "ee85ca0ed0969e9ff9693350c47d8b3e86f2be6ca499eef77b99219ebd65cde7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-seed.json",
+          "sha256": "bf32440ff186a2458d3310ccc63501b07a93b20f4a6b8e111c5059a49783e5d6"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup-r2.json",
+          "sha256": "d557297dd7dc6f69f396e62268c72be1d448d9b17a24b1ade7a219efe791b9d9"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup.json",
+          "sha256": "c0c634ac26d15ab781f415c9704ecd4d210b66fa59753f41a257ca7e1c571cd7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-restore-r2.json",
+          "sha256": "7255f643c5b9bf60807c95b8fa4edfc7fa17c8583a24aab0957c3f2b7fdbe1ac"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-seed.json",
+          "sha256": "be3fc0afce6774fc234652a5befa0bc1df8d0af4e19bb873e12dcfcc73049ab0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-backup.json",
+          "sha256": "c49a8c52fe6fb10674f8f8a6a591b229c1c6271a81669094fd942459c1705cc7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-restore.json",
+          "sha256": "0e197c1796ad39be92cf2254bfbd92e5bb91fbe0ce2a05edca1ea09cd3b37f4b"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-seed.json",
+          "sha256": "d3984780a8b3cc841f5c8124ed391e1ef2bc6feaaae070a408af63de9316eb91"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-backup.json",
+          "sha256": "3f735a01279f6d0250706481210a1da8afae1ddc25d791f72bd114c4e12ce0c3"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-seed.json",
+          "sha256": "b57da068e6c51f7a7342e8865fe5d1d2398dd4f566f3810f96dcf1b97abfa179"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-backup.json",
+          "sha256": "20081fff77b0ac8b7c57b340f328134b2362a91778ed4f4d8825342bb9e85ffd"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-restore.json",
+          "sha256": "849e1fb76a08721e9dd1d1b9e777f9abc32b63d8e6dd3073da43eb92355be1ad"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-cleanup.json",
+          "sha256": "34e72df84d23848062b2649bb3e19d76748f32bffcfd1a75c13345a16043a000"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-manifest.json",
+          "sha256": "0ae1658cb4b731008f050bc55e191f22fadf0d68d2a65d941c51e7471a1c97fc"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-recovery.json",
+          "sha256": "8d2c0a0d9a5a18867f2aa81c3684cc1ee25dba58fe781fdd1852f9424f153976"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-d31c8e7a-retry1-failure.json",
+          "sha256": "1c673b8f9ead029d1656a9ccf08f9e8b4a1b95996751d2586e71f427c8c17593"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-e29f6c4b-retry2-failure.json",
+          "sha256": "87e6d9a901aa36c5389bb13cb16986efbe63ac77766c5438cbf56ff6ae070872"
+        }
+      ],
+      "version": "tc.phase-f.prior-evidence-inventory.v1"
+    },
+    "priorEvidenceHashesPreserved": true
+  },
+  "provider": {
+    "distribution": "lightrag-hku",
+    "id": "official-lightrag-postgresql",
+    "networkFreeBootstrap": "tc_backend.knowledge.lightrag_local_rehearsal:build_network_free_components",
+    "runtimeConfigDigest": "sha256:b409d9edc2e902fe14d4366a037c5f8fe0b29152a81165f0b57df9c247f6c9f2",
+    "storage": [
+      "PGKVStorage",
+      "PGVectorStorage",
+      "PGDocStatusStorage",
+      "PGGraphStorage"
+    ],
+    "version": "1.5.6"
+  },
+  "rawCorpusOmitted": true,
+  "releaseGate": "NOT_RUN",
+  "runtime": {
+    "activeGenerationSmoke": {
+      "api": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "35b324e1ea138c6bfa686ffb0797c4cbe2c5de1890f7248b7c9bdeecef52f055",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "6685a0c690876cb1591ff320f19f23ec48ba0b1ee1b6934a601cd1b2def2405a",
+        "generationId": "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740",
+        "rawContextOmitted": true,
+        "status": "ok"
+      },
+      "worker": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "35b324e1ea138c6bfa686ffb0797c4cbe2c5de1890f7248b7c9bdeecef52f055",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "6685a0c690876cb1591ff320f19f23ec48ba0b1ee1b6934a601cd1b2def2405a",
+        "generationId": "pf-sf1-t09-wave8-e7c4a91b-f2c99b573740",
+        "rawContextOmitted": true,
+        "status": "ok"
+      }
+    },
+    "processCleanup": [
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      },
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      },
+      {
+        "allProcessesAbsent": true,
+        "observedProcessCount": 1
+      }
+    ],
+    "processFailureFallback": {
+      "degradationReasons": [
+        "LIGHTRAG_UNAVAILABLE"
+      ],
+      "degraded": true,
+      "matchCount": 2,
+      "rawResultsOmitted": true,
+      "typedGraphAndPgvector": true
+    },
+    "providerRestartRecovered": true,
+    "rollbackGenerationSmoke": {
+      "api": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "35b324e1ea138c6bfa686ffb0797c4cbe2c5de1890f7248b7c9bdeecef52f055",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "6685a0c690876cb1591ff320f19f23ec48ba0b1ee1b6934a601cd1b2def2405a",
+        "generationId": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80",
+        "rawContextOmitted": true,
+        "status": "ok"
+      },
+      "worker": {
+        "citationIdentityCount": 2,
+        "citationIdentitySetDigest": {
+          "sha256": "35b324e1ea138c6bfa686ffb0797c4cbe2c5de1890f7248b7c9bdeecef52f055",
+          "version": "tc.lightrag.query-citations.v1"
+        },
+        "contextSha256": "6685a0c690876cb1591ff320f19f23ec48ba0b1ee1b6934a601cd1b2def2405a",
+        "generationId": "pf-sf1-t09-wave8-e7c4a91b-01abe1725e80",
+        "rawContextOmitted": true,
+        "status": "ok"
+      }
+    },
+    "runtimeDirectoriesEmpty": true,
+    "separateResolverInstances": [
+      "api",
+      "worker"
+    ]
+  },
+  "schemaVersion": "tc.phase-f.lightrag-wave8-evidence.v1",
+  "source": {
+    "beforeAfterSnapshotEqual": true,
+    "currentTcAccess": "READ_ONLY",
+    "currentTcCorpusDocumentCount": 0,
+    "fixtureCounts": {
+      "edges": 1,
+      "embeddings": 2,
+      "evidence": 3,
+      "nodes": 2,
+      "sources": 3
+    },
+    "fixtureVersion": "pf-sf1-t09-wave8-local-corpus-v1",
+    "preflight": {
+      "ageGraphCount": 0,
+      "databaseCommentAttested": true,
+      "databaseName": "tc_phase_f_pf_sf1_t09_wave8_e7c4a91b_source_test_disposable",
+      "emptyTargetRequired": false,
+      "extensions": [
+        "vector"
+      ],
+      "publicTableCount": 78,
+      "serverVersionNum": 160012
+    },
+    "rawCorpusOmitted": true,
+    "restoreAttestation": {
+      "logicalColumnCount": 945,
+      "logicalColumnDigest": {
+        "sha256": "824392080bc6b2523621c2b96ad5d86ea39e82070c61b58cfb183bc7ffae5d30",
+        "version": "tc.postgresql.logical-columns.v1"
+      },
+      "logicalDataExact": true,
+      "logicalSchemaExact": true,
+      "rawPhysicalDifference": "DROPPED_COLUMN_ATTRIBUTE_SLOTS_COMPACTED_BY_PG_DUMP",
+      "rawPhysicalFingerprintEqual": false
+    },
+    "restoredCopyEqualBeforeFixture": true,
+    "snapshot": {
+      "corpusDigest": "2e25a55893c0da6802ea008ed3efaa1b3fb76b7ed8ab71cfb0501989cae0b5fc",
+      "documentCount": 2,
+      "pgvectorDigest": "07ab12b0c1aedb9ac21916cf88d86ea9c7d470171e2c6fa2216775c23a87bcf4",
+      "pgvectorDimension": 1024,
+      "pgvectorModel": "bge-m3",
+      "projectionDigest": "ad573533fed85ead404626c493f63d5441caafa912e5901a584d63f494c6fb8d",
+      "rawCorpusOmitted": true,
+      "schemaVersion": "tc-lightrag-full-reindex/v1",
+      "sourceLedgerDigest": "fc1d8dcd234d9560c885d9411ff1f809e6511c62c17a7888009d2033f22b19fb",
+      "sourceTargetDigest": "e1c5ba4389ec9c17e32bf719db18eb924293e8b8a549b6522b9d449fb776b927",
+      "totalContentBytes": 106
+    }
+  },
+  "subGate": "LOCAL_DISPOSABLE_NETWORK_FREE",
+  "target": {
+    "auxiliaryDatabaseComment": "tc-phase-f-lightrag-auxiliary:disposable:tc-phase-f-pf-sf1-t09-wave8-e7c4a91b-disposable",
+    "containers": [
+      "tc-pf-sf1-t09-wave8-e7c4a91b-source-postgres-disposable",
+      "tc-pf-sf1-t09-wave8-e7c4a91b-aux-postgres-disposable"
+    ],
+    "network": "tc-pf-sf1-t09-wave8-e7c4a91b-network-disposable",
+    "ports": {
+      "auxiliaryLoopback": 55449,
+      "sourceLoopback": 55448
+    },
+    "project": "tc-pf-sf1-t09-wave8-e7c4a91b",
+    "runId": "e7c4a91b",
+    "seedWorkspace": "pf-sf1-t09-wave8-e7c4a91b-seed",
+    "sourceDatabaseComment": "tc-phase-f-rehearsal:disposable:tc-phase-f-pf-sf1-t09-wave8-e7c4a91b-disposable",
+    "target": {
+      "activeWorkspace": "pf-sf1-t09-wave8-e7c4a91b-seed",
+      "authoritativeDatabase": "tc_phase_f_pf_sf1_t09_wave8_e7c4a91b_source_test_disposable",
+      "authoritativeTargetDigest": "e1c5ba4389ec9c17e32bf719db18eb924293e8b8a549b6522b9d449fb776b927",
+      "auxiliaryDatabase": "tc_phase_f_pf_sf1_t09_wave8_e7c4a91b_aux_test_disposable",
+      "auxiliaryTargetDigest": "c4c147cb59ad99b29e6b9b3459420251b3cf1198b025ab6ba37842cd2ed5d1aa",
+      "class": "disposable",
+      "name": "tc-phase-f-pf-sf1-t09-wave8-e7c4a91b-disposable"
+    },
+    "volumes": [
+      "tc-pf-sf1-t09-wave8-e7c4a91b-source-data-disposable",
+      "tc-pf-sf1-t09-wave8-e7c4a91b-aux-data-disposable"
+    ]
+  },
+  "task": "PF-SF1-T09",
+  "tempDirectory": "/private/tmp/pf-sf1-t09-wave8-e7c4a91b",
+  "timing": {
+    "finishedAtUtc": "2026-09-07T01:00:09.942451+00:00",
+    "localMeasuredSeconds": 27.261476,
+    "productionRtoRpo": "NOT_RUN",
+    "startedAtUtc": "2026-09-07T00:59:42.619736+00:00"
+  }
+}

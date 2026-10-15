@@ -1,0 +1,140 @@
+{
+  "evalId": "sprint6-evidence-revision-01",
+  "synthetic": true,
+  "scenario": "EVIDENCE_REVISION",
+  "description": "An edited Slack decision cites the new revision exactly while retaining the prior revision only on the superseded candidate.",
+  "request": {
+    "schemaVersion": "1.0.0",
+    "bundle": {
+      "bundleId": "bundle_timeout_revision",
+      "workItemId": "work_item_timeout_revision",
+      "workspaceId": "T_SYNTHETIC",
+      "channelId": "C_SYNTHETIC",
+      "rootMessageTs": "1787274000.000102",
+      "revisions": [
+        {
+          "sourceRevisionId": "rev_timeout_policy_1",
+          "messageId": "message_timeout_policy",
+          "messageTs": "1787274060.000102",
+          "revision": 1,
+          "previousRevisionId": null,
+          "kind": "CREATED",
+          "authorId": "U_SYN_102",
+          "body": "Session timeout is 30 minutes.",
+          "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787274060000102",
+          "occurredAt": "2026-08-21T04:01:00Z"
+        },
+        {
+          "sourceRevisionId": "rev_timeout_policy_2",
+          "messageId": "message_timeout_policy",
+          "messageTs": "1787274060.000102",
+          "revision": 2,
+          "previousRevisionId": "rev_timeout_policy_1",
+          "kind": "EDITED",
+          "authorId": "U_SYN_102",
+          "body": "Session timeout is 15 minutes.",
+          "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787274060000102",
+          "occurredAt": "2026-08-21T04:05:00Z"
+        }
+      ],
+      "snapshotAt": "2026-08-21T04:05:01Z"
+    },
+    "priorKnowledge": {
+      "nodes": [
+        {
+          "id": "knowledge_session_timeout_30",
+          "nodeType": "DECISION",
+          "canonicalKey": "decision:session:timeout",
+          "label": "Session timeout",
+          "content": "Session timeout is 30 minutes.",
+          "status": "ACTIVE",
+          "validFrom": "2026-08-21T04:01:00Z",
+          "validTo": null,
+          "primarySource": {
+            "sourceType": "SLACK_MESSAGE_REVISION",
+            "sourceEntityId": "message_timeout_policy",
+            "sourceRevisionId": "rev_timeout_policy_1"
+          },
+          "evidenceIds": ["evidence_session_timeout_rev1"],
+          "resourceVersion": 1,
+          "createdAt": "2026-08-21T04:01:01Z",
+          "updatedAt": "2026-08-21T04:01:01Z"
+        }
+      ],
+      "edges": []
+    }
+  },
+  "expectedResult": {
+    "schemaVersion": "1.0.0",
+    "bundleId": "bundle_timeout_revision",
+    "workItemId": "work_item_timeout_revision",
+    "inputRevisionIds": ["rev_timeout_policy_1", "rev_timeout_policy_2"],
+    "deterministicInputHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "candidates": [
+      {
+        "candidateId": "knowledge_session_timeout_15",
+        "operation": "UPSERT",
+        "nodeType": "DECISION",
+        "content": "Session timeout is 15 minutes.",
+        "status": "ACTIVE",
+        "validFrom": "2026-08-21T04:05:00Z",
+        "validTo": null,
+        "evidence": [
+          {
+            "sourceRevisionId": "rev_timeout_policy_2",
+            "quote": "Session timeout is 15 minutes.",
+            "startOffset": 0,
+            "endOffset": 30,
+            "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+          }
+        ],
+        "supersedesCandidateIds": ["knowledge_session_timeout_30"],
+        "confidence": 1,
+        "reason": "The latest edit changes the timeout to 15 minutes and cites only revision 2."
+      },
+      {
+        "candidateId": "knowledge_session_timeout_30",
+        "operation": "UPSERT",
+        "nodeType": "DECISION",
+        "content": "Session timeout is 30 minutes.",
+        "status": "SUPERSEDED",
+        "validFrom": "2026-08-21T04:01:00Z",
+        "validTo": "2026-08-21T04:05:00Z",
+        "evidence": [
+          {
+            "sourceRevisionId": "rev_timeout_policy_1",
+            "quote": "Session timeout is 30 minutes.",
+            "startOffset": 0,
+            "endOffset": 30,
+            "contentHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          }
+        ],
+        "supersedesCandidateIds": [],
+        "confidence": 1,
+        "reason": "Revision 1 remains auditable but was replaced by revision 2."
+      }
+    ],
+    "edges": [
+      {
+        "candidateId": "edge_timeout_15_supersedes_30",
+        "fromCandidateId": "knowledge_session_timeout_15",
+        "predicate": "SUPERSEDES",
+        "toCandidateId": "knowledge_session_timeout_30",
+        "status": "ACTIVE",
+        "evidence": [
+          {
+            "sourceRevisionId": "rev_timeout_policy_2",
+            "quote": "Session timeout is 15 minutes.",
+            "startOffset": 0,
+            "endOffset": 30,
+            "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+          }
+        ],
+        "confidence": 1,
+        "reason": "The edited revision supersedes the prior timeout decision."
+      }
+    ],
+    "rejectedCandidates": [],
+    "generatedAt": "2026-08-21T04:05:02Z"
+  }
+}

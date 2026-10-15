@@ -1,0 +1,8 @@
+{
+  "name": "@tc/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ../../scripts/python.mjs -m uvicorn tc_api.main:app --reload --reload-dir backend/src --reload-dir apps/api/src --host 0.0.0.0 --port 8000"
+  }
+}

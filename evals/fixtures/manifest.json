@@ -1,0 +1,27 @@
+{
+  "datasetId": "synthetic-slack-golden-v1",
+  "synthetic": true,
+  "description": "실제 Slack 샘플 미확보 상태에서 계약 및 평가 harness 개발을 위해 만든 합성 root/thread golden dataset",
+  "fixtureSchema": "../../packages/contracts/slack-golden-fixture.schema.json",
+  "counts": {
+    "total": 12,
+    "NORMAL": 3,
+    "MISSING": 3,
+    "REVERSAL": 3,
+    "CONFLICT": 3
+  },
+  "fixtures": [
+    "slack-work-items/slack-normal-01.json",
+    "slack-work-items/slack-normal-02.json",
+    "slack-work-items/slack-normal-03.json",
+    "slack-work-items/slack-missing-01.json",
+    "slack-work-items/slack-missing-02.json",
+    "slack-work-items/slack-missing-03.json",
+    "slack-work-items/slack-reversal-01.json",
+    "slack-work-items/slack-reversal-02.json",
+    "slack-work-items/slack-reversal-03.json",
+    "slack-work-items/slack-conflict-01.json",
+    "slack-work-items/slack-conflict-02.json",
+    "slack-work-items/slack-conflict-03.json"
+  ]
+}

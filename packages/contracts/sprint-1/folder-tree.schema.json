@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-1/folder-tree.schema.json",
+  "title": "Sprint 1 folder tree API payloads",
+  "description": "Recursive adjacency-list folder representations. Tree topology semantics are checked by the fixture test.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "WorkspaceId": {
+      "type": "string",
+      "pattern": "^workspace_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "FolderId": {
+      "type": "string",
+      "pattern": "^folder_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "NullableFolderId": {
+      "oneOf": [
+        {"$ref": "#/$defs/FolderId"},
+        {"type": "null"}
+      ]
+    },
+    "PathSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"$ref": "#/$defs/FolderId"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"}
+      }
+    },
+    "FolderNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "parentId",
+        "name",
+        "sortOrder",
+        "depth",
+        "path",
+        "directTestCaseCount",
+        "subtreeTestCaseCount",
+        "version",
+        "deletedAt",
+        "children"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/FolderId"},
+        "parentId": {"$ref": "#/$defs/NullableFolderId"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "sortOrder": {"type": "integer", "minimum": 0},
+        "depth": {"type": "integer", "minimum": 0},
+        "path": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/PathSegment"}},
+        "directTestCaseCount": {"type": "integer", "minimum": 0},
+        "subtreeTestCaseCount": {"type": "integer", "minimum": 0},
+        "version": {"type": "integer", "minimum": 1},
+        "deletedAt": {
+          "oneOf": [
+            {"type": "string", "format": "date-time"},
+            {"type": "null"}
+          ]
+        },
+        "children": {"type": "array", "items": {"$ref": "#/$defs/FolderNode"}}
+      }
+    },
+    "FolderTreeResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "generatedAt", "items"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "generatedAt": {"type": "string", "format": "date-time"},
+        "items": {"type": "array", "items": {"$ref": "#/$defs/FolderNode"}}
+      }
+    }
+  }
+}

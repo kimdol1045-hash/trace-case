@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tc-api"
+version = "0.1.0"
+description = "FastAPI entrypoint for the TC platform"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.116,<1",
+  "tc-backend==0.1.0",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+  "postgres: requires a disposable PostgreSQL 16+ database with pgvector",
+]

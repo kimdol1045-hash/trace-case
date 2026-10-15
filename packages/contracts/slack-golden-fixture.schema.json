@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/slack-golden-fixture.schema.json",
+  "title": "Synthetic Slack root/thread golden fixture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fixtureId", "synthetic", "category", "description", "source", "expected"],
+  "properties": {
+    "fixtureId": {"type": "string", "pattern": "^slack-(normal|missing|reversal|conflict)-[0-9]{2}$"},
+    "synthetic": {"const": true},
+    "category": {"type": "string", "enum": ["NORMAL", "MISSING", "REVERSAL", "CONFLICT"]},
+    "description": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "source": {"$ref": "#/$defs/SlackSourceBundle"},
+    "expected": {"$ref": "#/$defs/ExpectedResult"}
+  },
+  "$defs": {
+    "Identifier": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
+    "NonBlankString": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "SlackMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["messageTs", "messageRevisionId", "authorId", "body", "permalink", "revision"],
+      "properties": {
+        "messageTs": {"type": "string", "pattern": "^[0-9]{10}\\.[0-9]{6}$"},
+        "messageRevisionId": {"$ref": "#/$defs/Identifier"},
+        "authorId": {"type": "string", "pattern": "^U_SYN_[0-9]{3}$"},
+        "body": {"$ref": "#/$defs/NonBlankString"},
+        "permalink": {"type": "string", "pattern": "^https://synthetic\\.invalid/"},
+        "revision": {"type": "integer", "minimum": 1}
+      }
+    },
+    "SlackSourceBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "channelId", "root", "thread"],
+      "properties": {
+        "workspaceId": {"const": "T_SYNTHETIC"},
+        "channelId": {"const": "C_SYNTHETIC"},
+        "root": {"$ref": "#/$defs/SlackMessage"},
+        "thread": {"type": "array", "items": {"$ref": "#/$defs/SlackMessage"}}
+      }
+    },
+    "ExpectedKnowledgeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledgeId", "nodeType", "content", "status", "evidenceSourceMessageRevisions", "supersedesKnowledgeIds", "reason"],
+      "properties": {
+        "knowledgeId": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {"$ref": "state-enums.schema.json#/$defs/KnowledgeNodeType"},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "status": {"$ref": "state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "evidenceSourceMessageRevisions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "supersedesKnowledgeIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "reason": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "GenerationContextExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shouldGenerate", "activeKnowledgeIds", "excludedKnowledgeIds", "openQuestions"],
+      "properties": {
+        "shouldGenerate": {"type": "boolean"},
+        "activeKnowledgeIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "excludedKnowledgeIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "openQuestions": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/NonBlankString"}}
+      }
+    },
+    "ExpectedResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parseResult", "knowledgeItems", "generationContext"],
+      "properties": {
+        "parseResult": {"$ref": "slack-work-item-parse-result.schema.json"},
+        "knowledgeItems": {"type": "array", "items": {"$ref": "#/$defs/ExpectedKnowledgeItem"}},
+        "generationContext": {"$ref": "#/$defs/GenerationContextExpectation"}
+      }
+    }
+  }
+}

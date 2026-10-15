@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-5/error-contract.schema.json",
+  "title": "Sprint 5 Slack API error contract",
+  "description": "Strict typed errors for HTTP verification, channel policy, filters, cursors, normalization, rate-limit retry and terminal dead jobs. Errors never serialize secrets, tokens or authentication headers.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "WorkspaceId": {"$ref": "slack-event-api.schema.json#/$defs/WorkspaceId"},
+    "ChannelId": {"$ref": "slack-event-api.schema.json#/$defs/ChannelId"},
+    "SlackEventId": {"$ref": "slack-event-api.schema.json#/$defs/SlackEventId"},
+    "JobId": {"$ref": "slack-event-api.schema.json#/$defs/JobId"},
+    "ValidationError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/ValidationError"},
+    "ResourceNotFoundError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/ResourceNotFoundError"},
+    "VersionConflictError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/VersionConflictError"},
+    "IdempotencyConflictError": {"$ref": "../sprint-1/error-contract.schema.json#/$defs/IdempotencyConflictError"},
+    "CursorInvalidError": {"$ref": "../sprint-2/error-contract.schema.json#/$defs/CursorInvalidError"},
+    "SlackSignatureInvalidError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_SIGNATURE_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reason", "signatureVersion"],
+              "properties": {
+                "reason": {"type": "string", "enum": ["MISSING", "MALFORMED", "MISMATCH", "UNSUPPORTED_VERSION"]},
+                "signatureVersion": {
+                  "oneOf": [
+                    {"const": "v0"},
+                    {"type": "null"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Reports verification outcome only; raw signature, base string, signing secret and request headers are omitted."
+    },
+    "SlackRequestTimestampInvalidError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_REQUEST_TIMESTAMP_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reason", "requestTimestamp", "serverTimestamp", "maximumSkewSeconds"],
+              "properties": {
+                "reason": {"type": "string", "enum": ["MISSING", "MALFORMED", "STALE", "FUTURE"]},
+                "requestTimestamp": {
+                  "oneOf": [
+                    {"type": "integer", "minimum": 0},
+                    {"type": "null"}
+                  ]
+                },
+                "serverTimestamp": {"type": "integer", "minimum": 0},
+                "maximumSkewSeconds": {"const": 300}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackChannelAccessDeniedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_CHANNEL_ACCESS_DENIED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["workspaceId", "channelId", "visibility", "policy", "collectionAllowed"],
+              "properties": {
+                "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+                "channelId": {"$ref": "#/$defs/ChannelId"},
+                "visibility": {"type": "string", "enum": ["PUBLIC", "PRIVATE"]},
+                "policy": {"type": "string", "enum": ["PUBLIC_NOT_ALLOWLISTED", "PRIVATE_DEFAULT_DENY", "APP_NOT_MEMBER"]},
+                "collectionAllowed": {"const": false}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackPrivateChannelConfirmationRequiredError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_PRIVATE_CHANNEL_CONFIRMATION_REQUIRED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["workspaceId", "channelId", "requiredConfirmation", "defaultPolicy"],
+              "properties": {
+                "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+                "channelId": {"$ref": "#/$defs/ChannelId"},
+                "requiredConfirmation": {"const": "SHARED_WITH_WHOLE_TEAM"},
+                "defaultPolicy": {"const": "PRIVATE_DEFAULT_DENY"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackFilterInvalidError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_FILTER_INVALID"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resource", "field", "reason"],
+              "properties": {
+                "resource": {"type": "string", "enum": ["EVENT_LOG", "WORK_ITEM", "CHANNEL_ACCESS", "JOB"]},
+                "field": {"type": "string", "enum": ["channelIds", "eventIds", "actions", "deliveryOutcomes", "processingStates", "statuses", "parseStatuses", "jobTypes", "states", "failureReasons", "updatedFrom", "updatedTo", "receivedFrom", "receivedTo"]},
+                "reason": {"type": "string", "enum": ["UNKNOWN_VALUE", "TOO_MANY_VALUES", "INVALID_RANGE", "FILTER_CURSOR_MISMATCH"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackEventNormalizationError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_EVENT_NORMALIZATION_FAILED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["eventId", "eventType", "messageSubtype", "reason"],
+              "properties": {
+                "eventId": {
+                  "oneOf": [
+                    {"$ref": "#/$defs/SlackEventId"},
+                    {"type": "null"}
+                  ]
+                },
+                "eventType": {"type": "string", "maxLength": 128},
+                "messageSubtype": {
+                  "oneOf": [
+                    {"type": "string", "maxLength": 128},
+                    {"type": "null"}
+                  ]
+                },
+                "reason": {"type": "string", "enum": ["REQUIRED_FIELD_MISSING", "INVALID_TIMESTAMP", "THREAD_IDENTITY_INVALID", "UNSUPPORTED_SHAPE"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SlackRateLimitedError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_RATE_LIMITED"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "httpStatus", "attempt", "maxAttempts", "retryAfterSeconds", "nextAttemptAt"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/JobId"},
+                "httpStatus": {"const": 429},
+                "attempt": {"type": "integer", "minimum": 1},
+                "maxAttempts": {"type": "integer", "minimum": 1},
+                "retryAfterSeconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+                "nextAttemptAt": {"type": "string", "format": "date-time"}
+              }
+            }
+          }
+        }
+      ],
+      "description": "The retry delay is normalized from Slack rate-limit metadata without echoing the upstream authentication header or token."
+    },
+    "SlackJobDeadError": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "../sprint-1/error-contract.schema.json#/$defs/CommonError"},
+        {
+          "type": "object",
+          "properties": {
+            "code": {"const": "SLACK_JOB_DEAD"},
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["jobId", "attempts", "maxAttempts", "reason", "retryScheduled"],
+              "properties": {
+                "jobId": {"$ref": "#/$defs/JobId"},
+                "attempts": {"type": "integer", "minimum": 1},
+                "maxAttempts": {"type": "integer", "minimum": 1},
+                "reason": {"type": "string", "enum": ["RATE_LIMIT", "TRANSIENT_UPSTREAM", "TIMEOUT", "INTERNAL_ERROR"]},
+                "retryScheduled": {"const": false}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ErrorResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/ValidationError"},
+        {"$ref": "#/$defs/ResourceNotFoundError"},
+        {"$ref": "#/$defs/VersionConflictError"},
+        {"$ref": "#/$defs/IdempotencyConflictError"},
+        {"$ref": "#/$defs/CursorInvalidError"},
+        {"$ref": "#/$defs/SlackSignatureInvalidError"},
+        {"$ref": "#/$defs/SlackRequestTimestampInvalidError"},
+        {"$ref": "#/$defs/SlackChannelAccessDeniedError"},
+        {"$ref": "#/$defs/SlackPrivateChannelConfirmationRequiredError"},
+        {"$ref": "#/$defs/SlackFilterInvalidError"},
+        {"$ref": "#/$defs/SlackEventNormalizationError"},
+        {"$ref": "#/$defs/SlackRateLimitedError"},
+        {"$ref": "#/$defs/SlackJobDeadError"}
+      ]
+    }
+  }
+}

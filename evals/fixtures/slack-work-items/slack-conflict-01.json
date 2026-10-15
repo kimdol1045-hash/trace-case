@@ -1,0 +1,73 @@
+{
+  "fixtureId": "slack-conflict-01",
+  "synthetic": true,
+  "category": "CONFLICT",
+  "description": "세션 타임아웃을 15분과 30분으로 각각 주장하고 최종 결론이 없는 충돌 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787227200.000010",
+      "messageRevisionId": "rev_c01_root",
+      "authorId": "U_SYN_018",
+      "body": "[일감]\n개발건: 관리자 세션 타임아웃 변경\n요청 메뉴: 공통 > 보안\n기능 설명: 비활성 관리자 세션을 자동 종료한다.\n요청내용: 비활성 타임아웃 기준을 조정한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787227200000010",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787227260.000010",
+        "messageRevisionId": "rev_c01_reply_01",
+        "authorId": "U_SYN_019",
+        "body": "보안 기준상 15분으로 해야 합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787227260000010",
+        "revision": 1
+      },
+      {
+        "messageTs": "1787227320.000010",
+        "messageRevisionId": "rev_c01_reply_02",
+        "authorId": "U_SYN_020",
+        "body": "운영 편의를 위해 30분이 맞습니다. 15분에는 동의하지 않습니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787227320000010",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "관리자 세션 타임아웃 변경",
+      "requestedMenu": "공통 > 보안",
+      "featureDescription": "비활성 관리자 세션을 자동 종료한다.",
+      "requestDetails": "비활성 타임아웃 기준을 조정한다.",
+      "missingFields": [],
+      "confidence": 0.9,
+      "sourceMessageRevisions": ["rev_c01_root"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_c01_fifteen",
+        "nodeType": "DECISION",
+        "content": "관리자 비활성 세션 타임아웃은 15분이다.",
+        "status": "AMBIGUOUS",
+        "evidenceSourceMessageRevisions": ["rev_c01_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "30분 주장과 충돌하며 최종 확정 발화가 없다."
+      },
+      {
+        "knowledgeId": "knowledge_c01_thirty",
+        "nodeType": "DECISION",
+        "content": "관리자 비활성 세션 타임아웃은 30분이다.",
+        "status": "AMBIGUOUS",
+        "evidenceSourceMessageRevisions": ["rev_c01_reply_02"],
+        "supersedesKnowledgeIds": [],
+        "reason": "15분 주장과 충돌하며 권위 있는 최종 결론이 없다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": false,
+      "activeKnowledgeIds": [],
+      "excludedKnowledgeIds": ["knowledge_c01_fifteen", "knowledge_c01_thirty"],
+      "openQuestions": ["관리자 비활성 세션 타임아웃을 15분과 30분 중 어느 값으로 적용할지 확정되지 않았다."]
+    }
+  }
+}

@@ -1,0 +1,718 @@
+{
+  "fixtureId": "sprint-2-test-case-contracts",
+  "synthetic": true,
+  "cases": [
+    {
+      "name": "parent work item create request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateWorkItemRequest",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS"],
+      "payload": {
+        "key": "WORK-531",
+        "categoryId": "folder_orders",
+        "summary": "Card payment reliability",
+        "description": "Persisted parent scope",
+        "ownerLabel": "QA Kim",
+        "labels": ["payment", "smoke"]
+      }
+    },
+    {
+      "name": "parent work item update requires resource version",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/UpdateWorkItemRequest",
+      "expectedValid": false,
+      "payload": {
+        "categoryId": "folder_orders",
+        "summary": "Card payment reliability",
+        "changeReason": "Edit detail"
+      }
+    },
+    {
+      "name": "manual PER_STEP create request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Card approval creates an order",
+        "precondition": "A signed-in customer has an item in the cart.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "HIGH",
+        "ownerLabel": "QA Kim",
+        "labels": ["payment", "smoke"],
+        "steps": [
+          {"sequence": 1, "precondition": "The cart contains an orderable item.", "action": "Select card payment.", "expectedResult": "The card form opens."},
+          {"sequence": 2, "action": "Submit payment.", "expectedResult": "An order number is displayed."}
+        ],
+        "source": {"type": "UI", "actorLabel": "QA Kim", "correlationId": "trace_create_case_1"}
+      }
+    },
+    {
+      "name": "generation CASE create request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Five invalid codes lock verification",
+        "precondition": "An active account can request verification.",
+        "expectedResultMode": "CASE",
+        "caseExpectedResult": "Verification is locked after the fifth invalid code.",
+        "priority": "CRITICAL",
+        "labels": ["security", "generated"],
+        "steps": [
+          {"sequence": 1, "action": "Request an email verification code."},
+          {"sequence": 2, "action": "Submit an invalid code five times."}
+        ],
+        "source": {
+          "type": "WORKER",
+          "generationJobId": "generation_job_789",
+          "slackWorkItemId": "slack_work_456",
+          "sourceRevisionIds": ["message_revision_7"],
+          "evidenceNodeIds": ["decision_101", "requirement_203"],
+          "correlationId": "trace_generation_1"
+        },
+        "generationReason": "Covers the active five-attempt lock decision."
+      }
+    },
+    {
+      "name": "create request cannot start deprecated",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "DEPRECATED",
+        "summary": "Invalid initial state",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "LOW",
+        "labels": [],
+        "steps": [{"sequence": 1, "action": "Open checkout.", "expectedResult": "Checkout opens."}],
+        "source": {"type": "UI"}
+      }
+    },
+    {
+      "name": "PER_STEP requires every step result",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Missing step result",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "LOW",
+        "labels": [],
+        "steps": [{"sequence": 1, "action": "Open checkout."}],
+        "source": {"type": "UI"}
+      }
+    },
+    {
+      "name": "CASE forbids per-step result",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Ambiguous generated result placement",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "CASE",
+        "caseExpectedResult": "Checkout completes.",
+        "priority": "LOW",
+        "labels": ["generated"],
+        "steps": [{"sequence": 1, "action": "Open checkout.", "expectedResult": "Checkout opens."}],
+        "source": {"type": "WORKER", "generationJobId": "generation_job_9", "evidenceNodeIds": ["requirement_9"]},
+        "generationReason": "Generated regression coverage."
+      }
+    },
+    {
+      "name": "manual script rejects removed testData field",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "No test data column",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "LOW",
+        "labels": [],
+        "steps": [{"sequence": 1, "action": "Open checkout.", "testData": "card=4111", "expectedResult": "Checkout opens."}],
+        "source": {"type": "UI"}
+      }
+    },
+    {
+      "name": "labels are case-insensitive unique",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS"],
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Duplicate labels",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "LOW",
+        "labels": ["Smoke", " smoke "],
+        "steps": [{"sequence": 1, "action": "Open checkout.", "expectedResult": "Checkout opens."}],
+        "source": {"type": "UI"}
+      }
+    },
+    {
+      "name": "steps must be contiguous and one based",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "semanticRules": ["CONTIGUOUS_STEPS"],
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Gapped step order",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "LOW",
+        "labels": [],
+        "steps": [
+          {"sequence": 1, "action": "Open checkout.", "expectedResult": "Checkout opens."},
+          {"sequence": 3, "action": "Submit checkout.", "expectedResult": "Checkout completes."}
+        ],
+        "source": {"type": "UI"}
+      }
+    },
+    {
+      "name": "create response allocates TC-000001 ACTIVE",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "id": "case_checkout_happy",
+        "key": "TC-000001",
+        "workItemId": "work_item_checkout",
+        "categoryId": "folder_orders",
+        "sortOrder": 0,
+        "status": "ACTIVE",
+        "resourceVersion": 1,
+        "version": 1,
+        "currentVersion": {
+          "id": "case_version_checkout_happy_v1",
+          "testCaseId": "case_checkout_happy",
+          "version": 1,
+          "summary": "Card approval creates an order",
+          "precondition": "A signed-in customer has an item in the cart.",
+          "expectedResultMode": "PER_STEP",
+          "priority": "HIGH",
+          "ownerLabel": "QA Kim",
+          "labels": ["payment", "smoke"],
+          "steps": [
+            {"sequence": 1, "action": "Select card payment.", "expectedResult": "The card form opens."},
+            {"sequence": 2, "action": "Submit payment.", "expectedResult": "An order number is displayed."}
+          ],
+          "source": {"type": "UI", "actorLabel": "QA Kim", "correlationId": "trace_create_case_1"},
+          "changeReason": "Initial creation",
+          "createdAt": "2026-08-20T01:00:00Z"
+        },
+        "createdAt": "2026-08-20T01:00:00Z",
+        "updatedAt": "2026-08-20T01:00:00Z",
+        "deletedAt": null,
+        "generationManagement": {"managed": false}
+      }
+    },
+    {
+      "name": "full snapshot update request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/UpdateTestCaseRequest",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "baseVersion": 1,
+        "status": "ACTIVE",
+        "summary": "Card approval creates exactly one order",
+        "precondition": "A signed-in customer has an item in the cart.",
+        "expectedResultMode": "PER_STEP",
+        "priority": "CRITICAL",
+        "ownerLabel": "QA Kim",
+        "labels": ["payment", "regression"],
+        "steps": [
+          {"sequence": 1, "action": "Submit card payment twice rapidly.", "expectedResult": "Only one approval request is accepted."},
+          {"sequence": 2, "action": "Open order history.", "expectedResult": "Exactly one order is displayed."}
+        ],
+        "changeReason": "Add duplicate submission coverage.",
+        "source": {"type": "UI", "actorLabel": "QA Kim", "correlationId": "trace_update_case_1"}
+      }
+    },
+    {
+      "name": "worker source requires evidence metadata",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/SourceMetadata",
+      "expectedValid": false,
+      "payload": {"type": "WORKER", "generationJobId": "generation_job_789"}
+    },
+    {
+      "name": "SLACK source pins work item and message revisions",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/SourceMetadata",
+      "expectedValid": true,
+      "payload": {
+        "type": "SLACK",
+        "slackWorkItemId": "slack_work_456",
+        "sourceRevisionIds": ["message_revision_7", "message_revision_8"],
+        "externalActorId": "slack_user_42"
+      }
+    },
+    {
+      "name": "SLACK source rejects missing revisions",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/SourceMetadata",
+      "expectedValid": false,
+      "payload": {"type": "SLACK", "slackWorkItemId": "slack_work_456"}
+    },
+    {
+      "name": "CASE create rejects interactive source",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest",
+      "expectedValid": false,
+      "payload": {
+        "workItemId": "work_item_checkout",
+        "status": "ACTIVE",
+        "summary": "Interactive payload cannot use case-level result",
+        "precondition": "A cart exists.",
+        "expectedResultMode": "CASE",
+        "caseExpectedResult": "Checkout completes.",
+        "priority": "LOW",
+        "labels": [],
+        "steps": [{"sequence": 1, "action": "Open checkout."}],
+        "source": {"type": "UI", "actorLabel": "QA Kim"},
+        "generationReason": "This field cannot make an interactive payload generated."
+      }
+    },
+    {
+      "name": "test case VERSION_CONFLICT error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "VERSION_CONFLICT",
+        "message": "The test case changed after it was loaded.",
+        "details": {
+          "resourceType": "TEST_CASE",
+          "resourceId": "case_checkout_happy",
+          "expectedVersion": 1,
+          "actualVersion": 2
+        },
+        "traceId": "trace_version_conflict_1"
+      }
+    },
+    {
+      "name": "compound search and filter query",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCaseListQuery",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS"],
+      "payload": {
+        "search": "tc-000001 card",
+        "categoryIds": ["folder_orders"],
+        "workItemIds": ["work_item_checkout", "work_item_refunds"],
+        "statuses": ["ACTIVE"],
+        "priorities": ["HIGH", "CRITICAL"],
+        "labels": ["Payment", "Smoke"],
+        "labelMatch": "ALL",
+        "includeDeleted": false,
+        "sort": "UPDATED_AT_DESC",
+        "cursor": "cursor_case_page_2",
+        "limit": 50
+      }
+    },
+    {
+      "name": "labelMatch requires labels",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCaseListQuery",
+      "expectedValid": false,
+      "payload": {"labelMatch": "ALL", "limit": 50}
+    },
+    {
+      "name": "pagination limit is capped at 200",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCaseListQuery",
+      "expectedValid": false,
+      "payload": {"limit": 201}
+    },
+    {
+      "name": "paginated case list response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCasePageResponse",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS"],
+      "payload": {
+        "items": [
+          {
+            "id": "case_checkout_happy",
+            "key": "TC-000001",
+            "workItemId": "work_item_checkout",
+            "workItemKey": "WORK-482",
+            "workItemSummary": "Checkout reliability",
+            "categoryId": "folder_orders",
+            "sortOrder": 0,
+            "status": "ACTIVE",
+            "summary": "Card approval creates an order",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "resourceVersion": 2,
+            "version": 2,
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "updatedAt": "2026-08-20T02:00:00Z",
+            "deletedAt": null
+          }
+        ],
+        "nextCursor": "cursor_case_page_2",
+        "total": 137
+      }
+    },
+    {
+      "name": "paginated immutable version history",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCaseVersionPageResponse",
+      "expectedValid": true,
+      "semanticRules": ["CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "items": [
+          {
+            "id": "case_version_checkout_happy_v1",
+            "testCaseId": "case_checkout_happy",
+            "version": 1,
+            "summary": "Card approval creates an order",
+            "precondition": "A signed-in customer has an item in the cart.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "steps": [{"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Initial creation",
+            "createdAt": "2026-08-20T01:00:00Z"
+          }
+        ],
+        "nextCursor": null,
+        "total": 1
+      }
+    },
+    {
+      "name": "field and step version diff response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/TestCaseVersionDiffResponse",
+      "expectedValid": true,
+      "payload": {
+        "testCaseId": "case_checkout_happy",
+        "fromVersion": 1,
+        "toVersion": 2,
+        "fieldChanges": [
+          {"field": "summary", "before": "Card approval creates an order", "after": "Card approval creates exactly one order"},
+          {"field": "labels", "before": ["payment", "smoke"], "after": ["payment", "regression"]}
+        ],
+        "stepChanges": [
+          {
+            "changeType": "CHANGED",
+            "before": {"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."},
+            "after": {"sequence": 1, "action": "Submit card payment twice rapidly.", "expectedResult": "Only one order is displayed."}
+          }
+        ]
+      }
+    },
+    {
+      "name": "restore historical version request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/RestoreTestCaseVersionRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseVersion": 4,
+        "changeReason": "Restore the approved regression script.",
+        "source": {"type": "UI", "actorLabel": "QA Kim", "correlationId": "trace_restore_version_1"}
+      }
+    },
+    {
+      "name": "version restore appends a new version response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/RestoreTestCaseVersionResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "RESTORE_APPENDS_VERSION", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "testCase": {
+          "id": "case_checkout_happy",
+          "key": "TC-000001",
+          "workItemId": "work_item_checkout",
+          "categoryId": "folder_orders",
+          "sortOrder": 0,
+          "status": "ACTIVE",
+          "resourceVersion": 5,
+          "version": 5,
+          "currentVersion": {
+            "id": "case_version_checkout_happy_v5",
+            "testCaseId": "case_checkout_happy",
+            "version": 5,
+            "summary": "Card approval creates an order",
+            "precondition": "A signed-in customer has an item in the cart.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "steps": [{"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Restore the approved regression script.",
+            "restoredFromVersion": 2,
+            "createdAt": "2026-08-20T05:00:00Z"
+          },
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T05:00:00Z",
+          "deletedAt": null,
+          "generationManagement": {"managed": false}
+        },
+        "restoredFromVersion": 2,
+        "auditId": "audit_restore_case_version_2"
+      }
+    },
+    {
+      "name": "cross work item move request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/MoveTestCaseRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseResourceVersion": 5,
+        "targetWorkItemId": "work_item_refunds",
+        "targetSortOrder": 2,
+        "changeReason": "Move into the owning refund work item.",
+        "source": {"type": "UI", "actorLabel": "QA Kim"}
+      }
+    },
+    {
+      "name": "move response changes ownership category and order",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/MoveTestCaseResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "operation": "MOVE",
+        "testCase": {
+          "id": "case_checkout_happy",
+          "key": "TC-000001",
+          "workItemId": "work_item_refunds",
+          "categoryId": "folder_payments",
+          "sortOrder": 2,
+          "status": "ACTIVE",
+          "resourceVersion": 6,
+          "version": 5,
+          "currentVersion": {
+            "id": "case_version_checkout_happy_v5",
+            "testCaseId": "case_checkout_happy",
+            "version": 5,
+            "summary": "Card approval creates an order",
+            "precondition": "A signed-in customer has an item in the cart.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "steps": [{"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Restore the approved regression script.",
+            "restoredFromVersion": 2,
+            "createdAt": "2026-08-20T05:00:00Z"
+          },
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T06:00:00Z",
+          "deletedAt": null,
+          "generationManagement": {"managed": false}
+        },
+        "previousWorkItemId": "work_item_checkout",
+        "previousCategoryId": "folder_orders",
+        "previousSortOrder": 0,
+        "auditId": "audit_move_case_1"
+      }
+    },
+    {
+      "name": "copy explicit immutable version request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CopyTestCaseRequest",
+      "expectedValid": true,
+      "payload": {
+        "sourceVersion": 2,
+        "targetWorkItemId": "work_item_refunds",
+        "targetSortOrder": 3,
+        "summary": "Refunded approval is reconciled",
+        "changeReason": "Reuse the approved payment setup.",
+        "source": {"type": "UI", "actorLabel": "QA Kim"}
+      }
+    },
+    {
+      "name": "copy starts isolated history at version one",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/CopyTestCaseResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "COPY_HISTORY_ISOLATION", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "operation": "COPY",
+        "testCase": {
+          "id": "case_refund_copy",
+          "key": "TC-000002",
+          "workItemId": "work_item_refunds",
+          "categoryId": "folder_payments",
+          "sortOrder": 3,
+          "status": "ACTIVE",
+          "resourceVersion": 1,
+          "version": 1,
+          "currentVersion": {
+            "id": "case_version_refund_copy_v1",
+            "testCaseId": "case_refund_copy",
+            "version": 1,
+            "summary": "Refunded approval is reconciled",
+            "precondition": "A signed-in customer has an approved order.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "refund"],
+            "steps": [{"sequence": 1, "action": "Refund the approved order.", "expectedResult": "The payment is reconciled."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Copied from TC-000001 v2.",
+            "createdAt": "2026-08-20T07:00:00Z"
+          },
+          "copiedFrom": {
+            "testCaseId": "case_checkout_happy",
+            "caseKey": "TC-000001",
+            "versionId": "case_version_checkout_happy_v2",
+            "version": 2
+          },
+          "createdAt": "2026-08-20T07:00:00Z",
+          "updatedAt": "2026-08-20T07:00:00Z",
+          "deletedAt": null,
+          "generationManagement": {"managed": false}
+        },
+        "copiedFrom": {
+          "testCaseId": "case_checkout_happy",
+          "caseKey": "TC-000001",
+          "versionId": "case_version_checkout_happy_v2",
+          "version": 2
+        },
+        "auditId": "audit_copy_case_1"
+      }
+    },
+    {
+      "name": "soft delete request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/SoftDeleteTestCaseRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseResourceVersion": 6,
+        "reason": "Obsolete payment flow.",
+        "source": {"type": "API", "externalActorId": "cleanup_job"}
+      }
+    },
+    {
+      "name": "soft delete response preserves current version",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/SoftDeleteTestCaseResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "operation": "SOFT_DELETE",
+        "testCase": {
+          "id": "case_checkout_happy",
+          "key": "TC-000001",
+          "workItemId": "work_item_refunds",
+          "categoryId": "folder_payments",
+          "sortOrder": 2,
+          "status": "DEPRECATED",
+          "resourceVersion": 7,
+          "version": 5,
+          "currentVersion": {
+            "id": "case_version_checkout_happy_v5",
+            "testCaseId": "case_checkout_happy",
+            "version": 5,
+            "summary": "Card approval creates an order",
+            "precondition": "A signed-in customer has an item in the cart.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "steps": [{"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Restore the approved regression script.",
+            "restoredFromVersion": 2,
+            "createdAt": "2026-08-20T05:00:00Z"
+          },
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T08:00:00Z",
+          "deletedAt": "2026-08-20T08:00:00Z",
+          "generationManagement": {"managed": false}
+        },
+        "auditId": "audit_delete_case_1"
+      }
+    },
+    {
+      "name": "restore deleted case request with replacement owner",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/RestoreDeletedTestCaseRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseResourceVersion": 7,
+        "targetWorkItemId": "work_item_checkout",
+        "targetSortOrder": 4,
+        "reason": "The checkout flow is active again.",
+        "source": {"type": "UI", "actorLabel": "QA Kim"}
+      }
+    },
+    {
+      "name": "restore deleted case response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json#/$defs/RestoreDeletedTestCaseResponse",
+      "expectedValid": true,
+      "semanticRules": ["RESOURCE_VERSION_CONSISTENCY", "CASE_INSENSITIVE_LABELS", "CONTIGUOUS_STEPS"],
+      "payload": {
+        "operation": "RESTORE_DELETED",
+        "testCase": {
+          "id": "case_checkout_happy",
+          "key": "TC-000001",
+          "workItemId": "work_item_checkout",
+          "categoryId": "folder_orders",
+          "sortOrder": 4,
+          "status": "ACTIVE",
+          "resourceVersion": 8,
+          "version": 5,
+          "currentVersion": {
+            "id": "case_version_checkout_happy_v5",
+            "testCaseId": "case_checkout_happy",
+            "version": 5,
+            "summary": "Card approval creates an order",
+            "precondition": "A signed-in customer has an item in the cart.",
+            "expectedResultMode": "PER_STEP",
+            "priority": "HIGH",
+            "ownerLabel": "QA Kim",
+            "labels": ["payment", "smoke"],
+            "steps": [{"sequence": 1, "action": "Submit card payment.", "expectedResult": "An order is displayed."}],
+            "source": {"type": "UI", "actorLabel": "QA Kim"},
+            "changeReason": "Restore the approved regression script.",
+            "restoredFromVersion": 2,
+            "createdAt": "2026-08-20T05:00:00Z"
+          },
+          "createdAt": "2026-08-20T01:00:00Z",
+          "updatedAt": "2026-08-20T09:00:00Z",
+          "deletedAt": null,
+          "generationManagement": {"managed": false}
+        },
+        "auditId": "audit_restore_deleted_case_1"
+      }
+    },
+    {
+      "name": "case-insensitive label conflict error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "LABEL_CONFLICT",
+        "message": "Labels must be unique ignoring case.",
+        "details": {"labels": ["Smoke", " smoke "], "normalizedLabel": "smoke"},
+        "traceId": "trace_label_conflict_1"
+      }
+    },
+    {
+      "name": "pagination cursor error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "CURSOR_INVALID",
+        "message": "The cursor does not match the requested filters.",
+        "details": {"cursor": "cursor_from_other_filter"},
+        "traceId": "trace_cursor_invalid_1"
+      }
+    },
+    {
+      "name": "mutation conflict rejects private diagnostics",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-2/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": false,
+      "payload": {
+        "code": "TEST_CASE_MOVE_CONFLICT",
+        "message": "The target work item is not active.",
+        "details": {
+          "testCaseId": "case_checkout_happy",
+          "targetWorkItemId": "work_item_deleted",
+          "sql": "private diagnostic"
+        },
+        "traceId": "trace_move_conflict_1"
+      }
+    }
+  ]
+}

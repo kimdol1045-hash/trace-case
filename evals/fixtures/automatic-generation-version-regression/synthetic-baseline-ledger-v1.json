@@ -1,0 +1,79 @@
+{
+  "artifactKind": "AUTOMATIC_GENERATION_BASELINE_LEDGER_SNAPSHOT",
+  "contractVersion": "automatic-generation-version-regression/1.0.0",
+  "environment": "fixture",
+  "synthetic": true,
+  "ledgerVersion": 1,
+  "activeBaselineId": null,
+  "records": [
+    {
+      "baselineId": "baseline_fixture_v2_candidate",
+      "baselineVersion": 1,
+      "state": "CONTRACT_ONLY",
+      "synthetic": true,
+      "identity": {
+        "generationPolicyVersion": "generation-policy-v1",
+        "generationPolicyDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "promptVersion": "generation-prompt-v2",
+        "promptDigest": "sha256:1717171717171717171717171717171717171717171717171717171717171717",
+        "providerId": "fixture-provider",
+        "modelId": "fixture-model",
+        "modelRevision": "revision-1",
+        "embeddingProviderId": "local-deterministic",
+        "embeddingModelId": "sha256-char-ngram-feature-hash",
+        "embeddingRevision": "revision-2",
+        "embeddingDimensions": 256,
+        "semanticDuplicateAlgorithmVersion": "offline-char-ngram-cosine-v2",
+        "semanticDuplicateThreshold": 0.85,
+        "semanticDuplicatePolicyDigest": "sha256:1313131313131313131313131313131313131313131313131313131313131313",
+        "exactDuplicateAlgorithmVersion": "exact-content-v1",
+        "generationInputSchemaVersion": "1.0.0",
+        "generationOutputSchemaVersion": "1.0.0",
+        "suggestionSchemaVersion": "generation-suggestion/1.0.0",
+        "qualityGateSchemaVersion": "automatic-generation-quality-gate/1.0.0",
+        "ontologySchemaVersion": "ontology-v1",
+        "ontologySchemaDigest": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+        "regressionEvaluatorVersion": "automatic-generation-version-regression-evaluator-v1",
+        "regressionPolicyVersion": "automatic-generation-version-regression-policy-v1",
+        "regressionPolicyDigest": "sha256:1515151515151515151515151515151515151515151515151515151515151515",
+        "placementPolicyVersion": "generation-placement-v1",
+        "placementPolicyDigest": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+      },
+      "identityDigest": "sha256:5cf55f52797f8d425c575fa2842cf034f45e9897d2d423388bf1c2dd8100ed4b",
+      "changeRequestId": "change_fixture_prompt_v2",
+      "comparisonReportId": "version_regression_fixture_report_v1",
+      "approvalId": null,
+      "activationReceiptId": null,
+      "supersededByBaselineId": null,
+      "createdAt": "2026-08-31T00:00:01Z",
+      "auditDigest": "sha256:4141414141414141414141414141414141414141414141414141414141414141"
+    }
+  ],
+  "approvals": [],
+  "activations": [],
+  "rollbacks": [],
+  "events": [
+    {
+      "eventId": "baseline_event_fixture_1",
+      "sequence": 1,
+      "eventType": "CANDIDATE_RECORDED",
+      "idempotencyKey": "fixture-change-request-001",
+      "requestDigest": "sha256:7d09f338541aa39ade6c27c9a61b421831a5062aaa0d383ffe105813ca33d636",
+      "expectedLedgerVersion": 0,
+      "committedLedgerVersion": 1,
+      "baselineId": "baseline_fixture_v2_candidate",
+      "beforeActiveBaselineId": null,
+      "afterActiveBaselineId": null,
+      "principalId": "fixture_requester",
+      "occurredAt": "2026-08-31T00:00:01Z",
+      "outcome": "COMMITTED",
+      "receiptDigest": "sha256:4242424242424242424242424242424242424242424242424242424242424242"
+    }
+  ],
+  "snapshotDigest": "sha256:eb6f91683d3c9aa24e7c7e560393e9d18ccc9149eb84131299aac8de049a8247",
+  "retention": {
+    "retentionDays": 400,
+    "immutable": true,
+    "legalHoldOverridesDeletion": true
+  }
+}

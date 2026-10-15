@@ -1,0 +1,229 @@
+{
+  "absence": {
+    "disposableDatabases": true,
+    "dockerResources": true,
+    "dump": true,
+    "providerProcesses": true,
+    "tempDirectory": true,
+    "workspaces": true
+  },
+  "confirmationRequired": "RUN PF-SF1-T09 LOCAL-DISPOSABLE-CLEANUP ON tc-phase-f-pf-sf1-t09-wave8-sg9c42fd-disposable",
+  "consumedEvidence": {
+    "contractDigest": {
+      "sha256": "2f646db8648f4e2b5e81bac73621d2dccc6427d20261fecbd038b691b45f0300",
+      "version": "tc.canonical-json.sha256.v1"
+    },
+    "fileSafety": {
+      "ctimeNs": 1788745584560649596,
+      "device": 16777231,
+      "inode": 96556980,
+      "linkCount": 1,
+      "modeOctal": "0600",
+      "mtimeNs": 1788745584560649596,
+      "size": 26380
+    },
+    "fileSha256": "13489b5388989d5ee6a34016e03191def750b44c7025f4b7afc7b37da482eb76",
+    "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-sg9c42fd-20260907.json"
+  },
+  "contractDigest": {
+    "sha256": "16aee3d9eaca455ee3143fba3f2a5ca50cd8e4795189025988e01421f62492c3",
+    "version": "tc.canonical-json.sha256.v1"
+  },
+  "credentialsOmitted": true,
+  "mode": "LOCAL_DISPOSABLE_NETWORK_FREE_CLEANUP_PASS",
+  "notRun": [
+    "staging credentials and bootstrap",
+    "live model provider calls",
+    "staging apply",
+    "production-like multiprocess networking/load/alerts",
+    "operator handoff",
+    "production RTO/RPO",
+    "PF-SF1-T09 release gate",
+    "Phase F release gate"
+  ],
+  "preservation": {
+    "afterDatabaseInventory": {
+      "count": 20,
+      "digest": {
+        "sha256": "822bd3a9da55784787a1e5c28a10e2294bda0f28b545899379058166288fa3b2",
+        "version": "tc.postgresql-database-inventory.v1"
+      },
+      "tcPresent": true,
+      "version": "tc.postgresql-database-inventory.v1"
+    },
+    "afterDockerInventory": {
+      "counts": {
+        "containers": 8,
+        "images": 37,
+        "networks": 5,
+        "volumes": 5
+      },
+      "digest": {
+        "sha256": "2f8b63f57ab62e8bb4b07f3fbd5045e6932973d66d225b57455b86eadce97a33",
+        "version": "tc.docker-local-inventory.v1"
+      },
+      "version": "tc.docker-local-inventory.v1"
+    },
+    "afterTcFingerprintDigest": {
+      "sha256": "5cb5704c43263e57dc1230e545b2a1a8ae755367d55304e2aca4bbb5acd0c54e",
+      "version": "tc.postgresql-fingerprint.v1"
+    },
+    "currentTcFingerprintEqual": true,
+    "databaseInventoryEqual": true,
+    "dockerInventoryEqual": true,
+    "priorEvidence": {
+      "count": 25,
+      "digest": {
+        "sha256": "bc09fa8ac9cb4daeb0d206237f0e5d39ab7d7609b5fb3fb426b00772fbb2b5ac",
+        "version": "tc.phase-f.prior-evidence-inventory.v1"
+      },
+      "entries": [
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856-r2.json",
+          "sha256": "7a4acb6a8395082ef04ed482e7e7faacc2c1b68e6358caf8576f100a507696f0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t06-wave5-20260904-baa12856.json",
+          "sha256": "b3b3a6b738c145e2cce97500e8657a652d65b585cd7b562cbd2c33e4c9573e16"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-backup.json",
+          "sha256": "4dbe36c55ad7d20db700097acf3d8dbe3b1f6c9af5aace135463660eac5c07d2"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-restore.json",
+          "sha256": "ee85ca0ed0969e9ff9693350c47d8b3e86f2be6ca499eef77b99219ebd65cde7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-a91d50e8-retry5-final-seed.json",
+          "sha256": "bf32440ff186a2458d3310ccc63501b07a93b20f4a6b8e111c5059a49783e5d6"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup-r2.json",
+          "sha256": "d557297dd7dc6f69f396e62268c72be1d448d9b17a24b1ade7a219efe791b9d9"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-backup.json",
+          "sha256": "c0c634ac26d15ab781f415c9704ecd4d210b66fa59753f41a257ca7e1c571cd7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-restore-r2.json",
+          "sha256": "7255f643c5b9bf60807c95b8fa4edfc7fa17c8583a24aab0957c3f2b7fdbe1ac"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b6c91d4a-seed.json",
+          "sha256": "be3fc0afce6774fc234652a5befa0bc1df8d0af4e19bb873e12dcfcc73049ab0"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-backup.json",
+          "sha256": "c49a8c52fe6fb10674f8f8a6a591b229c1c6271a81669094fd942459c1705cc7"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-restore.json",
+          "sha256": "0e197c1796ad39be92cf2254bfbd92e5bb91fbe0ce2a05edca1ea09cd3b37f4b"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-b72f64c9-retry6-final-seed.json",
+          "sha256": "d3984780a8b3cc841f5c8124ed391e1ef2bc6feaaae070a408af63de9316eb91"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-backup.json",
+          "sha256": "3f735a01279f6d0250706481210a1da8afae1ddc25d791f72bd114c4e12ce0c3"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry3-seed.json",
+          "sha256": "b57da068e6c51f7a7342e8865fe5d1d2398dd4f566f3810f96dcf1b97abfa179"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-backup.json",
+          "sha256": "20081fff77b0ac8b7c57b340f328134b2362a91778ed4f4d8825342bb9e85ffd"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t07-wave6-20260904-c640954b-retry4-final-restore.json",
+          "sha256": "849e1fb76a08721e9dd1d1b9e777f9abc32b63d8e6dd3073da43eb92355be1ad"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-cleanup.json",
+          "sha256": "34e72df84d23848062b2649bb3e19d76748f32bffcfd1a75c13345a16043a000"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-manifest.json",
+          "sha256": "0ae1658cb4b731008f050bc55e191f22fadf0d68d2a65d941c51e7471a1c97fc"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-a47d91c6-final-recovery.json",
+          "sha256": "8d2c0a0d9a5a18867f2aa81c3684cc1ee25dba58fe781fdd1852f9424f153976"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-d31c8e7a-retry1-failure.json",
+          "sha256": "1c673b8f9ead029d1656a9ccf08f9e8b4a1b95996751d2586e71f427c8c17593"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t08-wave7-20260904-e29f6c4b-retry2-failure.json",
+          "sha256": "87e6d9a901aa36c5389bb13cb16986efbe63ac77766c5438cbf56ff6ae070872"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-20260907.json",
+          "sha256": "3b25f4e2b255be02ddaefdda17503fb2930b7f002561295d424e3986305d7970"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-final-20260907.json",
+          "sha256": "d77654b5bce8b07c8f4b05df36345f0fdd8c62d96a79338cbb1ab4e7f8d2821c"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-20260907.json",
+          "sha256": "db303df0de3c1e692f21a65f3bc3b2c596b01830329c6e16f40ced009f7e3efa"
+        },
+        {
+          "path": "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-final-20260907.json",
+          "sha256": "e8cc291d7875e852b29e84b13407ec59a7673f710e7f9e11d08eb9621d8c57a5"
+        }
+      ],
+      "version": "tc.phase-f.prior-evidence-inventory.v1"
+    },
+    "priorEvidenceHashesPreserved": true
+  },
+  "rawCorpusOmitted": true,
+  "releaseGate": "NOT_RUN",
+  "removed": {
+    "containers": 2,
+    "databasesWithContainers": 2,
+    "dump": true,
+    "network": 1,
+    "providerProcesses": "ABSENT_BEFORE_CLEANUP",
+    "tempDirectory": true,
+    "volumes": 2,
+    "workspacesWithAuxiliaryDatabase": 3
+  },
+  "schemaVersion": "tc.phase-f.lightrag-wave8-cleanup.v1",
+  "target": {
+    "auxiliaryDatabaseComment": "tc-phase-f-lightrag-auxiliary:disposable:tc-phase-f-pf-sf1-t09-wave8-sg9c42fd-disposable",
+    "containers": [
+      "tc-pf-sf1-t09-wave8-sg9c42fd-source-postgres-disposable",
+      "tc-pf-sf1-t09-wave8-sg9c42fd-aux-postgres-disposable"
+    ],
+    "network": "tc-pf-sf1-t09-wave8-sg9c42fd-network-disposable",
+    "ports": {
+      "auxiliaryLoopback": 55469,
+      "sourceLoopback": 55468
+    },
+    "project": "tc-pf-sf1-t09-wave8-sg9c42fd",
+    "runId": "sg9c42fd",
+    "seedWorkspace": "pf-sf1-t09-wave8-sg9c42fd-seed",
+    "sourceDatabaseComment": "tc-phase-f-rehearsal:disposable:tc-phase-f-pf-sf1-t09-wave8-sg9c42fd-disposable",
+    "target": {
+      "activeWorkspace": "pf-sf1-t09-wave8-sg9c42fd-seed",
+      "authoritativeDatabase": "tc_phase_f_pf_sf1_t09_wave8_sg9c42fd_source_test_disposable",
+      "authoritativeTargetDigest": "ce0d481dde0ffa37323330d35a7f4e5c88f353c639270e5d5413d8cf89c0506f",
+      "auxiliaryDatabase": "tc_phase_f_pf_sf1_t09_wave8_sg9c42fd_aux_test_disposable",
+      "auxiliaryTargetDigest": "e3ba92ecdcb63fb9f08fad106c3e69c2e0316c8c4593d8fad0c0fd3a1e0d9382",
+      "class": "disposable",
+      "name": "tc-phase-f-pf-sf1-t09-wave8-sg9c42fd-disposable"
+    },
+    "volumes": [
+      "tc-pf-sf1-t09-wave8-sg9c42fd-source-data-disposable",
+      "tc-pf-sf1-t09-wave8-sg9c42fd-aux-data-disposable"
+    ]
+  },
+  "task": "PF-SF1-T09"
+}

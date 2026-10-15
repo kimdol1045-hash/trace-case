@@ -1,0 +1,100 @@
+{
+  "evalId": "sprint6-delete-retraction-01",
+  "synthetic": true,
+  "scenario": "DELETE_RETRACTION",
+  "description": "An active decision is retracted when its only supporting Slack message receives an append-only deletion revision.",
+  "request": {
+    "schemaVersion": "1.0.0",
+    "bundle": {
+      "bundleId": "bundle_delete_policy",
+      "workItemId": "work_item_delete_policy",
+      "workspaceId": "T_SYNTHETIC",
+      "channelId": "C_SYNTHETIC",
+      "rootMessageTs": "1787270400.000101",
+      "revisions": [
+        {
+          "sourceRevisionId": "rev_delete_policy_1",
+          "messageId": "message_delete_policy",
+          "messageTs": "1787270460.000101",
+          "revision": 1,
+          "previousRevisionId": null,
+          "kind": "CREATED",
+          "authorId": "U_SYN_101",
+          "body": "Guest checkout is allowed without email verification.",
+          "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787270460000101",
+          "occurredAt": "2026-08-21T03:01:00Z"
+        },
+        {
+          "sourceRevisionId": "rev_delete_policy_2",
+          "messageId": "message_delete_policy",
+          "messageTs": "1787270460.000101",
+          "revision": 2,
+          "previousRevisionId": "rev_delete_policy_1",
+          "kind": "DELETED",
+          "authorId": null,
+          "body": null,
+          "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787270460000101",
+          "occurredAt": "2026-08-21T03:05:00Z"
+        }
+      ],
+      "snapshotAt": "2026-08-21T03:05:01Z"
+    },
+    "priorKnowledge": {
+      "nodes": [
+        {
+          "id": "knowledge_guest_checkout",
+          "nodeType": "DECISION",
+          "canonicalKey": "decision:checkout:guest",
+          "label": "Guest checkout",
+          "content": "Guest checkout is allowed without email verification.",
+          "status": "ACTIVE",
+          "validFrom": "2026-08-21T03:01:00Z",
+          "validTo": null,
+          "primarySource": {
+            "sourceType": "SLACK_MESSAGE_REVISION",
+            "sourceEntityId": "message_delete_policy",
+            "sourceRevisionId": "rev_delete_policy_1"
+          },
+          "evidenceIds": ["evidence_guest_checkout_rev1"],
+          "resourceVersion": 1,
+          "createdAt": "2026-08-21T03:01:01Z",
+          "updatedAt": "2026-08-21T03:01:01Z"
+        }
+      ],
+      "edges": []
+    }
+  },
+  "expectedResult": {
+    "schemaVersion": "1.0.0",
+    "bundleId": "bundle_delete_policy",
+    "workItemId": "work_item_delete_policy",
+    "inputRevisionIds": ["rev_delete_policy_1", "rev_delete_policy_2"],
+    "deterministicInputHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "candidates": [
+      {
+        "candidateId": "knowledge_guest_checkout",
+        "operation": "RETRACT",
+        "nodeType": "DECISION",
+        "content": "Guest checkout is allowed without email verification.",
+        "status": "RETRACTED",
+        "validFrom": "2026-08-21T03:01:00Z",
+        "validTo": "2026-08-21T03:05:00Z",
+        "evidence": [
+          {
+            "sourceRevisionId": "rev_delete_policy_2",
+            "quote": null,
+            "startOffset": null,
+            "endOffset": null,
+            "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+          }
+        ],
+        "supersedesCandidateIds": [],
+        "confidence": 1,
+        "reason": "The only supporting Slack message was deleted; the exact deletion revision retracts the projected decision."
+      }
+    ],
+    "edges": [],
+    "rejectedCandidates": [],
+    "generatedAt": "2026-08-21T03:05:02Z"
+  }
+}

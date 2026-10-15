@@ -1,0 +1,249 @@
+groups:
+  - name: tc-availability
+    interval: 30s
+    rules:
+      - alert: TCApiScrapeDown
+        expr: absent(up{job="tc-api"}) or up{job="tc-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: TC API metrics target is unavailable
+          runbook: docs/phase-f/sprint-f1-observability.md#tcapiscrapedown-or-tcapostgresqlunavailable
+
+      - alert: TCPostgreSQLUnavailable
+        expr: tc_database_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: TC API cannot observe PostgreSQL
+          runbook: docs/phase-f/sprint-f1-observability.md#tcapiscrapedown-or-tcapostgresqlunavailable
+
+      - alert: TCApiNotReady
+        expr: tc_api_ready == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: TC API readiness is failing
+          runbook: docs/phase-f/sprint-f1-observability.md#tcapiscrapedown-or-tcapostgresqlunavailable
+
+      - alert: TCApiDegraded
+        expr: tc_api_degraded == 1
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: An enabled TC optional dependency is degraded
+          runbook: docs/phase-f/sprint-f1-observability.md#tc-api-degraded
+
+      - alert: TCWorkerPollStale
+        expr: |
+          absent(up{job="tc-worker-node-exporter"})
+          or up{job="tc-worker-node-exporter"} == 0
+          or (
+            up{job="tc-worker-node-exporter"} == 1
+            unless on(instance, job) tc_worker_up
+          )
+          or tc_worker_up == 0
+          or (time() - tc_worker_last_poll_timestamp_seconds) > 120
+        for: 2m
+        labels:
+          severity: critical
+          service: worker
+        annotations:
+          summary: TC worker metrics are absent, stopped, or stale
+          runbook: docs/phase-f/sprint-f1-observability.md#tcworkerpollstale
+
+  - name: tc-api-slo
+    interval: 30s
+    rules:
+      - alert: TCApiHighErrorRatio
+        expr: |
+          (
+            sum(rate(tc_api_http_requests_total{status_class="5xx"}[5m]))
+            /
+            clamp_min(sum(rate(tc_api_http_requests_total[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: TC API 5xx ratio is above 5 percent
+          runbook: docs/phase-f/sprint-f1-observability.md#tc-api-slo-alerts
+
+      - alert: TCApiHighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(tc_api_http_request_duration_seconds_bucket[5m]))
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: TC API p95 latency is above 2 seconds
+          runbook: docs/phase-f/sprint-f1-observability.md#tc-api-slo-alerts
+
+  - name: tc-data-pipelines
+    interval: 30s
+    rules:
+      - alert: TCBackgroundJobDead
+        expr: sum(tc_background_jobs{status="DEAD"}) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: worker
+        annotations:
+          summary: A background job reached DEAD state
+          runbook: docs/phase-f/sprint-f1-observability.md#tcbackgroundjobdead-or-tcoutboxdead
+
+      - alert: TCOutboxLagHigh
+        expr: tc_outbox_oldest_ready_age_seconds > 300
+        for: 15m
+        labels:
+          severity: warning
+          service: outbox
+        annotations:
+          summary: Oldest runnable outbox event is more than 5 minutes old
+          runbook: docs/phase-f/sprint-f1-observability.md#tcoutboxlaghigh
+
+      - alert: TCOutboxDead
+        expr: tc_outbox_events{status="DEAD"} > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: outbox
+        annotations:
+          summary: An outbox projection event reached DEAD state
+          runbook: docs/phase-f/sprint-f1-observability.md#tcbackgroundjobdead-or-tcoutboxdead
+
+      - alert: TCSlackIngressFailed
+        expr: tc_slack_events{status="FAILED"} > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: slack
+        annotations:
+          summary: Slack ingress ledger contains failed deliveries
+          runbook: docs/phase-f/sprint-f1-observability.md#tcslackingressfailed
+
+      - alert: TCKnowledgeDegradationHigh
+        expr: |
+          (
+            sum(rate(tc_knowledge_degraded_responses_total[10m]))
+            /
+            clamp_min(
+              sum(rate(tc_api_http_requests_total{component="knowledge"}[10m])),
+              0.001
+            )
+          ) > 0.10
+        for: 15m
+        labels:
+          severity: warning
+          service: knowledge
+        annotations:
+          summary: More than 10 percent of knowledge requests are degraded
+          runbook: docs/phase-f/sprint-f1-observability.md#tcknowledgedegradationhigh
+
+  - name: tc-object-storage
+    interval: 30s
+    rules:
+      - alert: TCObjectStorageUnavailable
+        expr: tc_dependency_ready{dependency="object_storage"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: object-storage
+        annotations:
+          summary: Required object storage or malware scanning is unavailable
+          runbook: docs/phase-f/sprint-f1-observability.md#tcobjectstorageunavailable-or-budget-alerts
+
+      - alert: TCObjectStorageBudgetHigh
+        expr: max(tc_object_storage_budget_ratio) > 0.85 and max(tc_object_storage_budget_ratio) <= 0.95
+        for: 15m
+        labels:
+          severity: warning
+          service: object-storage
+        annotations:
+          summary: Configured object storage budget is above 85 percent
+          runbook: docs/phase-f/sprint-f1-observability.md#tcobjectstorageunavailable-or-budget-alerts
+
+      - alert: TCObjectStorageBudgetCritical
+        expr: max(tc_object_storage_budget_ratio) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          service: object-storage
+        annotations:
+          summary: Configured object storage budget is above 95 percent
+          runbook: docs/phase-f/sprint-f1-observability.md#tcobjectstorageunavailable-or-budget-alerts
+
+  - name: tc-generation
+    interval: 30s
+    rules:
+      - alert: TCGenerationProviderOutcomeUnknown
+        expr: generation_execution_outcome_unknown > 0
+        labels:
+          severity: critical
+          service: generation
+        annotations:
+          summary: A generation provider outcome is ambiguous and requires review
+          runbook: docs/phase-f/sprint-f1-observability.md#tcgenerationprovideroutcomeunknown
+
+      - alert: TCGenerationScheduleLagHigh
+        expr: generation_execution_schedule_lag_seconds > 300
+        for: 15m
+        labels:
+          severity: warning
+          service: generation
+        annotations:
+          summary: Oldest READY generation schedule is more than 5 minutes late
+          runbook: docs/phase-f/sprint-f1-observability.md#tcgenerationschedulelaghigh
+
+      - alert: TCGenerationRetryExhaustionHigh
+        expr: |
+          sum(increase(generation_retry_exhaustion_total[15m])) > 0
+          and
+          (
+            sum(increase(generation_retry_exhaustion_total[15m]))
+            /
+            clamp_min(
+              sum(increase(generation_provider_attempt_total{outcome="SUCCEEDED"}[15m])),
+              1
+            )
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+          service: generation
+        annotations:
+          summary: Generation retry exhaustion exceeds 20 percent of successes
+          runbook: docs/phase-f/sprint-f1-observability.md#tcgenerationretryexhaustionhigh
+
+      - alert: TCGenerationMaterializationStuck
+        expr: tc_generation_materialization_oldest_nonterminal_age_seconds > 600
+        for: 5m
+        labels:
+          severity: critical
+          service: generation
+        annotations:
+          summary: A generation materialization is non-terminal for more than 10 minutes
+          runbook: docs/phase-f/sprint-f1-observability.md#tcgenerationmaterializationstuck
+
+      - alert: TCGenerationTerminalNotificationGap
+        expr: generation_terminal_notification_capture_gap > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: generation
+        annotations:
+          summary: A terminal generation failure has no notification intent
+          runbook: docs/phase-f/sprint-f1-observability.md#tcgenerationterminalnotificationgap

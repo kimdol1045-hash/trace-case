@@ -1,0 +1,112 @@
+{
+  "outputSchemaVersion": "1.0.0",
+  "cases": [
+    {
+      "summary": "유효한 인증번호로 비밀번호를 재설정한다",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": "비밀번호 재설정이 가능한 활성 계정이 있다.",
+          "action": "이메일 인증을 요청하고 수신한 유효한 인증번호를 입력한다."
+        },
+        {
+          "sequence": 2,
+          "action": "새 비밀번호를 입력하고 변경을 완료한다."
+        }
+      ],
+      "caseExpectedResult": "새 비밀번호가 저장되고 변경 완료 안내가 표시된다.",
+      "priority": "HIGH",
+      "labels": ["회원", "비밀번호", "정상흐름"],
+      "evidenceNodeIds": ["work_item_password_reset", "test_case_password_reset_happy_path"],
+      "generationReason": "Slack 일감과 같은 기능의 현재 ACTIVE 정상 흐름 케이스를 검증한다.",
+      "inferenceOnly": false,
+      "openQuestions": []
+    },
+    {
+      "summary": "발급 후 5분이 지난 인증번호는 사용할 수 없다",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": "비밀번호 재설정이 가능한 활성 계정이 있다.",
+          "action": "이메일 인증번호를 요청한다."
+        },
+        {
+          "sequence": 2,
+          "action": "발급 후 5분이 지난 인증번호를 입력한다."
+        }
+      ],
+      "caseExpectedResult": "만료된 인증번호로 인증되지 않는다.",
+      "priority": "HIGH",
+      "labels": ["회원", "비밀번호", "경계값"],
+      "evidenceNodeIds": ["decision_password_code_expiry"],
+      "generationReason": "현재 ACTIVE인 5분 유효시간 결정을 경계값으로 검증한다.",
+      "inferenceOnly": false,
+      "openQuestions": []
+    },
+    {
+      "summary": "잘못된 인증번호를 5회 입력하면 인증 요청이 잠긴다",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": "비밀번호 재설정 인증번호가 발급되어 있다.",
+          "action": "잘못된 인증번호를 연속 5회 입력한다."
+        }
+      ],
+      "caseExpectedResult": "해당 인증 요청이 잠기고 추가 인증번호 입력이 차단된다.",
+      "priority": "CRITICAL",
+      "labels": ["회원", "보안", "회귀"],
+      "evidenceNodeIds": ["decision_password_attempt_lock"],
+      "generationReason": "현재 ACTIVE인 5회 오류 잠금 결정을 직접 검증한다.",
+      "inferenceOnly": false,
+      "openQuestions": []
+    },
+    {
+      "summary": "잠긴 인증 요청은 인증번호 재발급으로 우회되지 않는다",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": "잘못된 인증번호 5회 입력으로 인증 요청이 잠겨 있다.",
+          "action": "같은 계정에서 인증번호를 다시 요청하고 새 인증번호를 입력한다."
+        }
+      ],
+      "caseExpectedResult": "잠금이 유지되어 새 인증번호 입력도 차단된다.",
+      "priority": "CRITICAL",
+      "labels": ["회원", "보안", "잠금우회"],
+      "evidenceNodeIds": [
+        "decision_password_attempt_lock",
+        "execution_password_lock_bypass",
+        "issue_node_password_lock_bypass"
+      ],
+      "generationReason": "현재 잠금 결정, 최근 FAIL 실행과 미종결 HIGH 이슈의 재발을 방지한다.",
+      "inferenceOnly": false,
+      "openQuestions": []
+    },
+    {
+      "summary": "인증 잠금 상태에서 입력 필드와 안내 문구를 표시한다",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": "잘못된 인증번호 5회 입력으로 인증 요청이 잠겨 있다.",
+          "action": "비밀번호 재설정 인증 화면의 잠금 상태를 확인한다."
+        }
+      ],
+      "caseExpectedResult": "인증번호 입력 필드가 비활성화되고 잠금 안내 문구가 표시된다.",
+      "priority": "HIGH",
+      "labels": ["회원", "비밀번호", "디자인"],
+      "evidenceNodeIds": ["decision_password_attempt_lock", "extra_design_password_lock_state"],
+      "generationReason": "사용자가 명시적으로 제공한 잠금 상태 디자인과 현재 잠금 결정을 검증한다.",
+      "inferenceOnly": false,
+      "openQuestions": []
+    }
+  ],
+  "categoryCandidate": {
+    "categoryId": "folder_members",
+    "score": 0.94,
+    "alternatives": [
+      {
+        "categoryId": "folder_uncategorized",
+        "score": 0.1
+      }
+    ]
+  }
+}

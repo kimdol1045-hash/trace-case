@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/quality-review/1.0.0/schema.json",
+  "deprecated": true,
+  "description": "Retired historical schema. Runtime and package exports reject this unsafe legacy shape; use quality-review/2.0.0.",
+  "title": "Automatic generation quality review API 1.0.0",
+  "description": "Strict request and safe-response projections for the append-only two-principal T08 review workflow. The nested reviewed snapshot is independently governed by automatic-generation-quality-gate/1.0.0.",
+  "oneOf": [
+    {"$ref": "#/$defs/ImportRequest"},
+    {"$ref": "#/$defs/DecisionRequest"},
+    {"$ref": "#/$defs/Candidate"},
+    {"$ref": "#/$defs/CandidatePage"},
+    {"$ref": "#/$defs/ReviewedSnapshot"}
+  ],
+  "$defs": {
+    "Digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "Uuid": {"type": "string", "format": "uuid"},
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "CandidateAlias": {
+      "type": "string",
+      "pattern": "^quality_candidate_[a-f0-9]{32}$"
+    },
+    "DecisionAlias": {
+      "type": "string",
+      "pattern": "^quality_decision_[a-f0-9]{32}$"
+    },
+    "ApprovalAlias": {
+      "type": "string",
+      "pattern": "^quality_approval_[a-f0-9]{32}$"
+    },
+    "ReviewerAlias": {
+      "type": "string",
+      "pattern": "^quality_reviewer_[a-f0-9]{64}$"
+    },
+    "ReasonCode": {
+      "enum": [
+        "QUALITY_EVIDENCE_INSUFFICIENT",
+        "PRIVACY_FENCE_FAILED",
+        "SOURCE_DRIFT",
+        "TAMPER_DETECTED",
+        "OTHER_POLICY_FAILURE"
+      ]
+    },
+    "ImportRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotencyKey",
+        "rootJobIds",
+        "snapshot",
+        "expectedBaseArtifactDigest",
+        "expectedDatasetFingerprint",
+        "expectedSourceSnapshotFingerprint",
+        "expectedSnapshotFingerprint"
+      ],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "rootJobIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Uuid"}
+        },
+        "snapshot": {
+          "description": "Normative unreviewed operational automatic-generation-quality-gate/1.0.0 EvaluationInput.",
+          "allOf": [
+            {
+              "$ref": "https://qa-tool.local/schemas/generation/quality-gate/1.0.0/schema.json#/$defs/EvaluationInput"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "profile": {"const": "CANDIDATE"},
+                "dataset": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {"const": "OPERATIONAL_GOLDEN"},
+                    "synthetic": {"const": false},
+                    "review": {
+                      "type": "object",
+                      "properties": {
+                        "status": {"const": "UNREVIEWED"},
+                        "reviewedBy": {"type": "null"},
+                        "reviewedAt": {"type": "null"},
+                        "labelSetId": {"type": "null"},
+                        "reviewProtocolVersion": {"type": "null"},
+                        "approvalId": {"type": "null"},
+                        "reviewAuthorityDigest": {"type": "null"},
+                        "approvalArtifactDigest": {"type": "null"}
+                      }
+                    }
+                  }
+                },
+                "liveGate": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"const": "NOT_RUN"},
+                    "providerCredentialed": {"const": false},
+                    "providerCallObserved": {"const": false}
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "expectedBaseArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "expectedDatasetFingerprint": {"$ref": "#/$defs/Digest"},
+        "expectedSourceSnapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "expectedSnapshotFingerprint": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "DecisionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotencyKey",
+        "decision",
+        "expectedSnapshotFingerprint",
+        "reasonCode"
+      ],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "decision": {"enum": ["APPROVE", "REJECT"]},
+        "expectedSnapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "reasonCode": {
+          "oneOf": [{"$ref": "#/$defs/ReasonCode"}, {"type": "null"}]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"decision": {"const": "APPROVE"}},
+            "required": ["decision"]
+          },
+          "then": {"properties": {"reasonCode": {"type": "null"}}}
+        },
+        {
+          "if": {
+            "properties": {"decision": {"const": "REJECT"}},
+            "required": ["decision"]
+          },
+          "then": {"properties": {"reasonCode": {"$ref": "#/$defs/ReasonCode"}}}
+        }
+      ]
+    },
+    "Counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRoots",
+        "generationJobs",
+        "generationResults",
+        "generatedCases",
+        "generatedSteps",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "generationRoots": {"type": "integer", "minimum": 1},
+        "generationJobs": {"type": "integer", "minimum": 1},
+        "generationResults": {"type": "integer", "minimum": 1},
+        "generatedCases": {"type": "integer", "minimum": 0},
+        "generatedSteps": {"type": "integer", "minimum": 0},
+        "evidenceReferences": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ClassificationDistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "GROUNDED_ACTIVE",
+        "SUPERSEDED_TRAP",
+        "RETRACTED_TRAP",
+        "DELETED_TRAP",
+        "REJECTED_TRAP",
+        "UNAVAILABLE_TRAP",
+        "UNRESOLVED_CONFLICT",
+        "DECISION_CANDIDATE",
+        "EXACT_DUPLICATE_TRAP",
+        "SEMANTIC_DUPLICATE_TRAP",
+        "CATEGORY_COLLISION_TRAP",
+        "PARENT_COLLISION_TRAP",
+        "CASE_ORDERING",
+        "BLANK_OR_INVALID_RESULT",
+        "APPLY_PROVENANCE",
+        "SUGGESTION_PROVENANCE"
+      ],
+      "properties": {
+        "GROUNDED_ACTIVE": {"type": "integer", "minimum": 0},
+        "SUPERSEDED_TRAP": {"type": "integer", "minimum": 0},
+        "RETRACTED_TRAP": {"type": "integer", "minimum": 0},
+        "DELETED_TRAP": {"type": "integer", "minimum": 0},
+        "REJECTED_TRAP": {"type": "integer", "minimum": 0},
+        "UNAVAILABLE_TRAP": {"type": "integer", "minimum": 0},
+        "UNRESOLVED_CONFLICT": {"type": "integer", "minimum": 0},
+        "DECISION_CANDIDATE": {"type": "integer", "minimum": 0},
+        "EXACT_DUPLICATE_TRAP": {"type": "integer", "minimum": 0},
+        "SEMANTIC_DUPLICATE_TRAP": {"type": "integer", "minimum": 0},
+        "CATEGORY_COLLISION_TRAP": {"type": "integer", "minimum": 0},
+        "PARENT_COLLISION_TRAP": {"type": "integer", "minimum": 0},
+        "CASE_ORDERING": {"type": "integer", "minimum": 0},
+        "BLANK_OR_INVALID_RESULT": {"type": "integer", "minimum": 0},
+        "APPLY_PROVENANCE": {"type": "integer", "minimum": 0},
+        "SUGGESTION_PROVENANCE": {"type": "integer", "minimum": 0}
+      }
+    },
+    "Fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseArtifactDigest",
+        "datasetFingerprint",
+        "sourceSnapshotFingerprint",
+        "snapshotFingerprint"
+      ],
+      "properties": {
+        "baseArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "datasetFingerprint": {"$ref": "#/$defs/Digest"},
+        "sourceSnapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "snapshotFingerprint": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "Privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "policyVersion",
+        "foundationPolicyVersion",
+        "containsRawSourceText"
+      ],
+      "properties": {
+        "status": {"const": "CLEAN"},
+        "policyVersion": {"type": "string", "minLength": 1, "maxLength": 128},
+        "foundationPolicyVersion": {"const": "review-candidate-sensitive-data-v1"},
+        "containsRawSourceText": {"const": false}
+      }
+    },
+    "Progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approveCount", "requiredApproveCount", "rejected"],
+      "properties": {
+        "approveCount": {"type": "integer", "minimum": 0, "maximum": 2},
+        "requiredApproveCount": {"const": 2},
+        "rejected": {"type": "boolean"}
+      }
+    },
+    "Decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionId",
+        "reviewerAlias",
+        "decision",
+        "reasonCode",
+        "decisionDigest",
+        "snapshotFingerprint",
+        "decidedAt"
+      ],
+      "properties": {
+        "decisionId": {"$ref": "#/$defs/DecisionAlias"},
+        "reviewerAlias": {"$ref": "#/$defs/ReviewerAlias"},
+        "decision": {"enum": ["APPROVE", "REJECT"]},
+        "reasonCode": {
+          "oneOf": [{"$ref": "#/$defs/ReasonCode"}, {"type": "null"}]
+        },
+        "decisionDigest": {"$ref": "#/$defs/Digest"},
+        "snapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "decidedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "Approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvalId",
+        "reviewAuthorityDigest",
+        "approvalArtifactDigest",
+        "approvedAt"
+      ],
+      "properties": {
+        "approvalId": {"$ref": "#/$defs/ApprovalAlias"},
+        "reviewAuthorityDigest": {"$ref": "#/$defs/Digest"},
+        "approvalArtifactDigest": {"$ref": "#/$defs/Digest"},
+        "approvedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "status",
+        "reviewable",
+        "materialization",
+        "createdAt",
+        "capturedAt",
+        "captureEnvironment",
+        "captureRevision",
+        "fingerprints",
+        "privacy",
+        "counts",
+        "classificationDistribution",
+        "progress",
+        "decisions",
+        "approval",
+        "certificationStatus",
+        "releaseCertified"
+      ],
+      "properties": {
+        "candidateId": {"$ref": "#/$defs/CandidateAlias"},
+        "status": {"enum": ["UNREVIEWED", "PENDING_APPROVAL", "APPROVED", "REJECTED"]},
+        "reviewable": {"type": "boolean"},
+        "materialization": {"const": "COMPLETE"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "capturedAt": {"type": "string", "format": "date-time"},
+        "captureEnvironment": {"enum": ["staging", "production"]},
+        "captureRevision": {"type": "string", "minLength": 1, "maxLength": 128},
+        "fingerprints": {"$ref": "#/$defs/Fingerprints"},
+        "privacy": {"$ref": "#/$defs/Privacy"},
+        "counts": {"$ref": "#/$defs/Counts"},
+        "classificationDistribution": {"$ref": "#/$defs/ClassificationDistribution"},
+        "progress": {"$ref": "#/$defs/Progress"},
+        "decisions": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/Decision"}
+        },
+        "approval": {
+          "oneOf": [{"$ref": "#/$defs/Approval"}, {"type": "null"}]
+        },
+        "certificationStatus": {
+          "enum": ["NOT_REVIEWED", "REVIEWED_NOT_RELEASE_CERTIFIED"]
+        },
+        "releaseCertified": {"const": false}
+      }
+    },
+    "CandidatePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {"$ref": "#/$defs/Candidate"}
+        },
+        "nextCursor": {
+          "oneOf": [{"$ref": "#/$defs/CandidateAlias"}, {"type": "null"}]
+        }
+      }
+    },
+    "ReviewedSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "candidateId",
+        "reviewStatus",
+        "certificationStatus",
+        "releaseCertified",
+        "snapshot"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_QUALITY_REVIEWED_SNAPSHOT"},
+        "contractVersion": {"const": "automatic-generation-quality-review/1.0.0"},
+        "candidateId": {"$ref": "#/$defs/CandidateAlias"},
+        "reviewStatus": {"const": "REVIEWED"},
+        "certificationStatus": {"const": "REVIEWED_NOT_RELEASE_CERTIFIED"},
+        "releaseCertified": {"const": false},
+        "snapshot": {
+          "allOf": [
+            {
+              "$ref": "https://qa-tool.local/schemas/generation/quality-gate/1.0.0/schema.json#/$defs/EvaluationInput"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "profile": {"const": "CANDIDATE"},
+                "dataset": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {"const": "OPERATIONAL_GOLDEN"},
+                    "synthetic": {"const": false},
+                    "review": {
+                      "type": "object",
+                      "properties": {"status": {"const": "REVIEWED"}}
+                    }
+                  }
+                },
+                "liveGate": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"const": "NOT_RUN"},
+                    "providerCredentialed": {"const": false},
+                    "providerCallObserved": {"const": false}
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

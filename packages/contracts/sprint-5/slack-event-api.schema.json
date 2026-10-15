@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-5/slack-event-api.schema.json",
+  "title": "Sprint 5 Slack event ingress API",
+  "description": "Strict Slack URL verification, event_callback, normalized message-event and acknowledgement contracts. Raw signing secrets and authorization headers are transport-only and are never response fields.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "WorkspaceId": {
+      "type": "string",
+      "pattern": "^T[A-Z0-9]{2,}$",
+      "maxLength": 64
+    },
+    "ChannelId": {
+      "type": "string",
+      "pattern": "^[CGD][A-Z0-9]{2,}$",
+      "maxLength": 64
+    },
+    "UserId": {
+      "type": "string",
+      "pattern": "^[UW][A-Z0-9]{2,}$",
+      "maxLength": 64
+    },
+    "AppId": {
+      "type": "string",
+      "pattern": "^A[A-Z0-9]{2,}$",
+      "maxLength": 64
+    },
+    "SlackEventId": {
+      "type": "string",
+      "pattern": "^Ev[A-Za-z0-9]+$",
+      "maxLength": 128
+    },
+    "EventLogId": {
+      "type": "string",
+      "pattern": "^slack_event_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "JobId": {
+      "type": "string",
+      "pattern": "^slack_job_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "SlackTimestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{10,}\\.[0-9]{6}$",
+      "maxLength": 32
+    },
+    "NullableSlackTimestamp": {
+      "oneOf": [
+        {"$ref": "#/$defs/SlackTimestamp"},
+        {"type": "null"}
+      ]
+    },
+    "NullableUserId": {
+      "oneOf": [
+        {"$ref": "#/$defs/UserId"},
+        {"type": "null"}
+      ]
+    },
+    "NullableText": {
+      "oneOf": [
+        {"type": "string", "maxLength": 20000},
+        {"type": "null"}
+      ]
+    },
+    "SlackUrlVerificationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "challenge", "type"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "writeOnly": true,
+          "description": "Legacy Slack verification token accepted only on ingress and never echoed. Signature verification remains mandatory."
+        },
+        "challenge": {"$ref": "#/$defs/NonBlankString"},
+        "type": {"const": "url_verification"}
+      }
+    },
+    "SlackUrlVerificationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["challenge"],
+      "properties": {
+        "challenge": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "description": "The response echoes only challenge; it never includes signing secret, app/bot token, verification token or any authorization header."
+    },
+    "SlackHttpVerificationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authenticated", "signatureVersion", "requestTimestamp", "receivedAt", "timestampSkewSeconds", "maximumSkewSeconds"],
+      "properties": {
+        "authenticated": {"const": true},
+        "signatureVersion": {"const": "v0"},
+        "requestTimestamp": {"type": "integer", "minimum": 0},
+        "receivedAt": {"type": "string", "format": "date-time"},
+        "timestampSkewSeconds": {"type": "integer", "minimum": 0, "maximum": 300},
+        "maximumSkewSeconds": {"const": 300}
+      },
+      "description": "Server-produced proof that both signature and timestamp passed before payload processing. Raw signature, signing secret and authentication headers are deliberately absent."
+    },
+    "SlackAuthorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enterprise_id", "team_id", "user_id", "is_bot", "is_enterprise_install"],
+      "properties": {
+        "enterprise_id": {
+          "oneOf": [
+            {"type": "string", "pattern": "^E[A-Z0-9]{2,}$", "maxLength": 64},
+            {"type": "null"}
+          ]
+        },
+        "team_id": {"$ref": "#/$defs/WorkspaceId"},
+        "user_id": {"$ref": "#/$defs/UserId"},
+        "is_bot": {"type": "boolean"},
+        "is_enterprise_install": {"type": "boolean"}
+      }
+    },
+    "RawRootMessageEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "user", "text", "ts", "event_ts", "channel", "channel_type"],
+      "properties": {
+        "type": {"const": "message"},
+        "user": {"$ref": "#/$defs/UserId"},
+        "text": {"type": "string", "maxLength": 20000},
+        "ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "event_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "channel": {"$ref": "#/$defs/ChannelId"},
+        "channel_type": {"type": "string", "enum": ["channel", "group", "im", "mpim"]},
+        "team": {"$ref": "#/$defs/WorkspaceId"},
+        "client_msg_id": {"type": "string", "format": "uuid"}
+      }
+    },
+    "RawReplyMessageEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "user", "text", "ts", "thread_ts", "event_ts", "channel", "channel_type"],
+      "properties": {
+        "type": {"const": "message"},
+        "user": {"$ref": "#/$defs/UserId"},
+        "text": {"type": "string", "maxLength": 20000},
+        "ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "thread_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "event_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "channel": {"$ref": "#/$defs/ChannelId"},
+        "channel_type": {"type": "string", "enum": ["channel", "group", "im", "mpim"]},
+        "team": {"$ref": "#/$defs/WorkspaceId"},
+        "client_msg_id": {"type": "string", "format": "uuid"}
+      }
+    },
+    "RawMessageSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "user", "text", "ts"],
+      "properties": {
+        "type": {"const": "message"},
+        "user": {"$ref": "#/$defs/UserId"},
+        "text": {"type": "string", "maxLength": 20000},
+        "ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "thread_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "edited": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["user", "ts"],
+          "properties": {
+            "user": {"$ref": "#/$defs/UserId"},
+            "ts": {"$ref": "#/$defs/SlackTimestamp"}
+          }
+        }
+      }
+    },
+    "RawMessageChangedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "subtype", "hidden", "channel", "ts", "event_ts", "channel_type", "message", "previous_message"],
+      "properties": {
+        "type": {"const": "message"},
+        "subtype": {"const": "message_changed"},
+        "hidden": {"const": true},
+        "channel": {"$ref": "#/$defs/ChannelId"},
+        "ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "event_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "channel_type": {"type": "string", "enum": ["channel", "group", "im", "mpim"]},
+        "message": {"$ref": "#/$defs/RawMessageSnapshot"},
+        "previous_message": {"$ref": "#/$defs/RawMessageSnapshot"}
+      }
+    },
+    "RawMessageDeletedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "subtype", "hidden", "channel", "deleted_ts", "event_ts", "channel_type", "previous_message"],
+      "properties": {
+        "type": {"const": "message"},
+        "subtype": {"const": "message_deleted"},
+        "hidden": {"const": true},
+        "channel": {"$ref": "#/$defs/ChannelId"},
+        "deleted_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "event_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "channel_type": {"type": "string", "enum": ["channel", "group", "im", "mpim"]},
+        "previous_message": {"$ref": "#/$defs/RawMessageSnapshot"}
+      }
+    },
+    "RawSlackMessageEvent": {
+      "oneOf": [
+        {"$ref": "#/$defs/RawRootMessageEvent"},
+        {"$ref": "#/$defs/RawReplyMessageEvent"},
+        {"$ref": "#/$defs/RawMessageChangedEvent"},
+        {"$ref": "#/$defs/RawMessageDeletedEvent"}
+      ]
+    },
+    "SlackEventCallbackEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "team_id", "api_app_id", "event", "type", "event_id", "event_time"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "writeOnly": true,
+          "description": "Ingress-only legacy verification token; it is redacted before event-log resources are exposed."
+        },
+        "team_id": {"$ref": "#/$defs/WorkspaceId"},
+        "api_app_id": {"$ref": "#/$defs/AppId"},
+        "event": {"$ref": "#/$defs/RawSlackMessageEvent"},
+        "type": {"const": "event_callback"},
+        "event_id": {"$ref": "#/$defs/SlackEventId"},
+        "event_time": {"type": "integer", "minimum": 0},
+        "event_context": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+        "authorizations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/SlackAuthorization"}
+        },
+        "is_ext_shared_channel": {"type": "boolean"},
+        "context_team_id": {"$ref": "#/$defs/WorkspaceId"},
+        "context_enterprise_id": {
+          "oneOf": [
+            {"type": "string", "pattern": "^E[A-Z0-9]{2,}$", "maxLength": 64},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "NormalizedMessageEventBase": {
+      "type": "object",
+      "required": [
+        "eventId",
+        "workspaceId",
+        "channelId",
+        "messageTs",
+        "threadTs",
+        "action",
+        "position",
+        "authorId",
+        "text",
+        "sourceEventTime",
+        "occurredAt",
+        "normalizedAt"
+      ],
+      "properties": {
+        "eventId": {"$ref": "#/$defs/SlackEventId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "messageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "threadTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "action": {"type": "string", "enum": ["ROOT", "REPLY", "EDIT", "DELETE"]},
+        "position": {"type": "string", "enum": ["ROOT", "REPLY"]},
+        "authorId": {"$ref": "#/$defs/NullableUserId"},
+        "text": {"$ref": "#/$defs/NullableText"},
+        "sourceEventTime": {"type": "integer", "minimum": 0},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "normalizedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "NormalizedRootMessageEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/NormalizedMessageEventBase"},
+        {
+          "type": "object",
+          "properties": {
+            "action": {"const": "ROOT"},
+            "position": {"const": "ROOT"},
+            "authorId": {"$ref": "#/$defs/UserId"},
+            "text": {"type": "string", "maxLength": 20000}
+          }
+        }
+      ],
+      "description": "For ROOT, threadTs equals messageTs; semantic fixtures make this identity normative."
+    },
+    "NormalizedReplyMessageEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/NormalizedMessageEventBase"},
+        {
+          "type": "object",
+          "properties": {
+            "action": {"const": "REPLY"},
+            "position": {"const": "REPLY"},
+            "authorId": {"$ref": "#/$defs/UserId"},
+            "text": {"type": "string", "maxLength": 20000}
+          }
+        }
+      ]
+    },
+    "NormalizedEditMessageEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/NormalizedMessageEventBase"},
+        {
+          "type": "object",
+          "properties": {
+            "action": {"const": "EDIT"},
+            "authorId": {"$ref": "#/$defs/UserId"},
+            "text": {"type": "string", "maxLength": 20000}
+          }
+        }
+      ]
+    },
+    "NormalizedDeleteMessageEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/NormalizedMessageEventBase"},
+        {
+          "type": "object",
+          "properties": {
+            "action": {"const": "DELETE"},
+            "authorId": {"$ref": "#/$defs/NullableUserId"},
+            "text": {"type": "null"}
+          }
+        }
+      ]
+    },
+    "NormalizedSlackMessageEvent": {
+      "oneOf": [
+        {"$ref": "#/$defs/NormalizedRootMessageEvent"},
+        {"$ref": "#/$defs/NormalizedReplyMessageEvent"},
+        {"$ref": "#/$defs/NormalizedEditMessageEvent"},
+        {"$ref": "#/$defs/NormalizedDeleteMessageEvent"}
+      ]
+    },
+    "AcceptedEventAck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["httpStatus", "acknowledged", "outcome", "eventLogId", "duplicateOfEventLogId", "ignoredReason", "enqueuedJobIds"],
+      "properties": {
+        "httpStatus": {"const": 200},
+        "acknowledged": {"const": true},
+        "outcome": {"const": "ACCEPTED"},
+        "eventLogId": {"$ref": "#/$defs/EventLogId"},
+        "duplicateOfEventLogId": {"type": "null"},
+        "ignoredReason": {"type": "null"},
+        "enqueuedJobIds": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/JobId"}
+        }
+      }
+    },
+    "DuplicateEventAck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["httpStatus", "acknowledged", "outcome", "eventLogId", "duplicateOfEventLogId", "ignoredReason", "enqueuedJobIds"],
+      "properties": {
+        "httpStatus": {"const": 200},
+        "acknowledged": {"const": true},
+        "outcome": {"type": "string", "enum": ["DUPLICATE_EVENT_ID", "DUPLICATE_MESSAGE_IDENTITY"]},
+        "eventLogId": {"type": "null"},
+        "duplicateOfEventLogId": {"$ref": "#/$defs/EventLogId"},
+        "ignoredReason": {"type": "null"},
+        "enqueuedJobIds": {"type": "array", "maxItems": 0}
+      },
+      "description": "A duplicate is acknowledged but creates neither another ledger row nor another job."
+    },
+    "IgnoredEventAck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["httpStatus", "acknowledged", "outcome", "eventLogId", "duplicateOfEventLogId", "ignoredReason", "enqueuedJobIds"],
+      "properties": {
+        "httpStatus": {"const": 200},
+        "acknowledged": {"const": true},
+        "outcome": {"const": "IGNORED"},
+        "eventLogId": {"type": "null"},
+        "duplicateOfEventLogId": {"type": "null"},
+        "ignoredReason": {
+          "type": "string",
+          "enum": ["CHANNEL_NOT_ALLOWLISTED", "PRIVATE_DEFAULT_DENY", "APP_NOT_MEMBER", "UNSUPPORTED_MESSAGE_SUBTYPE"]
+        },
+        "enqueuedJobIds": {"type": "array", "maxItems": 0}
+      }
+    },
+    "SlackEventAckResponse": {
+      "oneOf": [
+        {"$ref": "#/$defs/AcceptedEventAck"},
+        {"$ref": "#/$defs/DuplicateEventAck"},
+        {"$ref": "#/$defs/IgnoredEventAck"}
+      ],
+      "description": "Fast HTTP acknowledgement with an explicit dedup/ignore outcome and no credential or authentication-header material."
+    }
+  }
+}

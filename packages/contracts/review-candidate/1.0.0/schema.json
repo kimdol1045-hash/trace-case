@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/review-candidate/1.0.0/schema.json",
+  "title": "Review candidate privacy envelope 1.0.0",
+  "description": "A fail-closed envelope for synthetic or minimized review candidates. It carries only sanitized projections, opaque keyed source seals, public projection fingerprints, and explicit non-certification state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactKind",
+    "contractVersion",
+    "purpose",
+    "dataClass",
+    "candidate",
+    "source",
+    "sanitization",
+    "sampling",
+    "payload",
+    "fingerprints",
+    "review",
+    "attestation",
+    "retention",
+    "certification"
+  ],
+  "properties": {
+    "artifactKind": {"const": "REVIEW_CANDIDATE"},
+    "contractVersion": {"const": "review-candidate-envelope/1.0.0"},
+    "purpose": {"$ref": "#/$defs/SafeNonBlank"},
+    "dataClass": {"enum": ["SYNTHETIC", "ACTUAL_MINIMIZED"]},
+    "candidate": {"$ref": "#/$defs/Candidate"},
+    "source": {"$ref": "#/$defs/Source"},
+    "sanitization": {"$ref": "#/$defs/Sanitization"},
+    "sampling": {"$ref": "#/$defs/Sampling"},
+    "payload": {"$ref": "#/$defs/Payload"},
+    "fingerprints": {"$ref": "#/$defs/Fingerprints"},
+    "review": {"$ref": "#/$defs/Review"},
+    "attestation": {"$ref": "#/$defs/Attestation"},
+    "retention": {"$ref": "#/$defs/Retention"},
+    "certification": {"$ref": "#/$defs/Certification"}
+  },
+  "allOf": [
+    {
+      "if": {"type": "object", "properties": {"dataClass": {"const": "SYNTHETIC"}}, "required": ["dataClass"]},
+      "then": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "object", "properties": {"synthetic": {"const": true}}},
+          "retention": {"type": "object", "properties": {"maxAgeDays": {"type": "integer", "maximum": 90}}}
+        }
+      }
+    },
+    {
+      "if": {"type": "object", "properties": {"dataClass": {"const": "ACTUAL_MINIMIZED"}}, "required": ["dataClass"]},
+      "then": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "object", "properties": {"synthetic": {"const": false}}},
+          "retention": {"type": "object", "properties": {"maxAgeDays": {"type": "integer", "maximum": 30}}}
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "candidate": {"type": "object", "properties": {"revision": {"const": 1}}, "required": ["revision"]}
+        },
+        "required": ["candidate"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "candidate": {"type": "object", "properties": {"predecessorArtifactFingerprint": {"type": "null"}}},
+          "review": {
+            "type": "object",
+            "properties": {
+              "status": {"const": "UNREVIEWED"},
+              "reviewedAt": {"type": "null"},
+              "reviewAuthoritySeal": {"type": "null"},
+              "approvalArtifactFingerprint": {"type": "null"}
+            }
+          },
+          "attestation": {
+            "type": "object",
+            "properties": {
+              "status": {"const": "NOT_RUN"},
+              "attestedAt": {"type": "null"},
+              "attestationFingerprint": {"type": "null"}
+            }
+          },
+          "certification": {
+            "type": "object",
+            "properties": {
+              "status": {"const": "NOT_CERTIFIED"},
+              "eligible": {"const": false},
+              "scope": {"type": "null"},
+              "certificationFingerprint": {"type": "null"}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "OpaqueToken": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$",
+      "not": {"enum": ["latest", "LATEST", "unknown", "UNKNOWN", "unconfigured", "UNCONFIGURED", "unpinned", "UNPINNED"]}
+    },
+    "PublicFingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "SourceSeal": {
+      "type": "string",
+      "pattern": "^hmac-sha256:[a-f0-9]{64}$"
+    },
+    "CandidateKey": {
+      "type": "string",
+      "pattern": "^review-candidate:[a-f0-9]{64}$"
+    },
+    "NullablePublicFingerprint": {
+      "oneOf": [{"$ref": "#/$defs/PublicFingerprint"}, {"type": "null"}]
+    },
+    "NullableSourceSeal": {
+      "oneOf": [{"$ref": "#/$defs/SourceSeal"}, {"type": "null"}]
+    },
+    "NullableDateTime": {
+      "oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]
+    },
+    "SafeNonBlank": {
+      "allOf": [
+        {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+        {"$ref": "#/$defs/SafeString"}
+      ]
+    },
+    "SafeString": {
+      "type": "string",
+      "maxLength": 20000,
+      "not": {
+        "anyOf": [
+          {"pattern": "(?:[A-Za-z][A-Za-z0-9+.-]*://|www\\.|(?:[A-Za-z0-9-]+\\.)+(?:com|net|org|io|ai|kr|co\\.kr)(?:[/:?#]|\\b))"},
+          {"pattern": "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"},
+          {"pattern": "(?:[Bb][Ee][Aa][Rr][Ee][Rr]\\s+|-----BEGIN [A-Z ]*PRIVATE KEY-----)"},
+          {"pattern": "(?:[Pp]assword|[Pp]asswd|[Ss]ecret|[Aa]pi[-_ ]?[Kk]ey|[Aa]uthorization|[Cc]lient[-_ ]?[Ss]ecret)\\s*[:=]\\s*[^\\s,;]{3,}"},
+          {"pattern": "\\b(?:xox[baprs]-[A-Za-z0-9-]{8,}|sk-[A-Za-z0-9_-]{12,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16})\\b"},
+          {"pattern": "(?:sha256:)?[a-fA-F0-9]{64}"},
+          {"pattern": "(?:^|[\\s\"'])(?:/[Uu]sers/|/home/|/var/|/etc/|/private/|[A-Za-z]:\\\\|\\\\\\\\)"},
+          {"pattern": "\\b(?:01[016789][ -]?[0-9]{3,4}[ -]?[0-9]{4}|[0-9]{2,4}-[0-9]{3,4}-[0-9]{4})\\b"},
+          {"pattern": "\\b[0-9]{6}-?[1-8][0-9]{6}\\b"},
+          {"pattern": "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b"},
+          {"pattern": "(?:^|[^0-9A-Fa-f:])[0-9A-Fa-f]{0,4}:[0-9A-Fa-f:]{2,}(?:$|[^0-9A-Fa-f:])"},
+          {"pattern": "\\b[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}\\b"},
+          {"pattern": "\\b(?:[TtUuWwCcGgDd][A-Z0-9]{8,}|[A-Z][A-Z0-9]{1,9}-[1-9][0-9]*)\\b"},
+          {"pattern": "(?:[0-9][ -]?){13,19}"},
+          {"pattern": "(?:[Cc]ustomer|[Oo]rder|[Aa]ccount|[Pp]erson)[-_ ]?(?:[Ii][Dd]|[Nn]umber|[Nn]o|[Kk]ey)\\s*[:=#-]?\\s*[A-Za-z0-9][A-Za-z0-9._:-]{3,}"}
+        ]
+      }
+    },
+    "SafePropertyName": {
+      "description": "After the envelope's pinned NFKC/Cf normalization, public projection property names use an ASCII letter-led camel/snake/kebab form. Matching is conservative and substring-based: a sensitive marker anywhere in the normalized property name rejects the entire property.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,127}$",
+      "not": {
+        "anyOf": [
+          {"pattern": "[Rr][Aa][Ww]"},
+          {"pattern": "[Uu][Rr][Ll]|[Uu][Rr][Ii]|[Pp]ermalink|[Hh]ref|[Ee]ndpoint"},
+          {"pattern": "[Ss]ecret|[Tt]oken|[Pp]assword|[Pp]asswd|[Aa]uthorization|[Cc]redential|[Pp]rivate[Kk]ey|[Aa]pi[_-]?[Kk]ey"},
+          {"pattern": "[Ee]mail"},
+          {"pattern": "[Pp]hone|[Mm]obile|[Tt]elephone|[Ff]ax"},
+          {"pattern": "[Mm]ac[Aa]ddress|^[Mm][Aa][Cc]$"},
+          {"pattern": "[Ii]p[Aa]ddress|^[Ii][Pp]$"},
+          {"pattern": "[Pp]ostal[Aa]ddress"},
+          {"pattern": "[Pp]ath"},
+          {"pattern": "[Ss]ource|[Cc]ontent|[Bb]ody|[Mm]essage|[Pp]rompt|[Ee]xcerpt"},
+          {"pattern": "[Cc]ontent(?:[Ss]ha|[Hh]ash|[Dd]igest)|[Ss]ha256"},
+          {"pattern": "(?:^[Ii][Dd][Ss]?$|(?:Id[s]?|ID[Ss]?)$|_[Ii][Dd][Ss]?$|-[Ii][Dd][Ss]?$|[Ii]dentifier)"},
+          {"pattern": "[Ss]lack|[Jj]ira"},
+          {"pattern": "[Cc]ustomer|[Oo]rder|[Aa]ccount|[Pp]erson|[Pp]ayment|[Cc]ard|[Ii]ban|[Pp]an|[Bb]illing|[Ff]irst[Nn]ame|[Ll]ast[Nn]ame|[Ff]ull[Nn]ame"}
+        ]
+      }
+    },
+    "SafeJson": {
+      "anyOf": [
+        {"type": "null"},
+        {"type": "boolean"},
+        {"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991},
+        {"type": "number", "not": {"type": "integer"}},
+        {"$ref": "#/$defs/SafeString"},
+        {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {"$ref": "#/$defs/SafeJson"}
+        },
+        {
+          "type": "object",
+          "maxProperties": 1000,
+          "propertyNames": {"$ref": "#/$defs/SafePropertyName"},
+          "additionalProperties": {"$ref": "#/$defs/SafeJson"}
+        }
+      ]
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateKey", "revision", "createdAt", "predecessorArtifactFingerprint"],
+      "properties": {
+        "candidateKey": {"$ref": "#/$defs/CandidateKey"},
+        "revision": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "predecessorArtifactFingerprint": {"$ref": "#/$defs/NullablePublicFingerprint"}
+      }
+    },
+    "SourceFieldSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fieldDomain", "seal"],
+      "properties": {
+        "fieldDomain": {"$ref": "#/$defs/OpaqueToken"},
+        "seal": {"$ref": "#/$defs/SourceSeal"}
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sealAlgorithm", "keyId", "privacyDomain", "synthetic", "fieldSeals"],
+      "properties": {
+        "sealAlgorithm": {"const": "HMAC-SHA-256"},
+        "keyId": {"$ref": "#/$defs/OpaqueToken"},
+        "privacyDomain": {"$ref": "#/$defs/OpaqueToken"},
+        "synthetic": {"type": "boolean"},
+        "fieldSeals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/SourceFieldSeal"}
+        }
+      }
+    },
+    "FindingCategory": {
+      "enum": [
+        "ABSOLUTE_PATH",
+        "DIRECT_IDENTIFIER",
+        "EMAIL",
+        "IP_ADDRESS",
+        "KOREAN_IDENTIFIER",
+        "MAC_ADDRESS",
+        "PAYMENT_OR_ACCOUNT",
+        "PHONE",
+        "RAW_CONTENT_SHA",
+        "SECRET",
+        "URL"
+      ]
+    },
+    "Sanitization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyVersion", "normalizationVersion", "mode", "status", "redactionCount", "findingCategories", "policyFingerprint"],
+      "properties": {
+        "policyVersion": {"const": "review-candidate-sensitive-data-v1"},
+        "normalizationVersion": {"const": "review-candidate-nfkc-lf-ignorables-v1"},
+        "mode": {"enum": ["REDACT", "REJECT"]},
+        "status": {"const": "CLEAN"},
+        "redactionCount": {"type": "integer", "minimum": 0},
+        "findingCategories": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/FindingCategory"}
+        },
+        "policyFingerprint": {"$ref": "#/$defs/PublicFingerprint"}
+      }
+    },
+    "Sampling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "algorithmVersion", "populationSize", "sampleSize", "seedFingerprint"],
+      "properties": {
+        "strategy": {"enum": ["ALL", "DETERMINISTIC_HASH"]},
+        "algorithmVersion": {"const": "review-candidate-sampling-v1"},
+        "populationSize": {"type": "integer", "minimum": 0},
+        "sampleSize": {"type": "integer", "minimum": 0},
+        "seedFingerprint": {"$ref": "#/$defs/PublicFingerprint"}
+      }
+    },
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "projection"],
+      "properties": {
+        "schemaVersion": {"$ref": "#/$defs/OpaqueToken"},
+        "projection": {"$ref": "#/$defs/SafeJson"}
+      }
+    },
+    "Fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payloadFingerprint", "artifactFingerprint"],
+      "properties": {
+        "payloadFingerprint": {"$ref": "#/$defs/PublicFingerprint"},
+        "artifactFingerprint": {"$ref": "#/$defs/PublicFingerprint"}
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewedAt", "reviewAuthoritySeal", "approvalArtifactFingerprint"],
+      "properties": {
+        "status": {"enum": ["UNREVIEWED", "REVIEWED", "REJECTED"]},
+        "reviewedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "reviewAuthoritySeal": {"$ref": "#/$defs/NullableSourceSeal"},
+        "approvalArtifactFingerprint": {"$ref": "#/$defs/NullablePublicFingerprint"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"status": {"const": "UNREVIEWED"}}, "required": ["status"]},
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewedAt": {"type": "null"},
+              "reviewAuthoritySeal": {"type": "null"},
+              "approvalArtifactFingerprint": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "Attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "attestedAt", "attestationFingerprint"],
+      "properties": {
+        "status": {"enum": ["NOT_RUN", "PASSED", "FAILED"]},
+        "attestedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "attestationFingerprint": {"$ref": "#/$defs/NullablePublicFingerprint"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"status": {"const": "NOT_RUN"}}, "required": ["status"]},
+          "then": {
+            "type": "object",
+            "properties": {
+              "attestedAt": {"type": "null"},
+              "attestationFingerprint": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "Retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyVersion", "disposition", "maxAgeDays", "expiresAt"],
+      "properties": {
+        "policyVersion": {"const": "review-candidate-retention-v1"},
+        "disposition": {"const": "DELETE"},
+        "maxAgeDays": {"type": "integer", "minimum": 1, "maximum": 90},
+        "expiresAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "Certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "eligible", "scope", "certificationFingerprint", "limitations"],
+      "properties": {
+        "status": {"enum": ["NOT_CERTIFIED", "CERTIFIED", "REJECTED"]},
+        "eligible": {"type": "boolean"},
+        "scope": {
+          "oneOf": [{"$ref": "#/$defs/OpaqueToken"}, {"type": "null"}]
+        },
+        "certificationFingerprint": {"$ref": "#/$defs/NullablePublicFingerprint"},
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["ATTESTATION_NOT_RUN", "NOT_A_RELEASE_CERTIFICATION", "REVIEW_REQUIRED", "SYNTHETIC_ONLY", "ACTUAL_DATA_MINIMIZED"]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"status": {"const": "CERTIFIED"}}, "required": ["status"]},
+          "then": {
+            "type": "object",
+            "properties": {
+              "eligible": {"const": true},
+              "scope": {"$ref": "#/$defs/OpaqueToken"},
+              "certificationFingerprint": {"$ref": "#/$defs/PublicFingerprint"}
+            }
+          },
+          "else": {"type": "object", "properties": {"eligible": {"const": false}}}
+        }
+      ]
+    }
+  }
+}

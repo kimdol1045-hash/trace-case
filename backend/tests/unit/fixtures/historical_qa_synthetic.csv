@@ -1,0 +1,18 @@
+경로,항목,내용,WEB,AOS,IOS,비고,담당자
+"결제 ＞ 쿠폰","쿠폰 적용","쿠폰을 선택하고
+주문 번호: 1234567890 표시되는지 확인",Pass,Fail,확인불가,"BUG-431 및 https://jira.example.invalid/browse/BUG-431, qa@example.com",홍길동
+" 결제/쿠폰 ",쿠폰 적용,"쿠폰을 선택하고
+주문 번호: 1234567890 표시되는지 확인",Fail,Pass,확인불가,"재검증 담당자: 김민수",김민수
+,,,,,,,
+비고,내용,IOS,경로,항목,위험도
+"테스터: Jane Doe; 고객 ID=CUSTOMER-9988","상품명이 정상적으로 표시되는지 확인",Pass,"상품／상세",상품 정보,High
+경로,항목,AOS,작성자
+"회원 > 로그인","잘못된 비밀번호 입력 시 오류가 표시되는지 확인",NG,박영희
+2026-08-26,"POS-900 결제 개선",https://jira.example.invalid/browse/POS-900
+,,,"복합 결제 시나리오 확인 - 담당자: 홍길동 qa-context@example.com"
+,,,,"카드/현금 결제 조합 검증 - 고객 ID=CUSTOMER-CONTEXT-7777"
+,"판매 > 결제",결제화면,작성자A,QA담당A,개발담당A,QA완료,Pass
+,"회원 > 로그인",로그인,"오류 메시지가 표시되는지 확인",작성자B,QA담당B,개발담당B,QA완료,Fail
+,,"설정 / 화면 설정",화면설정,"진입되는지 확인",작성자C,QA담당C,개발담당C,QA완료,확인불가
+,"판매 > 분할결제",영수증,"영수증이 출력되는지 확인",작성자D,QA담당D,개발담당D,,Blocked
+,"테스트 환경 : synthetic-context@example.com","결제 단말기 : DEVICE-CONTEXT-9000"

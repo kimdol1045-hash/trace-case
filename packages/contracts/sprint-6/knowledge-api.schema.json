@@ -1,0 +1,587 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json",
+  "title": "Sprint 6 typed knowledge graph, hybrid search and ontology explorer API",
+  "description": "Strict shared wire contracts for provenance-backed knowledge nodes, edges, evidence, status changes, hybrid search explanations and ontology exploration.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "pattern": "\\S"
+    },
+    "NullableIdentifier": {
+      "oneOf": [
+        {"$ref": "#/$defs/Identifier"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "NullableUri": {
+      "oneOf": [
+        {"type": "string", "format": "uri-reference", "maxLength": 2048},
+        {"type": "null"}
+      ],
+      "description": "An external source URI or an app-relative QA ledger URI. Null means the authoritative source rows could not be resolved."
+    },
+    "NullableExcerpt": {
+      "oneOf": [
+        {"$ref": "#/$defs/NonBlankString"},
+        {"type": "null"}
+      ]
+    },
+    "KnowledgeSourceType": {
+      "type": "string",
+      "enum": [
+        "SLACK_MESSAGE_REVISION",
+        "TEST_CASE_VERSION",
+        "EXECUTION_ATTEMPT",
+        "ISSUE_SNAPSHOT",
+        "MANUAL"
+      ]
+    },
+    "KnowledgeSourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "sourceEntityId", "sourceRevisionId"],
+      "properties": {
+        "sourceType": {"$ref": "#/$defs/KnowledgeSourceType"},
+        "sourceEntityId": {"$ref": "#/$defs/Identifier"},
+        "sourceRevisionId": {"$ref": "#/$defs/NullableIdentifier"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "sourceType": {"enum": ["SLACK_MESSAGE_REVISION", "TEST_CASE_VERSION"]}
+            },
+            "required": ["sourceType"]
+          },
+          "then": {
+            "properties": {
+              "sourceRevisionId": {"$ref": "#/$defs/Identifier"}
+            }
+          }
+        }
+      ],
+      "description": "Every graph projection identifies either an immutable source revision or an immutable ledger entity."
+    },
+    "KnowledgeCitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "label", "uri", "excerpt", "occurredAt", "deleted"],
+      "properties": {
+        "source": {"$ref": "#/$defs/KnowledgeSourceRef"},
+        "label": {"$ref": "#/$defs/NonBlankString"},
+        "uri": {
+          "$ref": "#/$defs/NullableUri",
+          "description": "Slack permalink or stable app-relative QA ledger navigation URI."
+        },
+        "excerpt": {"$ref": "#/$defs/NullableExcerpt"},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "deleted": {"type": "boolean"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"deleted": {"const": true}},
+            "required": ["deleted"]
+          },
+          "then": {"properties": {"excerpt": {"type": "null"}}},
+          "else": {"properties": {"excerpt": {"$ref": "#/$defs/NonBlankString"}}}
+        }
+      ]
+    },
+    "KnowledgeEvidenceResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectType",
+        "subjectId",
+        "source",
+        "revisionOrdinal",
+        "contentHash",
+        "citation",
+        "capturedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "subjectType": {"type": "string", "enum": ["NODE", "EDGE"]},
+        "subjectId": {"$ref": "#/$defs/Identifier"},
+        "source": {"$ref": "#/$defs/KnowledgeSourceRef"},
+        "revisionOrdinal": {"type": "integer", "minimum": 1},
+        "contentHash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "citation": {"$ref": "#/$defs/KnowledgeCitation"},
+        "capturedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Immutable evidence bound to the exact source revision used for a node or edge projection."
+    },
+    "KnowledgeNodeResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "nodeType",
+        "canonicalKey",
+        "label",
+        "content",
+        "status",
+        "validFrom",
+        "validTo",
+        "primarySource",
+        "evidenceIds",
+        "resourceVersion",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeNodeType"},
+        "canonicalKey": {"$ref": "#/$defs/NonBlankString"},
+        "label": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "validFrom": {"type": "string", "format": "date-time"},
+        "validTo": {"$ref": "#/$defs/NullableDateTime"},
+        "primarySource": {"$ref": "#/$defs/KnowledgeSourceRef"},
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "ACTIVE"}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"validTo": {"type": "null"}}}
+        },
+        {
+          "if": {
+            "properties": {"status": {"enum": ["SUPERSEDED", "RETRACTED"]}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"validTo": {"type": "string", "format": "date-time"}}}
+        }
+      ]
+    },
+    "KnowledgeEdgeResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "fromNodeId",
+        "predicate",
+        "toNodeId",
+        "status",
+        "validFrom",
+        "validTo",
+        "primarySource",
+        "evidenceIds",
+        "resourceVersion",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "fromNodeId": {"$ref": "#/$defs/Identifier"},
+        "predicate": {"$ref": "../state-enums.schema.json#/$defs/KnowledgePredicate"},
+        "toNodeId": {"$ref": "#/$defs/Identifier"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "validFrom": {"type": "string", "format": "date-time"},
+        "validTo": {"$ref": "#/$defs/NullableDateTime"},
+        "primarySource": {"$ref": "#/$defs/KnowledgeSourceRef"},
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "ACTIVE"}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"validTo": {"type": "null"}}}
+        },
+        {
+          "if": {
+            "properties": {"status": {"enum": ["SUPERSEDED", "RETRACTED"]}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"validTo": {"type": "string", "format": "date-time"}}}
+        }
+      ],
+      "description": "Typed directed relation. API and repository validation additionally enforce the ontology source/target type matrix."
+    },
+    "KnowledgeStatusPatchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetType",
+        "targetId",
+        "expectedVersion",
+        "status",
+        "effectiveAt",
+        "reason",
+        "evidenceIds",
+        "changedBy"
+      ],
+      "properties": {
+        "targetType": {"type": "string", "enum": ["NODE", "EDGE"]},
+        "targetId": {"$ref": "#/$defs/Identifier"},
+        "expectedVersion": {"type": "integer", "minimum": 1},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "effectiveAt": {"type": "string", "format": "date-time"},
+        "reason": {"$ref": "#/$defs/NonBlankString"},
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "changedBy": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "description": "Manual or system status correction with optimistic locking and mandatory audit evidence."
+    },
+    "KnowledgeStatusAuditResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "targetType",
+        "targetId",
+        "fromStatus",
+        "toStatus",
+        "reason",
+        "evidenceIds",
+        "changedBy",
+        "changedAt",
+        "targetVersion"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "targetType": {"type": "string", "enum": ["NODE", "EDGE"]},
+        "targetId": {"$ref": "#/$defs/Identifier"},
+        "fromStatus": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "toStatus": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "reason": {"$ref": "#/$defs/NonBlankString"},
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "changedBy": {"$ref": "#/$defs/NonBlankString"},
+        "changedAt": {"type": "string", "format": "date-time"},
+        "targetVersion": {"type": "integer", "minimum": 2}
+      }
+    },
+    "KnowledgeStatusPatchResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "audit", "projectionQueued"],
+      "properties": {
+        "target": {
+          "oneOf": [
+            {"$ref": "#/$defs/KnowledgeNodeResource"},
+            {"$ref": "#/$defs/KnowledgeEdgeResource"}
+          ]
+        },
+        "audit": {"$ref": "#/$defs/KnowledgeStatusAuditResource"},
+        "projectionQueued": {"type": "boolean"}
+      }
+    },
+    "HybridSearchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "statuses", "sourceTypes", "nodeTypes", "featureId", "limit", "cursor"],
+      "properties": {
+        "query": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S"},
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"}
+        },
+        "sourceTypes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/KnowledgeSourceType"}
+        },
+        "nodeTypes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeNodeType"}
+        },
+        "featureId": {"$ref": "#/$defs/NullableIdentifier"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200},
+        "cursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "description": "Callers explicitly choose status scope; current-confirmed search uses only ACTIVE."
+    },
+    "HybridSearchRecency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basisAt", "ageSeconds", "score"],
+      "properties": {
+        "basisAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authoritative node recordedAt timestamp used for recency scoring."
+        },
+        "ageSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Whole seconds from basisAt to the response executedAt timestamp."
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normalized recency component used by the hybrid ranker."
+        }
+      }
+    },
+    "HybridSearchResultReason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "signals"],
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/NonBlankString",
+          "description": "Deterministic human-readable explanation derived from this result's actual signals."
+        },
+        "signals": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["TYPED_GRAPH", "VECTOR", "LIGHTRAG", "EXACT_TEXT", "FEATURE_PROXIMITY", "RECENCY"]
+          },
+          "allOf": [
+            {"contains": {"const": "TYPED_GRAPH"}},
+            {"contains": {"const": "RECENCY"}}
+          ]
+        }
+      }
+    },
+    "HybridSearchResultItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank",
+        "nodeId",
+        "nodeType",
+        "label",
+        "content",
+        "score",
+        "reason",
+        "status",
+        "source",
+        "featureDistance",
+        "recency",
+        "degraded",
+        "degradationReasons",
+        "citation"
+      ],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Absolute one-based rank across all pages for the same ordered search."
+        },
+        "nodeId": {"$ref": "#/$defs/Identifier"},
+        "nodeType": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeNodeType"},
+        "label": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+        "content": {"$ref": "#/$defs/NonBlankString"},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "reason": {"$ref": "#/$defs/HybridSearchResultReason"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"},
+        "source": {"$ref": "#/$defs/KnowledgeSourceRef"},
+        "featureDistance": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ],
+          "description": "Shortest typed-graph hop count from the selected or matched feature; null means feature proximity did not contribute because no feature scope/path was available."
+        },
+        "recency": {"$ref": "#/$defs/HybridSearchRecency"},
+        "degraded": {"type": "boolean"},
+        "degradationReasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["LIGHTRAG_UNAVAILABLE", "VECTOR_UNAVAILABLE"]}
+        },
+        "citation": {"$ref": "#/$defs/KnowledgeCitation"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"degraded": {"const": true}},
+            "required": ["degraded"]
+          },
+          "then": {"properties": {"degradationReasons": {"type": "array", "minItems": 1}}},
+          "else": {"properties": {"degradationReasons": {"type": "array", "maxItems": 0}}}
+        },
+        {
+          "if": {
+            "properties": {
+              "reason": {
+                "type": "object",
+                "properties": {
+                  "signals": {
+                    "type": "array",
+                    "contains": {"const": "FEATURE_PROXIMITY"}
+                  }
+                },
+                "required": ["signals"]
+              }
+            },
+            "required": ["reason"]
+          },
+          "then": {"properties": {"featureDistance": {"type": "integer", "minimum": 0}}},
+          "else": {"properties": {"featureDistance": {"type": "null"}}}
+        }
+      ]
+    },
+    "HybridSearchResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "items", "nextCursor", "total", "degraded", "degradationReasons", "executedAt"],
+      "properties": {
+        "query": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S"},
+        "items": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {"$ref": "#/$defs/HybridSearchResultItem"}
+        },
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0},
+        "degraded": {"type": "boolean"},
+        "degradationReasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["LIGHTRAG_UNAVAILABLE", "VECTOR_UNAVAILABLE"]}
+        },
+        "executedAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"degraded": {"const": true}},
+            "required": ["degraded"]
+          },
+          "then": {"properties": {"degradationReasons": {"type": "array", "minItems": 1}}},
+          "else": {"properties": {"degradationReasons": {"type": "array", "maxItems": 0}}}
+        }
+      ],
+      "description": "The same response shape is returned when LightRAG is unavailable; response and item degraded flags make fallback explicit."
+    },
+    "OntologyExplorerRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rootNodeId", "direction", "predicates", "statuses", "maxDepth", "limit", "cursor"],
+      "properties": {
+        "rootNodeId": {"$ref": "#/$defs/Identifier"},
+        "direction": {"type": "string", "enum": ["OUTBOUND", "INBOUND", "BOTH"]},
+        "predicates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/KnowledgePredicate"}
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/KnowledgeStatus"}
+        },
+        "maxDepth": {"type": "integer", "minimum": 1, "maximum": 5},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200},
+        "cursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "OntologyExplorerNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "depth"],
+      "properties": {
+        "node": {"$ref": "#/$defs/KnowledgeNodeResource"},
+        "depth": {"type": "integer", "minimum": 0, "maximum": 5}
+      }
+    },
+    "OntologyExplorerResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rootNodeId", "nodes", "edges", "evidence", "truncated", "nextCursor"],
+      "properties": {
+        "rootNodeId": {"$ref": "#/$defs/Identifier"},
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {"$ref": "#/$defs/OntologyExplorerNode"}
+        },
+        "edges": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {"$ref": "#/$defs/KnowledgeEdgeResource"}
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 1200,
+          "items": {"$ref": "#/$defs/KnowledgeEvidenceResource"}
+        },
+        "truncated": {"type": "boolean"},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "description": "Minimal explorer payload for feature to decision to test-case to issue traversal with directly resolvable evidence."
+    }
+  }
+}

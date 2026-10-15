@@ -1,0 +1,961 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-2/test-case-api.schema.json",
+  "title": "Sprint 2 test case API payloads",
+  "description": "Canonical external contracts for test case CRUD, immutable versions, diff, restore, search, filtering, pagination, move, copy, deleted-detail reads and soft/permanent-delete lifecycle. Consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "TestCaseId": {
+      "type": "string",
+      "pattern": "^case_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseVersionId": {
+      "type": "string",
+      "pattern": "^case_version_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "GenerationLineageId": {
+      "type": "string",
+      "pattern": "^generation_lineage_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "GenerationApplyOutcomeId": {
+      "type": "string",
+      "pattern": "^generation_apply_outcome_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseKey": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{1,15}-[0-9]{6,}$",
+      "maxLength": 64,
+      "description": "Public case key allocated atomically without reuse. The default TC workspace starts at TC-000001; configured Sprint 1-compatible prefixes remain valid."
+    },
+    "CategoryId": {
+      "type": "string",
+      "pattern": "^folder_[A-Za-z0-9_-]+$",
+      "maxLength": 128,
+      "description": "The active root folder projected as a flat Test Library category."
+    },
+    "WorkItemId": {
+      "type": "string",
+      "pattern": "^work_item_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "WorkItemKey": {
+      "type": "string",
+      "pattern": "^WORK-[0-9]+$",
+      "maxLength": 64
+    },
+    "PersistedWorkItemKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "\\S"
+    },
+    "WorkItemResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "key", "categoryId", "summary", "description", "ownerLabel", "labels", "resourceVersion", "createdAt", "updatedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/WorkItemId"},
+        "key": {"$ref": "#/$defs/PersistedWorkItemKey"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "description": {"type": "string", "maxLength": 20000},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "CreateWorkItemRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "categoryId", "summary"],
+      "properties": {
+        "key": {"$ref": "#/$defs/WorkItemKey"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "description": {"type": "string", "maxLength": 20000, "default": ""},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels", "default": []}
+      }
+    },
+    "UpdateWorkItemRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "categoryId", "summary", "changeReason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "description": {"type": "string", "maxLength": 20000, "default": ""},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels", "default": []},
+        "changeReason": {"$ref": "#/$defs/Reason"}
+      }
+    },
+    "WorkItemPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/WorkItemResource"}},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "WorkItemDetailResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workItem", "testCases"],
+      "properties": {
+        "workItem": {"$ref": "#/$defs/WorkItemResource"},
+        "testCases": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/TestCaseListItem"}}
+      }
+    },
+    "AuditId": {
+      "type": "string",
+      "pattern": "^audit_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "Summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "Reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "Label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "\\S",
+      "description": "A Jira-style label. Collections compare trim + Unicode NFKC + case-folded values for uniqueness and matching."
+    },
+    "Labels": {
+      "type": "array",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/Label"},
+      "$comment": "JSON Schema uniqueItems catches exact duplicates; the normative case-insensitive uniqueness rule is exercised by the semantic fixture test."
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "SourceMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"$ref": "../state-enums.schema.json#/$defs/TestCaseVersionSourceType"},
+        "actorLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "externalActorId": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "generationJobId": {"$ref": "#/$defs/Identifier"},
+        "sourceRevisionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "evidenceNodeIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "correlationId": {"$ref": "#/$defs/Identifier"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "SLACK"}}, "required": ["type"]},
+          "then": {
+            "required": ["slackWorkItemId", "sourceRevisionIds"],
+            "properties": {"slackWorkItemId": {}, "sourceRevisionIds": {}}
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "WORKER"}}, "required": ["type"]},
+          "then": {
+            "required": ["generationJobId", "evidenceNodeIds"],
+            "properties": {"generationJobId": {}, "evidenceNodeIds": {}}
+          }
+        }
+      ],
+      "description": "Immutable source metadata for a version or mutation. actorLabel is display-only because the product has no web user identity."
+    },
+    "StepSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "PerStepTestStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action", "expectedResult"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "CaseTestStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "CreateTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workItemId",
+        "status",
+        "summary",
+        "precondition",
+        "expectedResultMode",
+        "priority",
+        "labels",
+        "steps",
+        "source"
+      ],
+      "properties": {
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "status": {"const": "ACTIVE"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResultMode": {"$ref": "../state-enums.schema.json#/$defs/ExpectedResultMode"},
+        "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "../state-enums.schema.json#/$defs/Priority"},
+        "ownerLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "labels": {"$ref": "#/$defs/Labels"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/StepSnapshot"}
+        },
+        "source": {"$ref": "#/$defs/SourceMetadata"},
+        "generationReason": {"$ref": "#/$defs/Reason"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "PER_STEP"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "properties": {
+              "caseExpectedResult": false,
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/PerStepTestStep"}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "CASE"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "required": ["caseExpectedResult", "generationReason"],
+            "properties": {
+              "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+              "generationReason": {"$ref": "#/$defs/Reason"},
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/CaseTestStep"}},
+              "source": {
+                "allOf": [
+                  {"$ref": "#/$defs/SourceMetadata"},
+                  {
+                    "type": "object",
+                    "required": ["type", "generationJobId"],
+                    "properties": {"type": {"const": "WORKER"}, "generationJobId": {}}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "Creates a case with an atomically allocated TC key and server-visible ACTIVE status. Interactive/manual creation uses PER_STEP; CASE mode is reserved for generation worker output."
+    },
+    "UpdateTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseVersion",
+        "summary",
+        "precondition",
+        "expectedResultMode",
+        "priority",
+        "labels",
+        "steps",
+        "changeReason",
+        "source"
+      ],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/TestCaseStatus"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResultMode": {"$ref": "../state-enums.schema.json#/$defs/ExpectedResultMode"},
+        "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "../state-enums.schema.json#/$defs/Priority"},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/StepSnapshot"}
+        },
+        "changeReason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"},
+        "generationReason": {"$ref": "#/$defs/Reason"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "PER_STEP"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "properties": {
+              "caseExpectedResult": false,
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/PerStepTestStep"}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "CASE"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "required": ["caseExpectedResult", "generationReason"],
+            "properties": {
+              "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+              "generationReason": {"$ref": "#/$defs/Reason"},
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/CaseTestStep"}},
+              "source": {
+                "allOf": [
+                  {"$ref": "#/$defs/SourceMetadata"},
+                  {
+                    "type": "object",
+                    "required": ["type", "generationJobId"],
+                    "properties": {"type": {"const": "WORKER"}, "generationJobId": {}}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "A complete immutable content snapshot appended by PATCH. baseVersion must equal the current content version or the API returns 409 VERSION_CONFLICT."
+    },
+    "TestCaseVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "testCaseId",
+        "version",
+        "summary",
+        "precondition",
+        "expectedResultMode",
+        "priority",
+        "labels",
+        "steps",
+        "source",
+        "changeReason",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseVersionId"},
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "version": {"type": "integer", "minimum": 1},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResultMode": {"$ref": "../state-enums.schema.json#/$defs/ExpectedResultMode"},
+        "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "../state-enums.schema.json#/$defs/Priority"},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/StepSnapshot"}
+        },
+        "source": {"$ref": "#/$defs/SourceMetadata"},
+        "changeReason": {"$ref": "#/$defs/Reason"},
+        "restoredFromVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "PER_STEP"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "properties": {
+              "caseExpectedResult": false,
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/PerStepTestStep"}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"expectedResultMode": {"const": "CASE"}}, "required": ["expectedResultMode"]},
+          "then": {
+            "required": ["caseExpectedResult"],
+            "properties": {
+              "caseExpectedResult": {"$ref": "#/$defs/NonBlankString"},
+              "steps": {"type": "array", "items": {"$ref": "#/$defs/CaseTestStep"}}
+            }
+          }
+        }
+      ]
+    },
+    "CopiedFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["testCaseId", "caseKey", "versionId", "version"],
+      "properties": {
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "caseKey": {"$ref": "#/$defs/TestCaseKey"},
+        "versionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "GenerationManagementActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"enum": ["UI", "API", "SYSTEM", "SLACK", "WORKER"]},
+        "actorLabel": {"type": "string", "minLength": 1, "maxLength": 200},
+        "externalActorId": {"type": "string", "minLength": 1, "maxLength": 200}
+      }
+    },
+    "GenerationManagement": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["managed"],
+          "properties": {"managed": {"const": false}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["managed", "lineageId", "createdOutcomeId", "baselineGeneratedVersionId", "latestGeneratedVersionId"],
+          "properties": {
+            "managed": {"const": true},
+            "lineageId": {"$ref": "#/$defs/GenerationLineageId"},
+            "createdOutcomeId": {"$ref": "#/$defs/GenerationApplyOutcomeId"},
+            "baselineGeneratedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+            "latestGeneratedVersionId": {"$ref": "#/$defs/TestCaseVersionId"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["managed", "lineageId", "createdOutcomeId", "baselineGeneratedVersionId", "latestGeneratedVersionId", "releasedAt", "releaseReason", "releaseActor", "releaseMutation", "releasedFromVersionId"],
+          "properties": {
+            "managed": {"const": false},
+            "lineageId": {"$ref": "#/$defs/GenerationLineageId"},
+            "createdOutcomeId": {"$ref": "#/$defs/GenerationApplyOutcomeId"},
+            "baselineGeneratedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+            "latestGeneratedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+            "releasedAt": {"type": "string", "format": "date-time"},
+            "releaseReason": {"$ref": "#/$defs/Reason"},
+            "releaseActor": {"$ref": "#/$defs/GenerationManagementActor"},
+            "releaseMutation": {"enum": ["CONTENT_VERSION", "PARENT_MOVE", "SOFT_DELETE", "RESTORE_DELETED", "LEGACY_HUMAN_OR_UNKNOWN_DIVERGENCE"]},
+            "releasedFromVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+            "releasedByVersionId": {"$ref": "#/$defs/TestCaseVersionId"}
+          }
+        }
+      ]
+    },
+    "TestCaseResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "workItemId",
+        "categoryId",
+        "sortOrder",
+        "status",
+        "resourceVersion",
+        "version",
+        "currentVersion",
+        "generationManagement",
+        "createdAt",
+        "updatedAt",
+        "deletedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseId"},
+        "key": {"$ref": "#/$defs/TestCaseKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "sortOrder": {"type": "integer", "minimum": 0},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/TestCaseStatus"},
+        "resourceVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Aggregate revision for ownership, ordering, status and soft-delete lifecycle mutations."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Current immutable content version number."
+        },
+        "currentVersion": {"$ref": "#/$defs/TestCaseVersion"},
+        "generationManagement": {"$ref": "#/$defs/GenerationManagement"},
+        "copiedFrom": {"$ref": "#/$defs/CopiedFrom"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "NewTestCaseResource": {
+      "allOf": [
+        {"$ref": "#/$defs/TestCaseResource"},
+        {
+          "type": "object",
+          "required": ["status", "resourceVersion", "version", "currentVersion"],
+          "properties": {
+            "status": {"const": "ACTIVE"},
+            "resourceVersion": {"const": 1},
+            "version": {"const": 1},
+            "currentVersion": {
+              "allOf": [
+                {"$ref": "#/$defs/TestCaseVersion"},
+                {"type": "object", "required": ["version"], "properties": {"version": {"const": 1}}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "CreateTestCaseResponse": {"$ref": "#/$defs/NewTestCaseResource"},
+    "UpdateTestCaseResponse": {"$ref": "#/$defs/TestCaseResource"},
+    "GetTestCaseResponse": {"$ref": "#/$defs/TestCaseResource"},
+    "GetTestCaseVersionResponse": {"$ref": "#/$defs/TestCaseVersion"},
+    "TestCaseListItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "workItemId",
+        "workItemKey",
+        "workItemSummary",
+        "categoryId",
+        "sortOrder",
+        "status",
+        "summary",
+        "priority",
+        "labels",
+        "resourceVersion",
+        "version",
+        "source",
+        "updatedAt",
+        "deletedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/TestCaseId"},
+        "key": {"$ref": "#/$defs/TestCaseKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "workItemKey": {"$ref": "#/$defs/PersistedWorkItemKey"},
+        "workItemSummary": {"$ref": "#/$defs/Summary"},
+        "categoryId": {"$ref": "#/$defs/CategoryId"},
+        "sortOrder": {"type": "integer", "minimum": 0},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/TestCaseStatus"},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "priority": {"$ref": "../state-enums.schema.json#/$defs/Priority"},
+        "ownerLabel": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "labels": {"$ref": "#/$defs/Labels"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "source": {"$ref": "#/$defs/SourceMetadata"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "TestCaseListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "categoryIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/CategoryId"}
+        },
+        "workItemIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/WorkItemId"}
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/TestCaseStatus"}
+        },
+        "priorities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/Priority"}
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Label"}
+        },
+        "labelMatch": {"type": "string", "enum": ["ANY", "ALL"], "default": "ANY"},
+        "includeDeleted": {"type": "boolean", "default": false},
+        "sort": {
+          "type": "string",
+          "enum": ["WORK_ITEM_ORDER", "UPDATED_AT_DESC", "KEY_ASC"],
+          "default": "WORK_ITEM_ORDER"
+        },
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "allOf": [
+        {
+          "if": {"required": ["labelMatch"], "properties": {"labelMatch": {}}},
+          "then": {"required": ["labels"], "properties": {"labels": {"type": "array"}}}
+        }
+      ],
+      "description": "Search matches case key and summary case-insensitively. Values within each filter are ORed (labels obey labelMatch); different supplied filters are ANDed. Cursor identity includes the normalized filter and sort tuple."
+    },
+    "TestCasePageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/TestCaseListItem"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "TestCaseVersionPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/TestCaseVersion"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "TestCaseVersionListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      }
+    },
+    "JsonValue": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "boolean"},
+        {"type": "number"},
+        {"type": "string"},
+        {"type": "array", "items": {"$ref": "#/$defs/JsonValue"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/JsonValue"}}
+      ]
+    },
+    "FieldDiff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "before", "after"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": ["summary", "precondition", "expectedResultMode", "caseExpectedResult", "priority", "ownerLabel", "labels"]
+        },
+        "before": {"$ref": "#/$defs/JsonValue"},
+        "after": {"$ref": "#/$defs/JsonValue"}
+      }
+    },
+    "StepDiff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changeType", "before", "after"],
+      "properties": {
+        "changeType": {"type": "string", "enum": ["ADDED", "REMOVED", "CHANGED", "MOVED"]},
+        "before": {
+          "oneOf": [
+            {"$ref": "#/$defs/StepSnapshot"},
+            {"type": "null"}
+          ]
+        },
+        "after": {
+          "oneOf": [
+            {"$ref": "#/$defs/StepSnapshot"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"changeType": {"const": "ADDED"}}, "required": ["changeType"]},
+          "then": {"properties": {"before": {"type": "null"}, "after": {"$ref": "#/$defs/StepSnapshot"}}}
+        },
+        {
+          "if": {"properties": {"changeType": {"const": "REMOVED"}}, "required": ["changeType"]},
+          "then": {"properties": {"before": {"$ref": "#/$defs/StepSnapshot"}, "after": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"changeType": {"enum": ["CHANGED", "MOVED"]}}, "required": ["changeType"]},
+          "then": {"properties": {"before": {"$ref": "#/$defs/StepSnapshot"}, "after": {"$ref": "#/$defs/StepSnapshot"}}}
+        }
+      ]
+    },
+    "TestCaseVersionDiffResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["testCaseId", "fromVersion", "toVersion", "fieldChanges", "stepChanges"],
+      "properties": {
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "fromVersion": {"type": "integer", "minimum": 1},
+        "toVersion": {"type": "integer", "minimum": 1},
+        "fieldChanges": {"type": "array", "items": {"$ref": "#/$defs/FieldDiff"}},
+        "stepChanges": {"type": "array", "items": {"$ref": "#/$defs/StepDiff"}}
+      }
+    },
+    "TestCaseVersionDiffQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fromVersion", "toVersion"],
+      "properties": {
+        "fromVersion": {"type": "integer", "minimum": 1},
+        "toVersion": {"type": "integer", "minimum": 1}
+      },
+      "description": "Selects two immutable versions of the path testCaseId for a field and ordered-step diff. The versions must differ."
+    },
+    "RestoreTestCaseVersionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "changeReason", "source"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "changeReason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      },
+      "description": "The target version is supplied in the path. Restore appends a new immutable version and never mutates the target history row."
+    },
+    "RestoreTestCaseVersionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["testCase", "restoredFromVersion", "auditId"],
+      "properties": {
+        "testCase": {"$ref": "#/$defs/TestCaseResource"},
+        "restoredFromVersion": {"type": "integer", "minimum": 1},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "MoveTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "targetWorkItemId", "targetSortOrder", "changeReason", "source"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "targetWorkItemId": {"$ref": "#/$defs/WorkItemId"},
+        "targetSortOrder": {"type": "integer", "minimum": 0},
+        "changeReason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      },
+      "description": "Moves or reorders a case. The server derives categoryId from targetWorkItemId and updates ownership, category and order atomically."
+    },
+    "MoveTestCaseResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "testCase", "previousWorkItemId", "previousCategoryId", "previousSortOrder"],
+      "properties": {
+        "operation": {"const": "MOVE"},
+        "testCase": {"$ref": "#/$defs/TestCaseResource"},
+        "previousWorkItemId": {"$ref": "#/$defs/WorkItemId"},
+        "previousCategoryId": {"$ref": "#/$defs/CategoryId"},
+        "previousSortOrder": {"type": "integer", "minimum": 0},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "CopyTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceVersion", "targetWorkItemId", "targetSortOrder", "changeReason", "source"],
+      "properties": {
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "targetWorkItemId": {"$ref": "#/$defs/WorkItemId"},
+        "targetSortOrder": {"type": "integer", "minimum": 0},
+        "summary": {"$ref": "#/$defs/Summary"},
+        "changeReason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      },
+      "description": "Copies one explicit immutable source version into an independently keyed case whose version history starts at 1."
+    },
+    "CopyTestCaseResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "testCase", "copiedFrom", "auditId"],
+      "properties": {
+        "operation": {"const": "COPY"},
+        "testCase": {
+          "allOf": [
+            {"$ref": "#/$defs/NewTestCaseResource"},
+            {"type": "object", "required": ["copiedFrom"], "properties": {"copiedFrom": {"$ref": "#/$defs/CopiedFrom"}}}
+          ]
+        },
+        "copiedFrom": {"$ref": "#/$defs/CopiedFrom"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "SoftDeleteTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason", "source"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      }
+    },
+    "SoftDeleteTestCaseResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "testCase", "auditId"],
+      "properties": {
+        "operation": {"const": "SOFT_DELETE"},
+        "testCase": {
+          "allOf": [
+            {"$ref": "#/$defs/TestCaseResource"},
+            {"type": "object", "properties": {"deletedAt": {"type": "string", "format": "date-time"}}}
+          ]
+        },
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "RestoreDeletedTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason", "source"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "targetWorkItemId": {"$ref": "#/$defs/WorkItemId"},
+        "targetSortOrder": {"type": "integer", "minimum": 0},
+        "reason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      },
+      "dependentRequired": {"targetSortOrder": ["targetWorkItemId"]},
+      "description": "Restores a soft-deleted case. targetWorkItemId is supplied only when the original work item is not active."
+    },
+    "RestoreDeletedTestCaseResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "testCase", "auditId"],
+      "properties": {
+        "operation": {"const": "RESTORE_DELETED"},
+        "testCase": {
+          "allOf": [
+            {"$ref": "#/$defs/TestCaseResource"},
+            {"type": "object", "properties": {"deletedAt": {"type": "null"}}}
+          ]
+        },
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "PermanentDeleteTestCaseRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason", "source"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"},
+        "source": {"$ref": "#/$defs/SourceMetadata"}
+      },
+      "description": "Permanently deletes only a previously soft-deleted test case after referential-integrity checks. The operation is irreversible."
+    },
+    "PermanentDeleteTestCaseResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "testCaseId", "deletedAttachmentCount", "auditId"],
+      "properties": {
+        "operation": {"const": "PERMANENT_DELETE"},
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "deletedAttachmentCount": {"const": 0},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    }
+  }
+}

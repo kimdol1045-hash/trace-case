@@ -1,0 +1,1208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-3/cycle-execution-api.schema.json",
+  "title": "Sprint 3 cycle and execution API payloads",
+  "description": "Canonical external contracts for cycle CRUD, deleted-detail reads, soft restore and permanent deletion, scope selection and preview, start/completion/reopen transitions, pinned case snapshots, append-only platform attempts, latest-version refresh and progress. Consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "CycleId": {
+      "type": "string",
+      "pattern": "^cycle_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "CycleItemId": {
+      "type": "string",
+      "pattern": "^cycle_item_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "ExecutionAttemptId": {
+      "type": "string",
+      "pattern": "^attempt_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestStepId": {
+      "type": "string",
+      "pattern": "^test_step_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseId": {
+      "type": "string",
+      "pattern": "^case_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseVersionId": {
+      "type": "string",
+      "pattern": "^case_version_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "TestCaseKey": {
+      "$ref": "../sprint-2/test-case-api.schema.json#/$defs/TestCaseKey"
+    },
+    "WorkItemId": {
+      "$ref": "../sprint-2/test-case-api.schema.json#/$defs/WorkItemId"
+    },
+    "WorkItemKey": {
+      "$ref": "../sprint-2/test-case-api.schema.json#/$defs/WorkItemKey"
+    },
+    "AuditId": {
+      "$ref": "../sprint-2/test-case-api.schema.json#/$defs/AuditId"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "CycleName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "Description": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "Reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "\\S"
+    },
+    "DisplayLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "Label": {
+      "$ref": "../sprint-2/test-case-api.schema.json#/$defs/Label"
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDisplayLabel": {
+      "oneOf": [
+        {"$ref": "#/$defs/DisplayLabel"},
+        {"type": "null"}
+      ]
+    },
+    "NullableNonBlankString": {
+      "oneOf": [
+        {"$ref": "#/$defs/NonBlankString"},
+        {"type": "null"}
+      ]
+    },
+    "WorkItemScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "workItemId", "workItemKey"],
+      "properties": {
+        "type": {"const": "WORK_ITEM"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "workItemKey": {"$ref": "#/$defs/WorkItemKey"}
+      }
+    },
+    "LabelScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"const": "LABEL"},
+        "label": {"$ref": "#/$defs/Label"},
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Label"}
+        }
+      },
+      "anyOf": [
+        {"required": ["label"], "properties": {"label": {}}},
+        {"required": ["labels"], "properties": {"labels": {}}}
+      ],
+      "description": "label is the backward-compatible primary value. labels is the canonical union selector; when both are present label is its first member."
+    },
+    "CycleScope": {
+      "oneOf": [
+        {"$ref": "#/$defs/WorkItemScope"},
+        {"$ref": "#/$defs/LabelScope"}
+      ],
+      "description": "Exactly one work item or the union of one or more normalized Jira-style labels. The server resolves duplicate-free current cases and locks the resolved scope when execution first records or explicitly starts."
+    },
+    "CycleResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "startDate",
+        "status",
+        "scope",
+        "scopeLocked",
+        "resourceVersion",
+        "itemCount",
+        "createdAt",
+        "updatedAt",
+        "startedAt",
+        "completedAt",
+        "deletedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/CycleId"},
+        "name": {"$ref": "#/$defs/CycleName"},
+        "description": {"$ref": "#/$defs/Description"},
+        "startDate": {"type": "string", "format": "date"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+        "scope": {"$ref": "#/$defs/CycleScope"},
+        "scopeLocked": {"type": "boolean"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "itemCount": {"type": "integer", "minimum": 0},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "startedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "deletedAt": {"$ref": "#/$defs/NullableDateTime"}
+      },
+      "allOf": [
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "PLANNED"}}},
+          "then": {
+            "required": ["scopeLocked", "startedAt", "completedAt"],
+            "properties": {
+              "scopeLocked": {"const": false},
+              "startedAt": {"type": "null"},
+              "completedAt": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "IN_PROGRESS"}}},
+          "then": {
+            "required": ["scopeLocked", "startedAt", "completedAt"],
+            "properties": {
+              "scopeLocked": {"const": true},
+              "startedAt": {"type": "string", "format": "date-time"},
+              "completedAt": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "COMPLETED"}}},
+          "then": {
+            "required": ["scopeLocked", "startedAt", "completedAt"],
+            "properties": {
+              "scopeLocked": {"const": true},
+              "startedAt": {"type": "string", "format": "date-time"},
+              "completedAt": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      ]
+    },
+    "NewCycleResource": {
+      "allOf": [
+        {"$ref": "#/$defs/CycleResource"},
+        {
+          "type": "object",
+          "required": ["status", "scopeLocked", "resourceVersion", "startedAt", "completedAt"],
+          "properties": {
+            "status": {"const": "PLANNED"},
+            "scopeLocked": {"const": false},
+            "resourceVersion": {"const": 1},
+            "startedAt": {"type": "null"},
+            "completedAt": {"type": "null"}
+          }
+        }
+      ]
+    },
+    "CreateCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "startDate", "scope"],
+      "properties": {
+        "name": {"$ref": "#/$defs/CycleName"},
+        "description": {"$ref": "#/$defs/Description"},
+        "startDate": {"type": "string", "format": "date"},
+        "scope": {"$ref": "#/$defs/CycleScope"}
+      },
+      "description": "Creates a PLANNED cycle and resolves the selected scope into duplicate-free preview items. Immutable version rows are pinned atomically by StartCycle, not by clients."
+    },
+    "CreateCycleResponse": {"$ref": "#/$defs/NewCycleResource"},
+    "UpdateCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 2,
+      "required": ["baseResourceVersion"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "name": {"$ref": "#/$defs/CycleName"},
+        "description": {"$ref": "#/$defs/Description"},
+        "startDate": {"type": "string", "format": "date"}
+      },
+      "description": "Updates basic cycle metadata. Scope and lifecycle transitions have explicit endpoints and cannot be smuggled through this payload."
+    },
+    "UpdateCycleResponse": {"$ref": "#/$defs/CycleResource"},
+    "DeleteCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"}
+      },
+      "description": "Soft-deletes a cycle in any lifecycle state while preserving its snapshot, execution, issue-link, and audit history."
+    },
+    "DeleteCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "cycleId", "deletedAt", "auditId"],
+      "properties": {
+        "operation": {"const": "DELETE"},
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "deletedAt": {"type": "string", "format": "date-time"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "RestoreCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"}
+      }
+    },
+    "RestoreCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "cycle", "auditId"],
+      "properties": {
+        "operation": {"const": "RESTORE"},
+        "cycle": {"$ref": "#/$defs/CycleListItem"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "PermanentDeleteCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"}
+      },
+      "description": "Permanently deletes only a previously soft-deleted cycle after issue-link checks and fail-closed attachment object deletion."
+    },
+    "PermanentDeleteCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "cycleId", "deletedAttachmentCount", "auditId"],
+      "properties": {
+        "operation": {"const": "PERMANENT_DELETE"},
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "deletedAttachmentCount": {"type": "integer", "minimum": 0},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "CycleListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"}
+        },
+        "scopeTypes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/CycleScopeType"}
+        },
+        "workItemIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/WorkItemId"}
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Label"}
+        },
+        "startDateFrom": {"type": "string", "format": "date"},
+        "startDateTo": {"type": "string", "format": "date"},
+        "deletedOnly": {"type": "boolean", "default": false},
+        "sort": {
+          "type": "string",
+          "enum": ["UPDATED_AT_DESC", "START_DATE_ASC", "NAME_ASC"],
+          "default": "UPDATED_AT_DESC"
+        },
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "Values inside one filter are ORed; different supplied filters are ANDed. Cursor identity includes every normalized filter and the stable sort tuple."
+    },
+    "CycleListItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "startDate",
+        "status",
+        "scope",
+        "resourceVersion",
+        "itemCount",
+        "platformResultCount",
+        "updatedAt",
+        "deletedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/CycleId"},
+        "name": {"$ref": "#/$defs/CycleName"},
+        "startDate": {"type": "string", "format": "date"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/CycleStatus"},
+        "scope": {"$ref": "#/$defs/CycleScope"},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "itemCount": {"type": "integer", "minimum": 0},
+        "platformResultCount": {"type": "integer", "minimum": 0},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "deletedAt": {
+          "oneOf": [
+            {"type": "string", "format": "date-time"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "CyclePageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total", "statusCounts"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/CycleListItem"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0},
+        "statusCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["PLANNED", "IN_PROGRESS", "COMPLETED"],
+          "properties": {
+            "PLANNED": {"type": "integer", "minimum": 0},
+            "IN_PROGRESS": {"type": "integer", "minimum": 0},
+            "COMPLETED": {"type": "integer", "minimum": 0}
+          },
+          "description": "Counts from the same source query with only the statuses filter removed."
+        }
+      }
+    },
+    "ListCyclesResponse": {"$ref": "#/$defs/CyclePageResponse"},
+    "GetCycleResponse": {"$ref": "#/$defs/CycleResource"},
+    "ScopeOptionListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"$ref": "../state-enums.schema.json#/$defs/CycleScopeType"},
+        "search": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      }
+    },
+    "WorkItemScopeOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "workItemId", "workItemKey", "summary", "caseCount"],
+      "properties": {
+        "type": {"const": "WORK_ITEM"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "workItemKey": {"$ref": "#/$defs/WorkItemKey"},
+        "summary": {"$ref": "#/$defs/NonBlankString"},
+        "ownerLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "caseCount": {"type": "integer", "minimum": 0}
+      }
+    },
+    "LabelScopeOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "label", "caseCount"],
+      "properties": {
+        "type": {"const": "LABEL"},
+        "label": {"$ref": "#/$defs/Label"},
+        "caseCount": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ScopeOption": {
+      "oneOf": [
+        {"$ref": "#/$defs/WorkItemScopeOption"},
+        {"$ref": "#/$defs/LabelScopeOption"}
+      ]
+    },
+    "ScopeOptionPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/ScopeOption"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ScopePreviewQuery": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scopeType", "workItemId"],
+          "properties": {
+            "scopeType": {"const": "WORK_ITEM"},
+            "workItemId": {"$ref": "#/$defs/WorkItemId"},
+            "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scopeType"],
+          "properties": {
+            "scopeType": {"const": "LABEL"},
+            "label": {"$ref": "#/$defs/Label"},
+            "labels": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 50,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/Label"}
+            },
+            "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+          },
+          "anyOf": [
+            {"required": ["label"], "properties": {"label": {}}},
+            {"required": ["labels"], "properties": {"labels": {}}}
+          ]
+        }
+      ]
+    },
+    "ScopePreviewItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "testCaseId",
+        "caseKey",
+        "summary",
+        "workItemId",
+        "workItemKey",
+        "ownerLabel",
+        "labels",
+        "currentVersionId",
+        "currentVersion"
+      ],
+      "properties": {
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "caseKey": {"$ref": "#/$defs/TestCaseKey"},
+        "summary": {"$ref": "#/$defs/NonBlankString"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "workItemKey": {"$ref": "#/$defs/WorkItemKey"},
+        "ownerLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "labels": {"$ref": "../sprint-2/test-case-api.schema.json#/$defs/Labels"},
+        "currentVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "currentVersion": {"type": "integer", "minimum": 1}
+      }
+    },
+    "ScopePreviewResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "resolvedAt", "items", "nextCursor", "total"],
+      "properties": {
+        "scope": {"$ref": "#/$defs/CycleScope"},
+        "resolvedAt": {"type": "string", "format": "date-time"},
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/ScopePreviewItem"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      },
+      "description": "Each active testCaseId appears once even when label resolution encounters duplicate joins. Preview is advisory; StartCycle re-resolves and pins current immutable versions transactionally."
+    },
+    "UpdateCycleScopeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "scope", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "scope": {"$ref": "#/$defs/CycleScope"},
+        "reason": {"$ref": "#/$defs/Reason"}
+      },
+      "description": "A PLANNED-only scope mutation. IN_PROGRESS and COMPLETED cycles return CYCLE_SCOPE_LOCKED and retain every pinned item."
+    },
+    "UpdateCycleScopeResponse": {"$ref": "#/$defs/CycleResource"},
+    "ExecutionAttemptResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "cycleId",
+        "cycleItemId",
+        "pinnedVersionId",
+        "platform",
+        "attemptNo",
+        "status",
+        "actualResult",
+        "note",
+        "executorLabel",
+        "startedAt",
+        "completedAt",
+        "isLatest"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/ExecutionAttemptId"},
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "cycleItemId": {"$ref": "#/$defs/CycleItemId"},
+        "pinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "attemptNo": {"type": "integer", "minimum": 1},
+        "status": {
+          "type": "string",
+          "enum": ["UNEXECUTED", "PASS", "FAIL", "BLOCKED"]
+        },
+        "actualResult": {"$ref": "#/$defs/NullableNonBlankString"},
+        "note": {"$ref": "#/$defs/NullableNonBlankString"},
+        "executorLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "startedAt": {"type": "string", "format": "date-time"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "isLatest": {"type": "boolean"}
+      },
+      "allOf": [
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "UNEXECUTED"}}},
+          "then": {
+            "required": ["actualResult", "completedAt"],
+            "properties": {"actualResult": {"type": "null"}, "completedAt": {"type": "null"}}
+          }
+        },
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "FAIL"}}},
+          "then": {
+            "required": ["actualResult", "completedAt"],
+            "properties": {
+              "actualResult": {"$ref": "#/$defs/NonBlankString"},
+              "completedAt": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "BLOCKED"}}},
+          "then": {
+            "required": ["note", "completedAt"],
+            "properties": {
+              "note": {"$ref": "#/$defs/NonBlankString"},
+              "completedAt": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "PASS"}}},
+          "then": {
+            "required": ["completedAt"],
+            "properties": {"completedAt": {"type": "string", "format": "date-time"}}
+          }
+        }
+      ],
+      "description": "An active attempt remains UNEXECUTED until it reaches PASS, FAIL or BLOCKED; terminal attempt rows are append-only."
+    },
+    "LatestPlatformExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "status", "latestAttempt"],
+      "properties": {
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"},
+        "latestAttempt": {
+          "oneOf": [
+            {"$ref": "#/$defs/ExecutionAttemptResource"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "UNEXECUTED"}}},
+          "then": {
+            "required": ["latestAttempt"],
+            "properties": {"latestAttempt": {"type": "null"}}
+          },
+          "else": {
+            "required": ["latestAttempt"],
+            "properties": {"latestAttempt": {"$ref": "#/$defs/ExecutionAttemptResource"}}
+          }
+        }
+      ]
+    },
+    "PlatformExecutionSet": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/LatestPlatformExecution"},
+      "allOf": [
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "WEB"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "AOS"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["platform"], "properties": {"platform": {"const": "IOS"}}}, "minContains": 1, "maxContains": 1}
+      ]
+    },
+    "LatestCaseVersionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versionId", "version", "updatedAt"],
+      "properties": {
+        "versionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "version": {"type": "integer", "minimum": 1},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "CycleItemResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "cycleId",
+        "testCaseId",
+        "caseKey",
+        "workItemId",
+        "workItemKey",
+        "ownerLabel",
+        "labels",
+        "sortOrder",
+        "pinnedVersionId",
+        "pinnedVersion",
+        "latestVersion",
+        "isLatestVersion",
+        "platformExecutions",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/CycleItemId"},
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "testCaseId": {"$ref": "#/$defs/TestCaseId"},
+        "caseKey": {"$ref": "#/$defs/TestCaseKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "workItemKey": {"$ref": "#/$defs/WorkItemKey"},
+        "ownerLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "labels": {"$ref": "../sprint-2/test-case-api.schema.json#/$defs/Labels"},
+        "sortOrder": {"type": "integer", "minimum": 0},
+        "pinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "pinnedVersion": {"$ref": "../sprint-2/test-case-api.schema.json#/$defs/TestCaseVersion"},
+        "latestVersion": {"$ref": "#/$defs/LatestCaseVersionRef"},
+        "isLatestVersion": {"type": "boolean"},
+        "platformExecutions": {"$ref": "#/$defs/PlatformExecutionSet"},
+        "createdAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "The pinnedVersionId and full pinnedVersion identify exactly what is executed. Library updates change latestVersion only and never mutate the pin implicitly."
+    },
+    "PinnedCycleItemListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "workItemIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/WorkItemId"}
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Label"}
+        },
+        "ownerLabels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/DisplayLabel"}
+        },
+        "hasLatestVersion": {"type": "boolean"},
+        "includeDeleted": {"type": "boolean", "default": false},
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "Filters are ANDed across fields and ORed within each array. includeDeleted allows the item ledger of a soft-deleted parent cycle to be read. The stable queue order is sortOrder then cycleItemId; cursor identity includes filters."
+    },
+    "PinnedCycleItemPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/CycleItemResource"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "CycleItemListQuery": {"$ref": "#/$defs/PinnedCycleItemListQuery"},
+    "CycleItemPageResponse": {"$ref": "#/$defs/PinnedCycleItemPageResponse"},
+    "StartCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "actorLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "description": "PLANNED-only transaction: re-resolve the selected scope, de-duplicate testCaseId values, pin each current immutable version, lock scope and enter IN_PROGRESS."
+    },
+    "StartCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle", "items", "auditId"],
+      "properties": {
+        "cycle": {
+          "allOf": [
+            {"$ref": "#/$defs/CycleResource"},
+            {
+              "type": "object",
+              "required": ["status", "scopeLocked"],
+              "properties": {"status": {"const": "IN_PROGRESS"}, "scopeLocked": {"const": true}}
+            }
+          ]
+        },
+        "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/CycleItemResource"}},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "IncompleteExecutionWarning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "unexecutedCount"],
+      "properties": {
+        "code": {"const": "INCOMPLETE_EXECUTIONS"},
+        "unexecutedCount": {"type": "integer", "minimum": 1}
+      }
+    },
+    "CompleteCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "acknowledgeIncomplete"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "acknowledgeIncomplete": {"type": "boolean"},
+        "actorLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "description": "IN_PROGRESS-only transition. UNEXECUTED latest platform states produce CYCLE_INCOMPLETE_WARNING unless acknowledgeIncomplete is true; acknowledged incompleteness never blocks completion."
+    },
+    "CompleteCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle", "warnings", "auditId"],
+      "properties": {
+        "cycle": {
+          "allOf": [
+            {"$ref": "#/$defs/CycleResource"},
+            {
+              "type": "object",
+              "required": ["status", "scopeLocked"],
+              "properties": {"status": {"const": "COMPLETED"}, "scopeLocked": {"const": true}}
+            }
+          ]
+        },
+        "warnings": {"type": "array", "maxItems": 1, "items": {"$ref": "#/$defs/IncompleteExecutionWarning"}},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "ReopenCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "reason": {"$ref": "#/$defs/Reason"},
+        "actorLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "description": "COMPLETED-only transition to IN_PROGRESS. Existing attempts stay terminal and immutable; subsequent execution uses RetryExecutionAttempt."
+    },
+    "ReopenCycleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle", "auditId"],
+      "properties": {
+        "cycle": {
+          "allOf": [
+            {"$ref": "#/$defs/CycleResource"},
+            {
+              "type": "object",
+              "required": ["status", "scopeLocked"],
+              "properties": {"status": {"const": "IN_PROGRESS"}, "scopeLocked": {"const": true}}
+            }
+          ]
+        },
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "RefreshCycleItemSnapshotRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseResourceVersion", "expectedPinnedVersionId", "targetVersionId", "confirm", "reason"],
+      "properties": {
+        "baseResourceVersion": {"type": "integer", "minimum": 1},
+        "expectedPinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "targetVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "confirm": {"const": true},
+        "reason": {"$ref": "#/$defs/Reason"}
+      },
+      "description": "The only snapshot mutation. It is explicit, compare-and-swap guarded, audited, and targets the current latest version; library edits never move a pin automatically."
+    },
+    "RefreshCycleItemSnapshotResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycleItem", "previousPinnedVersionId", "diff", "auditId"],
+      "properties": {
+        "cycleItem": {"$ref": "#/$defs/CycleItemResource"},
+        "previousPinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "diff": {"$ref": "../sprint-2/test-case-api.schema.json#/$defs/TestCaseVersionDiffResponse"},
+        "auditId": {"$ref": "#/$defs/AuditId"}
+      }
+    },
+    "StartExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform"],
+      "properties": {
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "executorLabel": {"$ref": "#/$defs/DisplayLabel"},
+        "note": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "description": "IN_PROGRESS-only. Creates attemptNo 1 for the selected item/platform and returns UNEXECUTED; PLANNED and COMPLETED cycles reject execution mutation."
+    },
+    "StartExecutionAttemptResponse": {
+      "allOf": [
+        {"$ref": "#/$defs/ExecutionAttemptResource"},
+        {
+          "type": "object",
+          "required": ["attemptNo", "status", "isLatest"],
+          "properties": {"attemptNo": {"const": 1}, "status": {"const": "UNEXECUTED"}, "isLatest": {"const": true}}
+        }
+      ]
+    },
+    "CompleteExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "BLOCKED"]},
+        "actualResult": {"$ref": "#/$defs/NonBlankString"},
+        "note": {"$ref": "#/$defs/NonBlankString"},
+        "executorLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "allOf": [
+        {
+          "if": {"required": ["status"], "properties": {"status": {"const": "FAIL"}}},
+          "then": {"required": ["actualResult"], "properties": {"actualResult": {"$ref": "#/$defs/NonBlankString"}}}
+        }
+      ],
+      "description": "Finishes the active UNEXECUTED attempt exactly once. FAIL requires actualResult; note is optional for every terminal status."
+    },
+    "CompleteExecutionAttemptResponse": {"$ref": "#/$defs/ExecutionAttemptResource"},
+    "RecordExecutionAttemptResultRequest": {"$ref": "#/$defs/CompleteExecutionAttemptRequest"},
+    "RecordExecutionAttemptResultResponse": {"$ref": "#/$defs/CompleteExecutionAttemptResponse"},
+    "RetryExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previousAttemptId"],
+      "properties": {
+        "previousAttemptId": {"$ref": "#/$defs/ExecutionAttemptId"},
+        "executorLabel": {"$ref": "#/$defs/DisplayLabel"},
+        "note": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "description": "IN_PROGRESS-only. Appends attemptNo = previous latest attemptNo + 1 for the same cycle item and platform; it never rewrites the previous result."
+    },
+    "RetryExecutionAttemptResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previousAttempt", "attempt"],
+      "properties": {
+        "previousAttempt": {"$ref": "#/$defs/ExecutionAttemptResource"},
+        "attempt": {
+          "allOf": [
+            {"$ref": "#/$defs/ExecutionAttemptResource"},
+            {
+              "type": "object",
+              "required": ["status", "isLatest"],
+              "properties": {"status": {"const": "UNEXECUTED"}, "isLatest": {"const": true}}
+            }
+          ]
+        }
+      }
+    },
+    "ExecutionAttemptHistoryQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platforms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"}
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"}
+        },
+        "cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}
+      },
+      "description": "History is ordered by platform then attemptNo descending. Cursor identity includes the item path and normalized filters."
+    },
+    "ExecutionAttemptHistoryPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor", "total", "latestAttemptIds"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/ExecutionAttemptResource"}},
+        "nextCursor": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+            {"type": "null"}
+          ]
+        },
+        "total": {"type": "integer", "minimum": 0},
+        "latestAttemptIds": {
+          "type": "array",
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/ExecutionAttemptId"}
+        }
+      },
+      "description": "At most one latestAttemptId exists per platform. Latest means the greatest attemptNo for that cycle item/platform, independent of result status."
+    },
+    "ExecutionStepResultInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "status"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "BLOCKED"]},
+        "note": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "description": "A terminal result for one pinned step. note is optional for PASS, FAIL, and BLOCKED."
+    },
+    "RecordStepResultsRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["results"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/ExecutionStepResultInput"}
+        },
+        "executorLabel": {"$ref": "#/$defs/DisplayLabel"}
+      },
+      "description": "IN_PROGRESS-only. Upserts unique pinned step sequences while the active attempt is UNEXECUTED; PLANNED and COMPLETED cycles reject execution mutation. All recorded steps derive the terminal attempt with FAIL > BLOCKED > PASS precedence."
+    },
+    "ExecutionStepResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["testStepId", "sequence", "precondition", "action", "expectedResult", "status", "note", "recordedAt", "updatedAt"],
+      "properties": {
+        "testStepId": {"$ref": "#/$defs/TestStepId"},
+        "sequence": {"type": "integer", "minimum": 1},
+        "precondition": {"$ref": "#/$defs/NullableNonBlankString"},
+        "action": {"$ref": "#/$defs/NonBlankString"},
+        "expectedResult": {"$ref": "#/$defs/NullableNonBlankString"},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"},
+        "note": {"$ref": "#/$defs/NullableNonBlankString"},
+        "recordedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "updatedAt": {"$ref": "#/$defs/NullableDateTime"}
+      }
+    },
+    "StepExecutionResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycleId", "cycleItemId", "pinnedVersionId", "platform", "attemptId", "attemptNo", "status", "executorLabel", "startedAt", "completedAt", "recordedStepCount", "totalStepCount", "steps"],
+      "properties": {
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "cycleItemId": {"$ref": "#/$defs/CycleItemId"},
+        "pinnedVersionId": {"$ref": "#/$defs/TestCaseVersionId"},
+        "platform": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "attemptId": {"oneOf": [{"$ref": "#/$defs/ExecutionAttemptId"}, {"type": "null"}]},
+        "attemptNo": {"oneOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]},
+        "status": {"$ref": "../state-enums.schema.json#/$defs/ExecutionStatus"},
+        "executorLabel": {"$ref": "#/$defs/NullableDisplayLabel"},
+        "startedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "recordedStepCount": {"type": "integer", "minimum": 0},
+        "totalStepCount": {"type": "integer", "minimum": 1},
+        "steps": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/ExecutionStepResource"}}
+      },
+      "description": "Returns every pinned step, including UNEXECUTED placeholders, persisted terminal results and notes, plus the attempt status derived from the complete step set."
+    },
+    "GetStepExecutionResponse": {"$ref": "#/$defs/StepExecutionResource"},
+    "RecordStepResultsResponse": {"$ref": "#/$defs/StepExecutionResource"},
+    "ExecutionStatusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["UNEXECUTED", "PASS", "FAIL", "BLOCKED", "total"],
+      "properties": {
+        "UNEXECUTED": {"type": "integer", "minimum": 0},
+        "PASS": {"type": "integer", "minimum": 0},
+        "FAIL": {"type": "integer", "minimum": 0},
+        "BLOCKED": {"type": "integer", "minimum": 0},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ProgressValues": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["counts", "executedCount", "passRate", "aggregateStatus"],
+      "properties": {
+        "counts": {"$ref": "#/$defs/ExecutionStatusCounts"},
+        "executedCount": {"type": "integer", "minimum": 0},
+        "passRate": {"type": "number", "minimum": 0, "maximum": 1},
+        "aggregateStatus": {"$ref": "../state-enums.schema.json#/$defs/ExecutionAggregateStatus"}
+      }
+    },
+    "OverallProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "key", "label", "values"],
+      "properties": {
+        "dimension": {"const": "OVERALL"},
+        "key": {"const": "ALL"},
+        "label": {"const": "All platforms"},
+        "values": {"$ref": "#/$defs/ProgressValues"}
+      }
+    },
+    "PlatformProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "key", "label", "values"],
+      "properties": {
+        "dimension": {"const": "PLATFORM"},
+        "key": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"},
+        "label": {"$ref": "#/$defs/DisplayLabel"},
+        "values": {"$ref": "#/$defs/ProgressValues"}
+      }
+    },
+    "OwnerProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "key", "label", "values"],
+      "properties": {
+        "dimension": {"const": "OWNER"},
+        "key": {"$ref": "#/$defs/DisplayLabel"},
+        "label": {"$ref": "#/$defs/DisplayLabel"},
+        "values": {"$ref": "#/$defs/ProgressValues"}
+      }
+    },
+    "WorkItemProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "key", "label", "values"],
+      "properties": {
+        "dimension": {"const": "WORK_ITEM"},
+        "key": {"$ref": "#/$defs/WorkItemId"},
+        "label": {"$ref": "#/$defs/DisplayLabel"},
+        "values": {"$ref": "#/$defs/ProgressValues"}
+      }
+    },
+    "LabelProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "key", "label", "values"],
+      "properties": {
+        "dimension": {"const": "LABEL"},
+        "key": {"$ref": "#/$defs/Label"},
+        "label": {"$ref": "#/$defs/DisplayLabel"},
+        "values": {"$ref": "#/$defs/ProgressValues"}
+      }
+    },
+    "CycleProgressQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platforms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "../state-enums.schema.json#/$defs/ExecutionPlatform"}
+        },
+        "ownerLabels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/DisplayLabel"}
+        },
+        "workItemIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/WorkItemId"}
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Label"}
+        }
+      },
+      "description": "Filters are ANDed across fields and ORed within each array. Progress excludes PLANNED cycles and reads only the greatest attemptNo per cycle item/platform."
+    },
+    "CycleProgressResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycleId",
+        "calculatedAt",
+        "excludesPlanned",
+        "latestAttemptOnly",
+        "overall",
+        "byPlatform",
+        "byOwner",
+        "byWorkItem",
+        "byLabel"
+      ],
+      "properties": {
+        "cycleId": {"$ref": "#/$defs/CycleId"},
+        "calculatedAt": {"type": "string", "format": "date-time"},
+        "excludesPlanned": {"const": true},
+        "latestAttemptOnly": {"const": true},
+        "overall": {"$ref": "#/$defs/OverallProgress"},
+        "byPlatform": {"type": "array", "items": {"$ref": "#/$defs/PlatformProgress"}},
+        "byOwner": {"type": "array", "items": {"$ref": "#/$defs/OwnerProgress"}},
+        "byWorkItem": {"type": "array", "items": {"$ref": "#/$defs/WorkItemProgress"}},
+        "byLabel": {"type": "array", "items": {"$ref": "#/$defs/LabelProgress"}}
+      }
+    }
+  }
+}

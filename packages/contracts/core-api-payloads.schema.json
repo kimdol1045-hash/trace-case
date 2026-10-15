@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/core-api-payloads.schema.json",
+  "title": "QA platform core REST API payloads",
+  "description": "Canonical definitions for the MVP's legacy core write payloads. Existing CreateTestCaseRequest and UpdateTestCaseRequest references remain stable; Sprint 2 consumers use the separately namespaced sprint-2/test-case-api schema.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "TestStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "action"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "action": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "TestCaseSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"$ref": "state-enums.schema.json#/$defs/TestCaseSourceType"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "generationJobId": {"$ref": "#/$defs/Identifier"},
+        "evidenceNodeIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "SLACK_AI"}}, "required": ["type"]},
+          "then": {
+            "required": ["slackWorkItemId", "generationJobId", "evidenceNodeIds"],
+            "properties": {
+              "slackWorkItemId": {},
+              "generationJobId": {},
+              "evidenceNodeIds": {}
+            }
+          }
+        }
+      ]
+    },
+    "CreateFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "parentId": {
+          "oneOf": [
+            {"$ref": "#/$defs/Identifier"},
+            {"type": "null"}
+          ]
+        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "sortOrder": {"type": "integer", "minimum": 0}
+      }
+    },
+    "CreateTestCaseRequest": {
+      "$comment": "Backward-compatible legacy shape. New Sprint 2 integrations use sprint-2/test-case-api.schema.json#/$defs/CreateTestCaseRequest.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["folderId", "status", "summary", "precondition", "steps", "expectedResult", "source"],
+      "properties": {
+        "folderId": {"$ref": "#/$defs/Identifier"},
+        "status": {"const": "ACTIVE"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/TestStep"}
+        },
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "state-enums.schema.json#/$defs/Priority"},
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}
+        },
+        "assigneeLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "source": {"$ref": "#/$defs/TestCaseSource"},
+        "generationReason": {"$ref": "#/$defs/NonBlankString"}
+      }
+    },
+    "UpdateTestCaseRequest": {
+      "$comment": "Backward-compatible legacy shape. New Sprint 2 integrations use sprint-2/test-case-api.schema.json#/$defs/UpdateTestCaseRequest.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "changeReason"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "changeReason": {"$ref": "#/$defs/NonBlankString"},
+        "folderId": {"$ref": "#/$defs/Identifier"},
+        "status": {"$ref": "state-enums.schema.json#/$defs/TestCaseStatus"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "steps": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/TestStep"}},
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "priority": {"$ref": "state-enums.schema.json#/$defs/Priority"},
+        "tags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"}}
+      },
+      "anyOf": [
+        {"required": ["folderId"]},
+        {"required": ["status"]},
+        {"required": ["summary"]},
+        {"required": ["precondition"]},
+        {"required": ["steps"]},
+        {"required": ["expectedResult"]},
+        {"required": ["priority"]},
+        {"required": ["tags"]}
+      ]
+    },
+    "CreateCycleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "environment", "status"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "description": {"type": "string"},
+        "build": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "environment": {"$ref": "#/$defs/NonBlankString"},
+        "startsAt": {"type": "string", "format": "date-time"},
+        "endsAt": {"type": "string", "format": "date-time"},
+        "participantLabels": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"}},
+        "status": {"const": "DRAFT"}
+      }
+    },
+    "CreateExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "executorLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "startedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "UpdateExecutionAttemptRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "status"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "status": {"$ref": "state-enums.schema.json#/$defs/ExecutionStatus"},
+        "actualResult": {"$ref": "#/$defs/NonBlankString"},
+        "comment": {"type": "string"},
+        "finishedAt": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"enum": ["FAIL", "BLOCKED"]}}, "required": ["status"]},
+          "then": {"required": ["actualResult"]}
+        }
+      ]
+    },
+    "CreateIssueRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "precondition", "steps", "expectedResult", "actualResult", "status", "severity"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "precondition": {"$ref": "#/$defs/NonBlankString"},
+        "steps": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/TestStep"}},
+        "expectedResult": {"$ref": "#/$defs/NonBlankString"},
+        "actualResult": {"$ref": "#/$defs/NonBlankString"},
+        "status": {"$ref": "state-enums.schema.json#/$defs/IssueStatus"},
+        "severity": {"$ref": "state-enums.schema.json#/$defs/Severity"},
+        "assigneeLabel": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "testCaseIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}},
+        "executionAttemptIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}}
+      }
+    },
+    "GenerateFromSlackWorkItemRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputSchemaVersion"],
+      "properties": {
+        "outputSchemaVersion": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "\\S"},
+        "additionalContext": {"type": "string"},
+        "referenceIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Identifier"}}
+      }
+    },
+    "ErrorResponse": {
+      "$ref": "sprint-1/error-contract.schema.json#/$defs/ErrorResponse"
+    }
+  }
+}

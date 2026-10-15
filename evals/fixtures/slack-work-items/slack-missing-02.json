@@ -1,0 +1,46 @@
+{
+  "fixtureId": "slack-missing-02",
+  "synthetic": true,
+  "category": "MISSING",
+  "description": "기능 설명이 없지만 요청 대상과 완료 조건은 있는 누락 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787205600.000005",
+      "messageRevisionId": "rev_m02_root",
+      "authorId": "U_SYN_009",
+      "body": "[일감]\n개발건: 장바구니 수량 상한 적용\n요청 메뉴: 주문 > 장바구니\n요청내용: 한 상품의 수량은 최대 99개로 제한하고 100 입력 시 오류를 표시한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787205600000005",
+      "revision": 1
+    },
+    "thread": []
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "장바구니 수량 상한 적용",
+      "requestedMenu": "주문 > 장바구니",
+      "requestDetails": "한 상품의 수량은 최대 99개로 제한하고 100 입력 시 오류를 표시한다.",
+      "missingFields": ["featureDescription"],
+      "confidence": 0.94,
+      "sourceMessageRevisions": ["rev_m02_root"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_m02_max",
+        "nodeType": "REQUIREMENT",
+        "content": "장바구니에서 한 상품의 수량은 최대 99개다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_m02_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "정량 경계와 오류 조건이 요청내용에 직접 명시되어 있다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_m02_max"],
+      "excludedKnowledgeIds": [],
+      "openQuestions": ["수량 변경 기능의 기존 동작 설명이 제공되지 않았다."]
+    }
+  }
+}

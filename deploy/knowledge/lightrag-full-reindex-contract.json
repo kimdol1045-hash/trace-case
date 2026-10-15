@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "tc-lightrag-generation-provider/v1",
+  "task": "PF-SF1-T09",
+  "authority": {
+    "authoritativeSystem": "PostgreSQL ledger",
+    "authoritativeMutation": "FORBIDDEN",
+    "derivedProjections": [
+      "knowledge_nodes",
+      "knowledge_edges",
+      "knowledge_evidence",
+      "knowledge_source_records",
+      "knowledge_embeddings",
+      "LightRAG PostgreSQL workspace and AGE graph"
+    ]
+  },
+  "sourceSnapshot": {
+    "transaction": "REPEATABLE READ, READ ONLY, DEFERRABLE",
+    "requiredAttestations": [
+      "exact target name and class",
+      "exact authoritative database name and database comment",
+      "PostgreSQL 16 or newer",
+      "Alembic head 20260902_0030",
+      "pgvector extension"
+    ],
+    "requiredDigests": [
+      "authoritative source-ledger SHA-256",
+      "canonical knowledge-projection SHA-256",
+      "BGE-M3 pgvector projection SHA-256",
+      "ordered LightRAG corpus SHA-256"
+    ],
+    "documentIdentity": "canonical lowercase PostgreSQL knowledge_nodes UUID",
+    "citationIdentity": "postgresql://knowledge/nodes/<UUID>",
+    "remoteCitationOrRedirect": "FORBIDDEN",
+    "rawCorpusInEvidence": false
+  },
+  "export": {
+    "maxDocuments": 100000,
+    "maxTotalBytes": 536870912,
+    "maxBatchDocuments": 50,
+    "maxBatchBytes": 2097152,
+    "oversizeBehavior": "FAIL_CLOSED"
+  },
+  "providerRequirements": {
+    "exactAuxiliaryTargetAttestation": true,
+    "activeWorkspaceAttestedSeparatelyFromStableAuxiliaryAuthority": true,
+    "exactAuxiliaryAuthorityId": true,
+    "exactProviderId": true,
+    "exactProviderIdValue": "official-lightrag-postgresql",
+    "exactProviderContractVersion": "tc-lightrag-generation-provider/v1",
+    "exactProviderDistribution": "lightrag-hku",
+    "exactProviderVersion": "1.5.6",
+    "exactRuntimeConfigDigest": true,
+    "controlPlane": "embedded-postgresql",
+    "redirectHops": 0,
+    "freshGenerationIsolation": true,
+    "fullDocumentCardinality": true,
+    "exactProcessedStatusDocumentIdentitySet": true,
+    "allDocumentsProcessed": true,
+    "zeroFailedDocuments": true,
+    "exactCorpusChecksum": true,
+    "sourceSnapshotRecheckBeforeActivation": true,
+    "atomicCompareAndSwapActivation": true,
+    "atomicCompareAndSwapRollback": true
+  },
+  "controller": {
+    "implementation": "LedgerBackedGenerationController",
+    "credentialInputs": [],
+    "activeGenerationAuthority": "TC PostgreSQL lightrag_active_generation_pointer",
+    "verifiedGenerationLedger": "TC PostgreSQL lightrag_generations",
+    "transitionEvidenceLedger": "TC PostgreSQL lightrag_generation_transition_events",
+    "manualEnvironmentSwitch": "FORBIDDEN",
+    "registrationBeforeActivation": true,
+    "registrationRuntimeMetadata": [
+      "auxiliaryAuthorityId",
+      "providerContractVersion",
+      "providerDistribution",
+      "providerVersion",
+      "runtimeConfigDigest"
+    ],
+    "sourceSnapshotRecheckBeforeRegistrationAndActivation": true,
+    "secretSafeEvidenceOnly": true
+  },
+  "runtimeRouting": {
+    "implementation": "LightRAGRuntimeResolver",
+    "bindingRead": "atomic pointer plus immutable generation metadata",
+    "cacheKey": [
+      "pointerVersion",
+      "generationId",
+      "registrationDigest"
+    ],
+    "pointerAttestation": "before and after every complete auxiliary operation",
+    "staleResultBehavior": "DISCARD_AND_TYPED_GRAPH_PGVECTOR_FALLBACK",
+    "noActiveOrMissingGenerationBehavior": "TYPED_GRAPH_PGVECTOR_FALLBACK",
+    "bindingMatch": [
+      "auxiliaryAuthorityId",
+      "auxiliaryTargetDigest",
+      "providerId",
+      "providerContractVersion",
+      "providerDistribution",
+      "providerVersion",
+      "runtimeConfigDigest",
+      "generationWorkspace"
+    ],
+    "workspaceSource": "ACTIVE_GENERATION_BINDING",
+    "manualEnvironmentSwitch": "FORBIDDEN",
+    "credentialInputs": []
+  },
+  "currentAdapter": {
+    "provider": "official-lightrag-postgresql",
+    "requiredVersion": "1.5.6",
+    "generationIsolation": "DEDICATED_SUBPROCESS_PER_GENERATION",
+    "storageNamespace": "POSTGRES_WORKSPACE",
+    "controller": "LedgerBackedGenerationController",
+    "durableActiveGenerationPointer": true,
+    "atomicActivation": "TC_POSTGRESQL_CAS",
+    "atomicRollback": "TC_POSTGRESQL_CAS",
+    "runtimeResolver": "LightRAGRuntimeResolver",
+    "runtimeResolverAvailable": true,
+    "runtimeFactory": "IsolatedLightRAGGenerationRuntimeFactory",
+    "runtimeFactoryAvailable": true,
+    "runtimeFactoryConfigured": false,
+    "runtimeSettingsComposition": "API_AND_WORKER_OPT_IN",
+    "runtimeDefaultEnabled": false,
+    "productionKnowledgeJobTypes": [
+      "KNOWLEDGE_PROJECTION",
+      "KNOWLEDGE_REINDEX"
+    ],
+    "productionKnowledgeJobsClaimable": true,
+    "generationWorkspaceFromSettings": false,
+    "approvedBootstrapAvailable": false,
+    "stagingCredentialsConfigured": false,
+    "runtimeProcessEnvironment": "CHILD_ONLY_IMMUTABLE_POSTGRES_ENVIRONMENT",
+    "parentProcessEnvironmentMutation": "FORBIDDEN",
+    "runtimePointerAttestation": "PER_OPERATION_BEFORE_AND_AFTER",
+    "applicationRuntimeComposition": true,
+    "liveApplySupported": false,
+    "executionStatus": "NOT_RUN"
+  },
+  "localVerification": {
+    "controllerProducedBindingToSettingsBuiltApiAndWorker": true,
+    "durableGenerationSwitchAndRollback": true,
+    "selfConsistentCounterfeitProviderIdRejected": true,
+    "exactProviderVersionAndRuntimeDigestRejection": true,
+    "productionChildRuntimeConfigDigestHandoff": true,
+    "apiKnowledgeJobsClaimedByProductionWorker": true,
+    "secretRedactionChecked": true,
+    "disabledDefaultChecked": true,
+    "tests": [
+      "backend/tests/unit/test_lightrag_generation_factory.py",
+      "scripts/phase-f/tests/test_lightrag_full_reindex.py",
+      "backend/tests/repository/test_lightrag_application_routing_postgresql.py"
+    ],
+    "scope": "DISPOSABLE_POSTGRESQL_PROTOCOL_CHILD_AND_NETWORK_FREE_PRODUCTION_CHILD_CONTRACT"
+  },
+  "localDisposableWave8": {
+    "status": "PASS",
+    "scope": "LOOPBACK_POSTGRESQL16_AGE_PGVECTOR_NETWORK_FREE",
+    "currentTcAccess": "READ_ONLY",
+    "officialAdapterInitializedAndIndexed": true,
+    "fullSupportedCorpusExported": true,
+    "documentContentCitationChunkVectorGraphChecks": true,
+    "semanticGraphCanonicalizationExcludesWorkspaceLocalAgeIds": true,
+    "semanticGraphDigestEqualAcrossPriorCutoverAndFailedActivation": true,
+    "immutableRegistrationAndCasCutover": true,
+    "separateApiAndWorkerResolvers": true,
+    "staleResultDiscarded": true,
+    "childProcessFailureFallback": true,
+    "providerStorageFailureFallback": true,
+    "failedActivationRolledBack": true,
+    "failedRollbackSurfaced": true,
+    "priorGenerationRestoredAndRetained": true,
+    "exactCleanupAndPreservation": true,
+    "evidence": [
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-sg9c42fd-20260907.json",
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-sg9c42fd-20260907.json"
+    ],
+    "historicalEvidence": [
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-20260907.json",
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-20260907.json",
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-local-disposable-final-20260907.json",
+      "docs/phase-f/evidence/pf-sf1-t09-wave8-cleanup-final-20260907.json"
+    ],
+    "releaseGate": "NOT_RUN"
+  },
+  "stagingEvidence": {
+    "credentialsAndBootstrap": "NOT_RUN",
+    "liveApply": "NOT_RUN",
+    "fullCorpus": "NOT_RUN",
+    "pointerMutation": "NOT_RUN",
+    "rollback": "NOT_RUN",
+    "load": "NOT_RUN",
+    "operatorHandoff": "NOT_RUN"
+  }
+}

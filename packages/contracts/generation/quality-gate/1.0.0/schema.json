@@ -1,0 +1,1038 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/quality-gate/1.0.0/schema.json",
+  "title": "Automatic generation quality gate 1.0.0",
+  "description": "Strict offline evaluation input and report contracts for PE-SE2-T08. Cross-record coverage, lifecycle-at-seal, duplicate, ordering, release-eligibility, and certification rules are semantic checks defined by the companion contract.",
+  "oneOf": [
+    {"$ref": "#/$defs/EvaluationInput"},
+    {"$ref": "#/$defs/EvaluationReport"}
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$"
+    },
+    "NonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "pattern": "\\S"
+    },
+    "Digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "PinnedText": {
+      "allOf": [
+        {"$ref": "#/$defs/NonBlank"},
+        {
+          "not": {
+            "enum": [
+              "latest",
+              "LATEST",
+              "unknown",
+              "UNKNOWN",
+              "unconfigured",
+              "UNCONFIGURED",
+              "unpinned",
+              "UNPINNED"
+            ]
+          }
+        }
+      ]
+    },
+    "Rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "NullableIdentifier": {
+      "oneOf": [
+        {"$ref": "#/$defs/Identifier"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDigest": {
+      "oneOf": [
+        {"$ref": "#/$defs/Digest"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "TextSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["normalizedLength", "digest"],
+      "properties": {
+        "normalizedLength": {"type": "integer", "minimum": 0, "maximum": 20000},
+        "digest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "VersionPins": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationPolicyVersion",
+        "generationPolicyDigest",
+        "promptVersion",
+        "promptDigest",
+        "providerId",
+        "modelId",
+        "modelRevision",
+        "embeddingProviderId",
+        "embeddingModelId",
+        "embeddingRevision",
+        "embeddingDimensions",
+        "semanticDuplicateThreshold",
+        "semanticDuplicateAlgorithmVersion",
+        "semanticDuplicatePolicyDigest",
+        "exactDuplicateAlgorithmVersion",
+        "inputSchemaVersion",
+        "outputSchemaVersion",
+        "suggestionSchemaVersion",
+        "qualityGateSchemaVersion",
+        "ontologySchemaVersion"
+      ],
+      "properties": {
+        "generationPolicyVersion": {"$ref": "#/$defs/PinnedText"},
+        "generationPolicyDigest": {"$ref": "#/$defs/Digest"},
+        "promptVersion": {"$ref": "#/$defs/PinnedText"},
+        "promptDigest": {"$ref": "#/$defs/Digest"},
+        "providerId": {"$ref": "#/$defs/PinnedText"},
+        "modelId": {"$ref": "#/$defs/PinnedText"},
+        "modelRevision": {"$ref": "#/$defs/PinnedText"},
+        "embeddingProviderId": {"$ref": "#/$defs/PinnedText"},
+        "embeddingModelId": {"$ref": "#/$defs/PinnedText"},
+        "embeddingRevision": {"$ref": "#/$defs/PinnedText"},
+        "embeddingDimensions": {"type": "integer", "minimum": 2, "maximum": 65536},
+        "semanticDuplicateThreshold": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "semanticDuplicateAlgorithmVersion": {"$ref": "#/$defs/PinnedText"},
+        "semanticDuplicatePolicyDigest": {"$ref": "#/$defs/Digest"},
+        "exactDuplicateAlgorithmVersion": {"$ref": "#/$defs/PinnedText"},
+        "inputSchemaVersion": {"const": "1.0.0"},
+        "outputSchemaVersion": {"const": "1.0.0"},
+        "suggestionSchemaVersion": {"const": "1.0.0"},
+        "qualityGateSchemaVersion": {"const": "automatic-generation-quality-gate/1.0.0"},
+        "ontologySchemaVersion": {"$ref": "#/$defs/PinnedText"}
+      }
+    },
+    "DatasetReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewedBy",
+        "reviewedAt",
+        "labelSetId",
+        "reviewProtocolVersion",
+        "approvalId",
+        "reviewAuthorityDigest",
+        "approvalArtifactDigest"
+      ],
+      "properties": {
+        "status": {"enum": ["UNREVIEWED", "REVIEWED", "REJECTED"]},
+        "reviewedBy": {
+          "oneOf": [
+            {"$ref": "#/$defs/NonBlank"},
+            {"type": "null"}
+          ]
+        },
+        "reviewedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "labelSetId": {"$ref": "#/$defs/NullableIdentifier"},
+        "reviewProtocolVersion": {
+          "oneOf": [
+            {"$ref": "#/$defs/PinnedText"},
+            {"type": "null"}
+          ]
+        },
+        "approvalId": {"$ref": "#/$defs/NullableIdentifier"},
+        "reviewAuthorityDigest": {"$ref": "#/$defs/NullableDigest"},
+        "approvalArtifactDigest": {"$ref": "#/$defs/NullableDigest"}
+      }
+    },
+    "PrivacyAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "containsRawSourceText",
+        "containsProductionData",
+        "secretsScan",
+        "piiScan",
+        "redactionPolicyVersion"
+      ],
+      "properties": {
+        "containsRawSourceText": {"const": false},
+        "containsProductionData": {"type": "boolean"},
+        "secretsScan": {"enum": ["CLEAN", "FAILED", "UNKNOWN"]},
+        "piiScan": {"enum": ["CLEAN", "FAILED", "UNKNOWN"]},
+        "redactionPolicyVersion": {"$ref": "#/$defs/PinnedText"}
+      }
+    },
+    "PrimaryClassification": {
+      "type": "string",
+      "enum": [
+        "GROUNDED_ACTIVE",
+        "SUPERSEDED_TRAP",
+        "RETRACTED_TRAP",
+        "DELETED_TRAP",
+        "REJECTED_TRAP",
+        "UNAVAILABLE_TRAP",
+        "UNRESOLVED_CONFLICT",
+        "DECISION_CANDIDATE",
+        "EXACT_DUPLICATE_TRAP",
+        "SEMANTIC_DUPLICATE_TRAP",
+        "CATEGORY_COLLISION_TRAP",
+        "PARENT_COLLISION_TRAP",
+        "CASE_ORDERING",
+        "BLANK_OR_INVALID_RESULT",
+        "APPLY_PROVENANCE",
+        "SUGGESTION_PROVENANCE"
+      ]
+    },
+    "ClassificationDistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "GROUNDED_ACTIVE",
+        "SUPERSEDED_TRAP",
+        "RETRACTED_TRAP",
+        "DELETED_TRAP",
+        "REJECTED_TRAP",
+        "UNAVAILABLE_TRAP",
+        "UNRESOLVED_CONFLICT",
+        "DECISION_CANDIDATE",
+        "EXACT_DUPLICATE_TRAP",
+        "SEMANTIC_DUPLICATE_TRAP",
+        "CATEGORY_COLLISION_TRAP",
+        "PARENT_COLLISION_TRAP",
+        "CASE_ORDERING",
+        "BLANK_OR_INVALID_RESULT",
+        "APPLY_PROVENANCE",
+        "SUGGESTION_PROVENANCE"
+      ],
+      "properties": {
+        "GROUNDED_ACTIVE": {"type": "integer", "minimum": 0},
+        "SUPERSEDED_TRAP": {"type": "integer", "minimum": 0},
+        "RETRACTED_TRAP": {"type": "integer", "minimum": 0},
+        "DELETED_TRAP": {"type": "integer", "minimum": 0},
+        "REJECTED_TRAP": {"type": "integer", "minimum": 0},
+        "UNAVAILABLE_TRAP": {"type": "integer", "minimum": 0},
+        "UNRESOLVED_CONFLICT": {"type": "integer", "minimum": 0},
+        "DECISION_CANDIDATE": {"type": "integer", "minimum": 0},
+        "EXACT_DUPLICATE_TRAP": {"type": "integer", "minimum": 0},
+        "SEMANTIC_DUPLICATE_TRAP": {"type": "integer", "minimum": 0},
+        "CATEGORY_COLLISION_TRAP": {"type": "integer", "minimum": 0},
+        "PARENT_COLLISION_TRAP": {"type": "integer", "minimum": 0},
+        "CASE_ORDERING": {"type": "integer", "minimum": 0},
+        "BLANK_OR_INVALID_RESULT": {"type": "integer", "minimum": 0},
+        "APPLY_PROVENANCE": {"type": "integer", "minimum": 0},
+        "SUGGESTION_PROVENANCE": {"type": "integer", "minimum": 0}
+      }
+    },
+    "DeclaredCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRoots",
+        "generationJobs",
+        "generationResults",
+        "generatedCases",
+        "generatedSteps",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "generationRoots": {"type": "integer", "minimum": 1},
+        "generationJobs": {"type": "integer", "minimum": 1},
+        "generationResults": {"type": "integer", "minimum": 1},
+        "generatedCases": {"type": "integer", "minimum": 0},
+        "generatedSteps": {"type": "integer", "minimum": 0},
+        "evidenceReferences": {"type": "integer", "minimum": 0}
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datasetId",
+        "kind",
+        "synthetic",
+        "description",
+        "review",
+        "declaredCounts",
+        "classificationDistribution",
+        "datasetFingerprint",
+        "snapshotFingerprint",
+        "privacy"
+      ],
+      "properties": {
+        "datasetId": {"$ref": "#/$defs/Identifier"},
+        "kind": {"enum": ["SYNTHETIC_FIXTURE", "OPERATIONAL_GOLDEN"]},
+        "synthetic": {"type": "boolean"},
+        "description": {"$ref": "#/$defs/NonBlank"},
+        "review": {"$ref": "#/$defs/DatasetReview"},
+        "declaredCounts": {"$ref": "#/$defs/DeclaredCounts"},
+        "classificationDistribution": {"$ref": "#/$defs/ClassificationDistribution"},
+        "datasetFingerprint": {"$ref": "#/$defs/Digest"},
+        "snapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "privacy": {"$ref": "#/$defs/PrivacyAttestation"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "SYNTHETIC_FIXTURE"}}, "required": ["kind"]},
+          "then": {"properties": {"synthetic": {"const": true}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "OPERATIONAL_GOLDEN"}}, "required": ["kind"]},
+          "then": {"properties": {"synthetic": {"const": false}}}
+        }
+      ]
+    },
+    "CaptureProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capturedAt",
+        "releaseCandidateAt",
+        "maxSnapshotAgeSeconds",
+        "environment",
+        "sourceSnapshotId",
+        "sourceSnapshotFingerprint",
+        "captureRevision",
+        "offlineReplay",
+        "networkAccess",
+        "providerCallsDuringEvaluation",
+        "slackCallsDuringEvaluation",
+        "degraded"
+      ],
+      "properties": {
+        "capturedAt": {"type": "string", "format": "date-time"},
+        "releaseCandidateAt": {"type": "string", "format": "date-time"},
+        "maxSnapshotAgeSeconds": {"const": 604800},
+        "environment": {"enum": ["synthetic", "staging", "production"]},
+        "sourceSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "sourceSnapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "captureRevision": {"$ref": "#/$defs/PinnedText"},
+        "offlineReplay": {"const": true},
+        "networkAccess": {"const": "DISABLED"},
+        "providerCallsDuringEvaluation": {"const": 0},
+        "slackCallsDuringEvaluation": {"const": 0},
+        "degraded": {"type": "boolean"}
+      }
+    },
+    "LiveGateAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "liveRunId",
+        "environment",
+        "providerCredentialed",
+        "providerCallObserved",
+        "approvedBy",
+        "approvedAt",
+        "capturedSnapshotFingerprint"
+      ],
+      "properties": {
+        "status": {"enum": ["NOT_RUN", "PASSED", "FAILED"]},
+        "liveRunId": {"$ref": "#/$defs/NullableIdentifier"},
+        "environment": {
+          "oneOf": [
+            {"enum": ["staging", "production"]},
+            {"type": "null"}
+          ]
+        },
+        "providerCredentialed": {"type": "boolean"},
+        "providerCallObserved": {"type": "boolean"},
+        "approvedBy": {
+          "oneOf": [
+            {"$ref": "#/$defs/NonBlank"},
+            {"type": "null"}
+          ]
+        },
+        "approvedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "capturedSnapshotFingerprint": {
+          "oneOf": [
+            {"$ref": "#/$defs/Digest"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "SourceRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "sourceEntityId", "sourceRevisionId", "sourceContentHash"],
+      "properties": {
+        "sourceType": {"$ref": "#/$defs/PinnedText"},
+        "sourceEntityId": {"$ref": "#/$defs/Identifier"},
+        "sourceRevisionId": {"$ref": "#/$defs/Identifier"},
+        "sourceContentHash": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "ContextSealEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contextEntryId",
+        "knowledgeNodeId",
+        "source",
+        "approvedEvidenceExcerptHashes",
+        "lifecycleStatusAtSeal",
+        "validFrom",
+        "validTo",
+        "availableAtSeal",
+        "conflictState",
+        "decisionState"
+      ],
+      "properties": {
+        "contextEntryId": {"$ref": "#/$defs/Identifier"},
+        "knowledgeNodeId": {"$ref": "#/$defs/Identifier"},
+        "source": {"$ref": "#/$defs/SourceRevision"},
+        "approvedEvidenceExcerptHashes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5000,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Digest"}
+        },
+        "lifecycleStatusAtSeal": {
+          "enum": ["ACTIVE", "SUPERSEDED", "RETRACTED", "DELETED", "REJECTED", "UNAVAILABLE"]
+        },
+        "validFrom": {"type": "string", "format": "date-time"},
+        "validTo": {"$ref": "#/$defs/NullableDateTime"},
+        "availableAtSeal": {"type": "boolean"},
+        "conflictState": {"enum": ["NONE", "UNRESOLVED"]},
+        "decisionState": {"enum": ["ACCEPTED", "CANDIDATE", "NOT_APPLICABLE"]}
+      }
+    },
+    "ContextSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contextSnapshotId", "contextDigest", "sealedAt", "entries"],
+      "properties": {
+        "contextSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "contextDigest": {"$ref": "#/$defs/Digest"},
+        "sealedAt": {"type": "string", "format": "date-time"},
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5000,
+          "items": {"$ref": "#/$defs/ContextSealEntry"}
+        }
+      }
+    },
+    "CoverageTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "stepSequence"],
+      "properties": {
+        "unit": {"enum": ["CASE", "STEP"]},
+        "stepSequence": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1, "maximum": 500},
+            {"type": "null"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"unit": {"const": "CASE"}}, "required": ["unit"]},
+          "then": {"properties": {"stepSequence": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"unit": {"const": "STEP"}}, "required": ["unit"]},
+          "then": {"properties": {"stepSequence": {"type": "integer", "minimum": 1}}}
+        }
+      ]
+    },
+    "EvidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceReferenceId",
+        "coverageTarget",
+        "contextEntryId",
+        "knowledgeNodeId",
+        "citationSourceRevisionId",
+        "source",
+        "citationExcerptHash"
+      ],
+      "properties": {
+        "evidenceReferenceId": {"$ref": "#/$defs/Identifier"},
+        "coverageTarget": {"$ref": "#/$defs/CoverageTarget"},
+        "contextEntryId": {"$ref": "#/$defs/Identifier"},
+        "knowledgeNodeId": {"$ref": "#/$defs/Identifier"},
+        "citationSourceRevisionId": {"$ref": "#/$defs/Identifier"},
+        "source": {"$ref": "#/$defs/SourceRevision"},
+        "citationExcerptHash": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "GeneratedStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "precondition", "action", "expectedResult"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1, "maximum": 500},
+        "precondition": {"$ref": "#/$defs/TextSeal"},
+        "action": {"$ref": "#/$defs/TextSeal"},
+        "expectedResult": {"$ref": "#/$defs/TextSeal"}
+      }
+    },
+    "PlacementSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "categoryDecision",
+        "categoryCanonicalKey",
+        "parentDecision",
+        "parentCanonicalKey"
+      ],
+      "properties": {
+        "categoryDecision": {"enum": ["REUSE_EXISTING", "CREATE_NEW"]},
+        "categoryCanonicalKey": {"$ref": "#/$defs/Digest"},
+        "parentDecision": {"enum": ["REUSE_EXISTING", "CREATE_NEW"]},
+        "parentCanonicalKey": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "MaterializationProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "applyId",
+        "applyOutcomeId",
+        "suggestionId",
+        "suggestionTargetId",
+        "sourceChangeAssessmentId",
+        "generationLineageId",
+        "baselineCaseVersionId",
+        "releaseReceiptId",
+        "sourceWorkspaceId",
+        "sourceGenerationJobId",
+        "sourceRootJobId",
+        "sourceVersion",
+        "contextDigest",
+        "inputDigest",
+        "resultDigest"
+      ],
+      "properties": {
+        "kind": {"enum": ["APPLY_CREATED", "APPLY_REUSED", "SUGGESTION", "NO_CHANGE", "NONE"]},
+        "applyId": {"$ref": "#/$defs/NullableIdentifier"},
+        "applyOutcomeId": {"$ref": "#/$defs/NullableIdentifier"},
+        "suggestionId": {"$ref": "#/$defs/NullableIdentifier"},
+        "suggestionTargetId": {"$ref": "#/$defs/NullableIdentifier"},
+        "sourceChangeAssessmentId": {"$ref": "#/$defs/NullableIdentifier"},
+        "generationLineageId": {"$ref": "#/$defs/NullableIdentifier"},
+        "baselineCaseVersionId": {"$ref": "#/$defs/NullableIdentifier"},
+        "releaseReceiptId": {"$ref": "#/$defs/NullableIdentifier"},
+        "sourceWorkspaceId": {"$ref": "#/$defs/Identifier"},
+        "sourceGenerationJobId": {"$ref": "#/$defs/Identifier"},
+        "sourceRootJobId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "contextDigest": {"$ref": "#/$defs/Digest"},
+        "inputDigest": {"$ref": "#/$defs/Digest"},
+        "resultDigest": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "GeneratedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseIndex",
+        "caseSnapshotId",
+        "summary",
+        "caseExpectedResult",
+        "generationReason",
+        "exactContentKey",
+        "semanticDuplicateClusterId",
+        "steps",
+        "evidenceReferences",
+        "placement",
+        "materialization"
+      ],
+      "properties": {
+        "caseIndex": {"type": "integer", "minimum": 0, "maximum": 9},
+        "caseSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "summary": {"$ref": "#/$defs/TextSeal"},
+        "caseExpectedResult": {"$ref": "#/$defs/TextSeal"},
+        "generationReason": {"$ref": "#/$defs/TextSeal"},
+        "exactContentKey": {"$ref": "#/$defs/Digest"},
+        "semanticDuplicateClusterId": {"$ref": "#/$defs/Identifier"},
+        "steps": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/GeneratedStep"}
+        },
+        "evidenceReferences": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {"$ref": "#/$defs/EvidenceReference"}
+        },
+        "placement": {"$ref": "#/$defs/PlacementSnapshot"},
+        "materialization": {"$ref": "#/$defs/MaterializationProvenance"}
+      }
+    },
+    "GenerationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resultSnapshotId",
+        "workspaceId",
+        "outputSchemaVersion",
+        "validationStatus",
+        "resultDigest",
+        "cases"
+      ],
+      "properties": {
+        "resultSnapshotId": {"$ref": "#/$defs/Identifier"},
+        "workspaceId": {"$ref": "#/$defs/Identifier"},
+        "outputSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "validationStatus": {"enum": ["VALID", "INVALID", "MISSING", "UNKNOWN"]},
+        "resultDigest": {"$ref": "#/$defs/Digest"},
+        "cases": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/GeneratedCase"}
+        }
+      }
+    },
+    "GenerationJob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationJobId",
+        "rootJobId",
+        "workspaceId",
+        "sourceVersion",
+        "retryOfJobId",
+        "attemptNumber",
+        "trigger",
+        "status",
+        "inputSchemaVersion",
+        "outputSchemaVersion",
+        "contextDigest",
+        "inputDigest",
+        "resultDigest",
+        "result"
+      ],
+      "properties": {
+        "generationJobId": {"$ref": "#/$defs/Identifier"},
+        "rootJobId": {"$ref": "#/$defs/Identifier"},
+        "workspaceId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "retryOfJobId": {"$ref": "#/$defs/NullableIdentifier"},
+        "attemptNumber": {"type": "integer", "minimum": 1},
+        "trigger": {"const": "AUTOMATIC"},
+        "status": {"enum": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "UNKNOWN"]},
+        "inputSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "outputSchemaVersion": {"$ref": "#/$defs/PinnedText"},
+        "contextDigest": {"$ref": "#/$defs/Digest"},
+        "inputDigest": {"$ref": "#/$defs/Digest"},
+        "resultDigest": {"$ref": "#/$defs/Digest"},
+        "result": {"$ref": "#/$defs/GenerationResult"}
+      }
+    },
+    "GenerationAttempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationJobId",
+        "rootJobId",
+        "workspaceId",
+        "sourceVersion",
+        "retryOfJobId",
+        "attemptNumber",
+        "status",
+        "contextDigest",
+        "inputDigest",
+        "resultDigest",
+        "rejectionCode"
+      ],
+      "properties": {
+        "generationJobId": {"$ref": "#/$defs/Identifier"},
+        "rootJobId": {"$ref": "#/$defs/Identifier"},
+        "workspaceId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "retryOfJobId": {"$ref": "#/$defs/NullableIdentifier"},
+        "attemptNumber": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["SUCCEEDED", "FAILED", "REJECTED", "UNAVAILABLE"]},
+        "contextDigest": {"$ref": "#/$defs/Digest"},
+        "inputDigest": {"$ref": "#/$defs/Digest"},
+        "resultDigest": {"$ref": "#/$defs/NullableDigest"},
+        "rejectionCode": {"$ref": "#/$defs/NullableIdentifier"}
+      }
+    },
+    "GenerationRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRootId",
+        "workspaceId",
+        "slackWorkItemId",
+        "sourceVersion",
+        "inputDigest",
+        "sealedSourceTime",
+        "primaryClassification",
+        "contextSeal",
+        "attemptHistory",
+        "selectedJob"
+      ],
+      "properties": {
+        "generationRootId": {"$ref": "#/$defs/Identifier"},
+        "workspaceId": {"$ref": "#/$defs/Identifier"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "inputDigest": {"$ref": "#/$defs/Digest"},
+        "sealedSourceTime": {"type": "string", "format": "date-time"},
+        "primaryClassification": {"$ref": "#/$defs/PrimaryClassification"},
+        "contextSeal": {"$ref": "#/$defs/ContextSeal"},
+        "attemptHistory": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/GenerationAttempt"}
+        },
+        "selectedJob": {"$ref": "#/$defs/GenerationJob"}
+      }
+    },
+    "ExistingCaseReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["caseReferenceId", "activeAtSeal", "exactContentKey", "semanticDuplicateClusterId"],
+      "properties": {
+        "caseReferenceId": {"$ref": "#/$defs/Identifier"},
+        "activeAtSeal": {"type": "boolean"},
+        "exactContentKey": {"$ref": "#/$defs/Digest"},
+        "semanticDuplicateClusterId": {"$ref": "#/$defs/Identifier"}
+      }
+    },
+    "CanonicalPlacementReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["referenceId", "activeAtSeal", "canonicalKey"],
+      "properties": {
+        "referenceId": {"$ref": "#/$defs/Identifier"},
+        "activeAtSeal": {"type": "boolean"},
+        "canonicalKey": {"$ref": "#/$defs/Digest"}
+      }
+    },
+    "ReferenceInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["existingCases", "categories", "parents"],
+      "properties": {
+        "existingCases": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ExistingCaseReference"}
+        },
+        "categories": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/CanonicalPlacementReference"}
+        },
+        "parents": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/CanonicalPlacementReference"}
+        }
+      }
+    },
+    "Thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceCoverage",
+        "retiredKnowledgeMisuseCount",
+        "duplicateCount",
+        "unresolvedAuthorityCount",
+        "provenanceFailureCount",
+        "invalidOrBlankResultCount",
+        "orderingFailureCount"
+      ],
+      "properties": {
+        "evidenceCoverage": {"const": 1},
+        "retiredKnowledgeMisuseCount": {"const": 0},
+        "duplicateCount": {"const": 0},
+        "unresolvedAuthorityCount": {"const": 0},
+        "provenanceFailureCount": {"const": 0},
+        "invalidOrBlankResultCount": {"const": 0},
+        "orderingFailureCount": {"const": 0}
+      }
+    },
+    "ReportOutputPaths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["json", "junit", "markdown"],
+      "properties": {
+        "json": {"type": "string", "pattern": "\\.json$", "maxLength": 1024},
+        "junit": {"type": "string", "pattern": "\\.xml$", "maxLength": 1024},
+        "markdown": {"type": "string", "pattern": "\\.md$", "maxLength": 1024}
+      }
+    },
+    "EvaluationInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "profile",
+        "dataset",
+        "capture",
+        "liveGate",
+        "versionPins",
+        "thresholds",
+        "reportOutputs",
+        "referenceInventory",
+        "generationRoots"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_QUALITY_EVALUATION_INPUT"},
+        "contractVersion": {"const": "automatic-generation-quality-gate/1.0.0"},
+        "profile": {"enum": ["CANDIDATE", "RELEASE"]},
+        "dataset": {"$ref": "#/$defs/Dataset"},
+        "capture": {"$ref": "#/$defs/CaptureProvenance"},
+        "liveGate": {"$ref": "#/$defs/LiveGateAttestation"},
+        "versionPins": {"$ref": "#/$defs/VersionPins"},
+        "thresholds": {"$ref": "#/$defs/Thresholds"},
+        "reportOutputs": {"$ref": "#/$defs/ReportOutputPaths"},
+        "referenceInventory": {"$ref": "#/$defs/ReferenceInventory"},
+        "generationRoots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/GenerationRoot"}
+        }
+      }
+    },
+    "CountRate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator", "rate"],
+      "properties": {
+        "numerator": {"type": "integer", "minimum": 0},
+        "denominator": {"type": "integer", "minimum": 0},
+        "rate": {"$ref": "#/$defs/Rate"}
+      }
+    },
+    "RetiredKnowledgeMisuseMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "SUPERSEDED", "RETRACTED", "DELETED", "REJECTED", "UNAVAILABLE"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "SUPERSEDED": {"type": "integer", "minimum": 0},
+        "RETRACTED": {"type": "integer", "minimum": 0},
+        "DELETED": {"type": "integer", "minimum": 0},
+        "REJECTED": {"type": "integer", "minimum": 0},
+        "UNAVAILABLE": {"type": "integer", "minimum": 0}
+      }
+    },
+    "DuplicateMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "exactKey", "semanticCluster", "categoryCollision", "parentCollision"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "exactKey": {"type": "integer", "minimum": 0},
+        "semanticCluster": {"type": "integer", "minimum": 0},
+        "categoryCollision": {"type": "integer", "minimum": 0},
+        "parentCollision": {"type": "integer", "minimum": 0}
+      }
+    },
+    "Metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceCoverage",
+        "retiredKnowledgeMisuse",
+        "duplicates",
+        "unresolvedAuthorityCount",
+        "provenanceFailureCount",
+        "invalidOrBlankResultCount",
+        "orderingFailureCount",
+        "eligibilityFailureCount"
+      ],
+      "properties": {
+        "evidenceCoverage": {"$ref": "#/$defs/CountRate"},
+        "retiredKnowledgeMisuse": {"$ref": "#/$defs/RetiredKnowledgeMisuseMetric"},
+        "duplicates": {"$ref": "#/$defs/DuplicateMetric"},
+        "unresolvedAuthorityCount": {"type": "integer", "minimum": 0},
+        "provenanceFailureCount": {"type": "integer", "minimum": 0},
+        "invalidOrBlankResultCount": {"type": "integer", "minimum": 0},
+        "orderingFailureCount": {"type": "integer", "minimum": 0},
+        "eligibilityFailureCount": {"type": "integer", "minimum": 0}
+      }
+    },
+    "GateCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "actual", "operator", "threshold", "passed"],
+      "properties": {
+        "code": {"$ref": "#/$defs/Identifier"},
+        "actual": {"type": "number"},
+        "operator": {"enum": ["==", ">=", "<="]},
+        "threshold": {"type": "number"},
+        "passed": {"type": "boolean"}
+      }
+    },
+    "Certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["releaseCertified", "status", "reasonCodes", "liveRunId"],
+      "properties": {
+        "releaseCertified": {"type": "boolean"},
+        "status": {
+          "enum": [
+            "RELEASE_CERTIFIED",
+            "NOT_CERTIFIED_SYNTHETIC",
+            "NOT_CERTIFIED_GATE_FAILED",
+            "NOT_CERTIFIED_LIVE_GATE_MISSING",
+            "NOT_CERTIFIED_INELIGIBLE"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/Identifier"}
+        },
+        "liveRunId": {"$ref": "#/$defs/NullableIdentifier"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "RELEASE_CERTIFIED"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {"releaseCertified": {"const": true}},
+            "required": ["releaseCertified"]
+          }
+        }
+      ]
+    },
+    "ArtifactRetention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retentionDays", "immutable", "legalHold"],
+      "properties": {
+        "retentionDays": {"type": "integer", "minimum": 30},
+        "immutable": {"const": true},
+        "legalHold": {"type": "boolean"}
+      }
+    },
+    "EvaluationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactKind",
+        "contractVersion",
+        "profile",
+        "datasetId",
+        "datasetKind",
+        "synthetic",
+        "datasetFingerprint",
+        "snapshotFingerprint",
+        "versionPins",
+        "evaluatorVersion",
+        "deterministicOfflineReplay",
+        "evaluatedCounts",
+        "metrics",
+        "checks",
+        "gate",
+        "certification",
+        "privacy",
+        "artifacts",
+        "retention"
+      ],
+      "properties": {
+        "artifactKind": {"const": "AUTOMATIC_GENERATION_QUALITY_EVALUATION_REPORT"},
+        "contractVersion": {"const": "automatic-generation-quality-gate/1.0.0"},
+        "profile": {"enum": ["CANDIDATE", "RELEASE"]},
+        "datasetId": {"$ref": "#/$defs/Identifier"},
+        "datasetKind": {"enum": ["SYNTHETIC_FIXTURE", "OPERATIONAL_GOLDEN"]},
+        "synthetic": {"type": "boolean"},
+        "datasetFingerprint": {"$ref": "#/$defs/Digest"},
+        "snapshotFingerprint": {"$ref": "#/$defs/Digest"},
+        "versionPins": {"$ref": "#/$defs/VersionPins"},
+        "evaluatorVersion": {"$ref": "#/$defs/PinnedText"},
+        "deterministicOfflineReplay": {"const": true},
+        "evaluatedCounts": {"$ref": "#/$defs/DeclaredCounts"},
+        "metrics": {"$ref": "#/$defs/Metrics"},
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/GateCheck"}
+        },
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passed", "allOrNothing"],
+          "properties": {
+            "passed": {"type": "boolean"},
+            "allOrNothing": {"const": true}
+          }
+        },
+        "certification": {"$ref": "#/$defs/Certification"},
+        "privacy": {"$ref": "#/$defs/PrivacyAttestation"},
+        "artifacts": {"$ref": "#/$defs/ReportOutputPaths"},
+        "retention": {"$ref": "#/$defs/ArtifactRetention"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "certification": {
+                "type": "object",
+                "properties": {"releaseCertified": {"const": true}},
+                "required": ["releaseCertified"]
+              }
+            },
+            "required": ["certification"]
+          },
+          "then": {
+            "properties": {
+              "profile": {"const": "RELEASE"},
+              "datasetKind": {"const": "OPERATIONAL_GOLDEN"},
+              "synthetic": {"const": false},
+              "gate": {
+                "type": "object",
+                "properties": {"passed": {"const": true}},
+                "required": ["passed"]
+              },
+              "certification": {
+                "type": "object",
+                "properties": {"status": {"const": "RELEASE_CERTIFIED"}},
+                "required": ["status"]
+              },
+              "retention": {
+                "type": "object",
+                "properties": {"retentionDays": {"type": "integer", "minimum": 400}},
+                "required": ["retentionDays"]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"synthetic": {"const": true}}, "required": ["synthetic"]},
+          "then": {
+            "properties": {
+              "datasetKind": {"const": "SYNTHETIC_FIXTURE"},
+              "certification": {
+                "type": "object",
+                "properties": {
+                  "releaseCertified": {"const": false},
+                  "status": {"const": "NOT_CERTIFIED_SYNTHETIC"}
+                },
+                "required": ["releaseCertified", "status"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

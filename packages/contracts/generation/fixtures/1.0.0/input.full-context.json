@@ -1,0 +1,165 @@
+{
+  "inputSchemaVersion": "1.0.0",
+  "requestedOutputSchemaVersion": "1.0.0",
+  "requestId": "generation_request_password_reset_1",
+  "createdAt": "2026-08-26T01:00:00Z",
+  "slackWorkItem": {
+    "workItemId": "slack_work_item_password_reset",
+    "evidenceNodeId": "work_item_password_reset",
+    "sourceVersion": 3,
+    "sourceRevisionIds": [
+      "slack_revision_password_root_1",
+      "slack_revision_password_reply_1",
+      "slack_revision_password_reply_2"
+    ],
+    "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787706000000000",
+    "developmentItem": "비밀번호 재설정 기능 개선",
+    "requestedMenu": "회원 > 계정관리 > 비밀번호",
+    "featureDescription": "이메일 인증 후 비밀번호를 변경하는 기능",
+    "requestDetails": "인증번호 유효시간을 5분으로 변경하고 5회 오류 시 인증을 잠근다.",
+    "missingFields": [],
+    "openQuestions": ["잠금 해제 조건은 아직 확정되지 않았다."]
+  },
+  "activeKnowledge": [
+    {
+      "nodeId": "decision_password_code_expiry",
+      "nodeType": "DECISION",
+      "status": "ACTIVE",
+      "content": "비밀번호 재설정 인증번호는 발급 후 5분 동안 유효하다.",
+      "validFrom": "2026-08-25T03:00:00Z",
+      "validTo": null,
+      "evidenceSourceRevisionIds": ["slack_revision_password_reply_1"],
+      "rank": 1,
+      "selectionReason": "현재 ACTIVE 결정이며 비밀번호 재설정 기능에 직접 적용된다."
+    },
+    {
+      "nodeId": "decision_password_attempt_lock",
+      "nodeType": "DECISION",
+      "status": "ACTIVE",
+      "content": "잘못된 인증번호를 5회 입력하면 해당 인증 요청을 잠근다.",
+      "validFrom": "2026-08-25T03:05:00Z",
+      "validTo": null,
+      "evidenceSourceRevisionIds": ["slack_revision_password_reply_2"],
+      "rank": 2,
+      "selectionReason": "현재 ACTIVE 결정이며 과거 잠금 우회 결함과 연결된다."
+    }
+  ],
+  "existingCases": [
+    {
+      "nodeId": "test_case_password_reset_happy_path",
+      "testCaseId": "test_case_password_reset",
+      "testCaseVersionId": "test_case_version_password_reset_3",
+      "caseKey": "TC-1042",
+      "status": "ACTIVE",
+      "summary": "유효한 이메일 인증번호로 비밀번호를 재설정한다",
+      "precondition": "비밀번호 재설정이 가능한 활성 계정이 있다.",
+      "steps": [
+        {
+          "sequence": 1,
+          "precondition": null,
+          "action": "이메일 인증을 요청하고 유효한 인증번호를 입력한다.",
+          "expectedResult": null
+        },
+        {
+          "sequence": 2,
+          "precondition": null,
+          "action": "새 비밀번호를 입력하고 변경을 완료한다.",
+          "expectedResult": null
+        }
+      ],
+      "expectedResultMode": "CASE",
+      "caseExpectedResult": "새 비밀번호가 저장되고 변경 완료 안내가 표시된다.",
+      "priority": "HIGH",
+      "labels": ["회원", "비밀번호"],
+      "rank": 1,
+      "selectionReason": "같은 기능의 현재 ACTIVE 정상 흐름 케이스다."
+    }
+  ],
+  "failedOrBlockedExecutions": [
+    {
+      "nodeId": "execution_password_lock_bypass",
+      "executionAttemptId": "execution_attempt_password_lock_bypass",
+      "testCaseVersionId": "test_case_version_password_lock_1",
+      "status": "FAIL",
+      "platform": "WEB",
+      "actualResult": "다섯 번째 오류 후 새 인증번호를 요청하면 잠금이 우회되었다.",
+      "occurredAt": "2026-08-18T06:00:00Z",
+      "linkedIssueIds": ["issue_password_lock_bypass"],
+      "rank": 1,
+      "selectionReason": "같은 기능에서 최근 실제 FAIL이 발생했다."
+    },
+    {
+      "nodeId": "execution_password_mail_blocked",
+      "executionAttemptId": "execution_attempt_password_mail_blocked",
+      "testCaseVersionId": "test_case_version_password_reset_3",
+      "status": "BLOCKED",
+      "platform": "WEB",
+      "actualResult": "테스트 메일 서버 장애로 인증번호 수신을 확인할 수 없었다.",
+      "occurredAt": "2026-08-19T08:00:00Z",
+      "linkedIssueIds": [],
+      "rank": 2,
+      "selectionReason": "같은 기능의 최근 BLOCKED 실행으로 환경 의존성을 보여준다."
+    }
+  ],
+  "openIssues": [
+    {
+      "nodeId": "issue_node_password_lock_bypass",
+      "issueId": "issue_password_lock_bypass",
+      "issueKey": "ISSUE-88",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "summary": "인증번호 재발급으로 5회 오류 잠금을 우회할 수 있다",
+      "expectedResult": "잠긴 인증 요청은 인증번호 재발급 후에도 추가 입력이 차단되어야 한다.",
+      "actualResult": "인증번호를 재발급하면 오류 횟수가 초기화되어 다시 입력할 수 있다.",
+      "linkedExecutionAttemptIds": ["execution_attempt_password_lock_bypass"],
+      "updatedAt": "2026-08-25T04:00:00Z",
+      "rank": 1,
+      "selectionReason": "현재 미종결 HIGH 이슈이며 ACTIVE 잠금 결정에 직접 영향을 준다."
+    }
+  ],
+  "extraSources": [
+    {
+      "sourceId": "extra_source_password_lock_design",
+      "evidenceNodeId": "extra_design_password_lock_state",
+      "sourceType": "DESIGN",
+      "title": "비밀번호 인증 잠금 상태 디자인",
+      "content": "잠금 상태에서는 인증번호 입력 필드를 비활성화하고 잠금 안내 문구를 표시한다.",
+      "uri": "/design/password-reset/lock-state",
+      "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "providedByUser": true
+    }
+  ],
+  "categoryCandidates": [
+    {
+      "categoryId": "folder_members",
+      "label": "회원",
+      "score": 0.94,
+      "selectionReason": "요청 메뉴와 기존 비밀번호 케이스가 회원 카테고리에 정확히 일치한다."
+    },
+    {
+      "categoryId": "folder_uncategorized",
+      "label": "미분류",
+      "score": 0.1,
+      "selectionReason": "기존 카테고리에 매핑하지 못할 때 사용하는 시스템 fallback이다."
+    }
+  ],
+  "generationPolicy": {
+    "policyVersion": "generation_policy_v1",
+    "batch": {
+      "batchId": "generation_batch_password_reset_1",
+      "featureGroup": "비밀번호 재설정 인증",
+      "batchNumber": 1,
+      "isFinalBatch": true
+    },
+    "minimumCaseCount": 5,
+    "maximumCaseCount": 10,
+    "expectedResultMode": "CASE",
+    "prioritizeHappyPath": true,
+    "includeApplicableCrud": true,
+    "allowUnsupportedEdgeCases": false,
+    "requireEvidenceReferences": true,
+    "unknownFactHandling": "OPEN_QUESTION",
+    "sensitiveDataHandling": "REDACT",
+    "language": "ko-KR"
+  }
+}

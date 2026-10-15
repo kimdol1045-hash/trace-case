@@ -1,0 +1,15 @@
+{
+  "datasetId": "synthetic-sprint-6-knowledge-eval-v1",
+  "synthetic": true,
+  "description": "Deterministic synthetic evaluations for Slack deletion retraction and exact evidence revision selection.",
+  "fixtureSchema": "../../../packages/contracts/sprint-6/slack-bundle-extraction.schema.json#/$defs/SlackBundleExtractionEvalCase",
+  "counts": {
+    "total": 2,
+    "DELETE_RETRACTION": 1,
+    "EVIDENCE_REVISION": 1
+  },
+  "fixtures": [
+    "sprint6-delete-retraction-01.json",
+    "sprint6-evidence-revision-01.json"
+  ]
+}

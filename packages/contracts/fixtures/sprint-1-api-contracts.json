@@ -1,0 +1,250 @@
+{
+  "fixtureId": "sprint-1-api-contracts",
+  "synthetic": true,
+  "cases": [
+    {
+      "name": "workspace settings response",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/workspace.schema.json#/$defs/WorkspaceSettings",
+      "expectedValid": true,
+      "payload": {
+        "id": "workspace_primary",
+        "teamName": "QA Platform Team",
+        "casePrefix": "TC",
+        "issuePrefix": "ISSUE",
+        "defaultEnvironment": "staging",
+        "generationQuietMinutes": 10,
+        "version": 3,
+        "createdAt": "2026-08-20T01:00:00Z",
+        "updatedAt": "2026-08-20T02:00:00Z"
+      }
+    },
+    {
+      "name": "workspace update rejects unknown fields",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/workspace.schema.json#/$defs/UpdateWorkspaceSettingsRequest",
+      "expectedValid": false,
+      "payload": {
+        "baseVersion": 3,
+        "teamName": "QA Platform Team",
+        "tenantId": "tenant_forbidden"
+      }
+    },
+    {
+      "name": "allocated key includes immutable ordinal",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/workspace.schema.json#/$defs/AllocatedKey",
+      "expectedValid": true,
+      "payload": {
+        "workspaceId": "workspace_primary",
+        "entityType": "TEST_CASE",
+        "key": "TC-000123",
+        "ordinal": 123
+      }
+    },
+    {
+      "name": "recursive folder tree",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-tree.schema.json#/$defs/FolderTreeResponse",
+      "expectedValid": true,
+      "payload": {
+        "workspaceId": "workspace_primary",
+        "generatedAt": "2026-08-20T03:00:00Z",
+        "items": [
+          {
+            "id": "folder_members",
+            "parentId": null,
+            "name": "회원",
+            "sortOrder": 0,
+            "depth": 0,
+            "path": [{"id": "folder_members", "name": "회원"}],
+            "directTestCaseCount": 1,
+            "subtreeTestCaseCount": 3,
+            "version": 1,
+            "deletedAt": null,
+            "children": [
+              {
+                "id": "folder_accounts",
+                "parentId": "folder_members",
+                "name": "계정관리",
+                "sortOrder": 0,
+                "depth": 1,
+                "path": [
+                  {"id": "folder_members", "name": "회원"},
+                  {"id": "folder_accounts", "name": "계정관리"}
+                ],
+                "directTestCaseCount": 2,
+                "subtreeTestCaseCount": 2,
+                "version": 2,
+                "deletedAt": null,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtree move request",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json#/$defs/MoveFolderRequest",
+      "expectedValid": true,
+      "payload": {
+        "baseVersion": 2,
+        "mode": "SUBTREE",
+        "targetParentId": "folder_orders",
+        "sortOrder": 1
+      }
+    },
+    {
+      "name": "folder alias cannot be a move parent",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json#/$defs/MoveFolderRequest",
+      "expectedValid": false,
+      "payload": {
+        "baseVersion": 2,
+        "mode": "SUBTREE",
+        "targetParentId": "alias_my_page",
+        "sortOrder": 1
+      }
+    },
+    {
+      "name": "soft delete subtree result",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json#/$defs/FolderMutationResult",
+      "expectedValid": true,
+      "payload": {
+        "operation": "SOFT_DELETE_SUBTREE",
+        "rootFolderId": "folder_members",
+        "affectedFolderIds": ["folder_members", "folder_accounts"],
+        "rootVersion": 3,
+        "auditId": "audit_delete_members",
+        "deletionBatchId": "folder_delete_members_20260820"
+      }
+    },
+    {
+      "name": "soft delete result requires deletion batch",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json#/$defs/FolderMutationResult",
+      "expectedValid": false,
+      "payload": {
+        "operation": "SOFT_DELETE_SUBTREE",
+        "rootFolderId": "folder_members",
+        "affectedFolderIds": ["folder_members"],
+        "rootVersion": 3,
+        "auditId": "audit_delete_members"
+      }
+    },
+    {
+      "name": "folder alias request targets a concrete folder",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json#/$defs/UpsertFolderAliasRequest",
+      "expectedValid": true,
+      "payload": {
+        "alias": "마이페이지",
+        "folderId": "folder_accounts"
+      }
+    },
+    {
+      "name": "append-only audit entry",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/audit.schema.json#/$defs/AuditEntry",
+      "expectedValid": true,
+      "payload": {
+        "id": "audit_move_accounts",
+        "workspaceId": "workspace_primary",
+        "entityType": "FOLDER",
+        "entityId": "folder_accounts",
+        "action": "MOVE_SUBTREE",
+        "before": {"parentId": "folder_members", "sortOrder": 0},
+        "after": {"parentId": "folder_orders", "sortOrder": 1},
+        "source": {"type": "UI", "actorLabel": "team member"},
+        "reason": "information architecture cleanup",
+        "occurredAt": "2026-08-20T03:10:00Z",
+        "traceId": "trace_move_accounts",
+        "idempotencyKey": "move-accounts-20260820"
+      }
+    },
+    {
+      "name": "audit entry rejects mutable status fields",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/audit.schema.json#/$defs/AuditEntry",
+      "expectedValid": false,
+      "payload": {
+        "id": "audit_move_accounts",
+        "workspaceId": "workspace_primary",
+        "entityType": "FOLDER",
+        "entityId": "folder_accounts",
+        "action": "MOVE_SUBTREE",
+        "before": null,
+        "after": null,
+        "source": {"type": "SYSTEM"},
+        "occurredAt": "2026-08-20T03:10:00Z",
+        "traceId": "trace_move_accounts",
+        "mutable": true
+      }
+    },
+    {
+      "name": "folder cycle error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "FOLDER_CYCLE",
+        "message": "A folder cannot be moved below its own subtree.",
+        "details": {
+          "folderId": "folder_members",
+          "targetParentId": "folder_accounts"
+        },
+        "traceId": "trace_cycle_001"
+      }
+    },
+    {
+      "name": "folder error rejects untyped detail fields",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": false,
+      "payload": {
+        "code": "FOLDER_CYCLE",
+        "message": "A folder cannot be moved below its own subtree.",
+        "details": {
+          "folderId": "folder_members",
+          "sql": "private diagnostic"
+        },
+        "traceId": "trace_cycle_002"
+      }
+    },
+    {
+      "name": "folder content warning error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "FOLDER_CONTENT_WARNING",
+        "message": "The folder subtree requires explicit confirmation.",
+        "details": {
+          "folderId": "folder_members",
+          "affectedFolderCount": 3,
+          "activeTestCaseCount": 0,
+          "requiresConfirmation": true
+        },
+        "traceId": "trace_folder_warning_001"
+      }
+    },
+    {
+      "name": "system folder protected error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "SYSTEM_FOLDER_PROTECTED",
+        "message": "The system folder cannot be changed.",
+        "details": {
+          "folderId": "folder_ai_generated"
+        },
+        "traceId": "trace_system_folder_001"
+      }
+    },
+    {
+      "name": "version conflict error",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-1/error-contract.schema.json#/$defs/ErrorResponse",
+      "expectedValid": true,
+      "payload": {
+        "code": "VERSION_CONFLICT",
+        "message": "The folder changed after it was loaded.",
+        "details": {
+          "resourceType": "FOLDER",
+          "resourceId": "folder_accounts",
+          "expectedVersion": 2,
+          "actualVersion": 3
+        },
+        "traceId": "trace_version_001"
+      }
+    }
+  ]
+}

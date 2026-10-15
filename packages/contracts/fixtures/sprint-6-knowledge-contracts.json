@@ -1,0 +1,459 @@
+{
+  "synthetic": true,
+  "description": "Synthetic Sprint 6 typed knowledge, status, hybrid search and ontology explorer wire examples. No production Slack or QA data is present.",
+  "cases": [
+    {
+      "name": "knowledge node is backed by an immutable Slack message revision",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeNodeResource",
+      "expectedValid": true,
+      "semanticRules": ["TEMPORAL_STATUS"],
+      "payload": {
+        "id": "knowledge_password_expiry",
+        "nodeType": "DECISION",
+        "canonicalKey": "decision:password-reset:expiry",
+        "label": "Password reset expiry",
+        "content": "Password reset codes expire after five minutes.",
+        "status": "ACTIVE",
+        "validFrom": "2026-08-21T01:00:00Z",
+        "validTo": null,
+        "primarySource": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_password_policy",
+          "sourceRevisionId": "rev_password_policy_2"
+        },
+        "evidenceIds": ["evidence_password_expiry"],
+        "resourceVersion": 2,
+        "createdAt": "2026-08-21T01:00:00Z",
+        "updatedAt": "2026-08-21T01:01:00Z"
+      }
+    },
+    {
+      "name": "knowledge node rejects missing evidence",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeNodeResource",
+      "expectedValid": false,
+      "payload": {
+        "id": "knowledge_without_evidence",
+        "nodeType": "DECISION",
+        "canonicalKey": "decision:missing:evidence",
+        "label": "Unsupported decision",
+        "content": "This decision has no evidence.",
+        "status": "ACTIVE",
+        "validFrom": "2026-08-21T01:00:00Z",
+        "validTo": null,
+        "primarySource": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_missing_evidence",
+          "sourceRevisionId": "rev_missing_evidence_1"
+        },
+        "evidenceIds": [],
+        "resourceVersion": 1,
+        "createdAt": "2026-08-21T01:00:00Z",
+        "updatedAt": "2026-08-21T01:00:00Z"
+      }
+    },
+    {
+      "name": "knowledge edge carries source revision and evidence",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeEdgeResource",
+      "expectedValid": true,
+      "semanticRules": ["NO_SELF_EDGE", "TEMPORAL_STATUS"],
+      "payload": {
+        "id": "edge_decision_applies_feature",
+        "fromNodeId": "knowledge_password_expiry",
+        "predicate": "APPLIES_TO",
+        "toNodeId": "feature_password_reset",
+        "status": "ACTIVE",
+        "validFrom": "2026-08-21T01:00:00Z",
+        "validTo": null,
+        "primarySource": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_password_policy",
+          "sourceRevisionId": "rev_password_policy_2"
+        },
+        "evidenceIds": ["evidence_edge_password_feature"],
+        "resourceVersion": 1,
+        "createdAt": "2026-08-21T01:00:00Z",
+        "updatedAt": "2026-08-21T01:00:00Z"
+      }
+    },
+    {
+      "name": "deleted Slack evidence is represented as a tombstone citation",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeEvidenceResource",
+      "expectedValid": true,
+      "semanticRules": ["EVIDENCE_SOURCE_MATCH"],
+      "payload": {
+        "id": "evidence_deleted_policy",
+        "subjectType": "NODE",
+        "subjectId": "knowledge_deleted_policy",
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_deleted_policy",
+          "sourceRevisionId": "rev_deleted_policy_2"
+        },
+        "revisionOrdinal": 2,
+        "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "citation": {
+          "source": {
+            "sourceType": "SLACK_MESSAGE_REVISION",
+            "sourceEntityId": "message_deleted_policy",
+            "sourceRevisionId": "rev_deleted_policy_2"
+          },
+          "label": "Deleted Slack message revision 2",
+          "uri": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787270400000001",
+          "excerpt": null,
+          "occurredAt": "2026-08-21T02:00:00Z",
+          "deleted": true
+        },
+        "capturedAt": "2026-08-21T02:00:01Z"
+      }
+    },
+    {
+      "name": "status patch requires optimistic version reason and evidence",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeStatusPatchRequest",
+      "expectedValid": true,
+      "payload": {
+        "targetType": "NODE",
+        "targetId": "knowledge_password_expiry",
+        "expectedVersion": 2,
+        "status": "RETRACTED",
+        "effectiveAt": "2026-08-21T02:00:00Z",
+        "reason": "The only supporting Slack message was deleted.",
+        "evidenceIds": ["evidence_deleted_policy"],
+        "changedBy": "worker_ontology_projection"
+      }
+    },
+    {
+      "name": "hybrid fallback result exposes rank reason status source distance recency degradation and citation",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/HybridSearchResponse",
+      "expectedValid": true,
+      "semanticRules": ["HYBRID_DEGRADATION_ALIGNMENT"],
+      "payload": {
+        "query": "password reset expiry",
+        "items": [
+          {
+            "rank": 1,
+            "nodeId": "knowledge_password_expiry",
+            "nodeType": "DECISION",
+            "label": "Password reset expiry",
+            "content": "Password reset codes expire after five minutes.",
+            "score": 0.91,
+            "reason": {
+              "summary": "Typed graph and vector matches remain available while LightRAG is offline.",
+              "signals": ["TYPED_GRAPH", "VECTOR", "FEATURE_PROXIMITY", "RECENCY"]
+            },
+            "status": "ACTIVE",
+            "source": {
+              "sourceType": "SLACK_MESSAGE_REVISION",
+              "sourceEntityId": "message_password_policy",
+              "sourceRevisionId": "rev_password_policy_2"
+            },
+            "featureDistance": 1,
+            "recency": {
+              "basisAt": "2026-08-21T01:00:00Z",
+              "ageSeconds": 3600,
+              "score": 0.98
+            },
+            "degraded": true,
+            "degradationReasons": ["LIGHTRAG_UNAVAILABLE"],
+            "citation": {
+              "source": {
+                "sourceType": "SLACK_MESSAGE_REVISION",
+                "sourceEntityId": "message_password_policy",
+                "sourceRevisionId": "rev_password_policy_2"
+              },
+              "label": "Slack password policy revision 2",
+              "uri": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787270400000002",
+              "excerpt": "Password reset codes expire after five minutes.",
+              "occurredAt": "2026-08-21T01:00:00Z",
+              "deleted": false
+            }
+          }
+        ],
+        "nextCursor": null,
+        "total": 1,
+        "degraded": true,
+        "degradationReasons": ["LIGHTRAG_UNAVAILABLE"],
+        "executedAt": "2026-08-21T02:00:00Z"
+      }
+    },
+    {
+      "name": "hybrid result without feature scope uses explicit null distance and non-active lifecycle",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/HybridSearchResultItem",
+      "expectedValid": true,
+      "payload": {
+        "rank": 2,
+        "nodeId": "knowledge_old_password_policy",
+        "nodeType": "DECISION",
+        "label": "Old password policy",
+        "content": "Password reset codes previously had no expiry.",
+        "score": 0.72,
+        "reason": {
+          "summary": "Rank 2 with score 0.720: typed graph candidate; exact query text matched; feature proximity did not contribute (no feature scope/path); recency contributed 0.450.",
+          "signals": ["TYPED_GRAPH", "EXACT_TEXT", "RECENCY"]
+        },
+        "status": "SUPERSEDED",
+        "source": {
+          "sourceType": "MANUAL",
+          "sourceEntityId": "source_old_password_policy",
+          "sourceRevisionId": null
+        },
+        "featureDistance": null,
+        "recency": {
+          "basisAt": "2026-07-21T01:00:00Z",
+          "ageSeconds": 2678400,
+          "score": 0.45
+        },
+        "degraded": false,
+        "degradationReasons": [],
+        "citation": {
+          "source": {
+            "sourceType": "MANUAL",
+            "sourceEntityId": "source_old_password_policy",
+            "sourceRevisionId": null
+          },
+          "label": "Retained historical password policy",
+          "uri": null,
+          "excerpt": "Password reset codes previously had no expiry.",
+          "occurredAt": "2026-07-21T01:00:00Z",
+          "deleted": false
+        }
+      }
+    },
+    {
+      "name": "hybrid pagination page keeps absolute consecutive ranks and descending scores",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/HybridSearchResponse",
+      "expectedValid": true,
+      "semanticRules": ["HYBRID_DEGRADATION_ALIGNMENT"],
+      "payload": {
+        "query": "historical password policy",
+        "items": [
+          {
+            "rank": 3,
+            "nodeId": "knowledge_historical_policy_3",
+            "nodeType": "DECISION",
+            "label": "Historical policy 3",
+            "content": "The third ranked historical policy.",
+            "score": 0.72,
+            "reason": {
+              "summary": "Rank 3 with score 0.720 from typed graph, exact text and recency signals.",
+              "signals": ["TYPED_GRAPH", "EXACT_TEXT", "RECENCY"]
+            },
+            "status": "SUPERSEDED",
+            "source": {"sourceType": "MANUAL", "sourceEntityId": "source_historical_3", "sourceRevisionId": null},
+            "featureDistance": null,
+            "recency": {"basisAt": "2026-07-21T01:00:00Z", "ageSeconds": 2678400, "score": 0.45},
+            "degraded": false,
+            "degradationReasons": [],
+            "citation": {
+              "source": {"sourceType": "MANUAL", "sourceEntityId": "source_historical_3", "sourceRevisionId": null},
+              "label": "Historical policy source 3",
+              "uri": null,
+              "excerpt": "The third ranked historical policy.",
+              "occurredAt": "2026-07-21T01:00:00Z",
+              "deleted": false
+            }
+          },
+          {
+            "rank": 4,
+            "nodeId": "knowledge_historical_policy_4",
+            "nodeType": "DECISION",
+            "label": "Historical policy 4",
+            "content": "The fourth ranked historical policy.",
+            "score": 0.7,
+            "reason": {
+              "summary": "Rank 4 with score 0.700 from typed graph and recency signals.",
+              "signals": ["TYPED_GRAPH", "RECENCY"]
+            },
+            "status": "RETRACTED",
+            "source": {"sourceType": "MANUAL", "sourceEntityId": "source_historical_4", "sourceRevisionId": null},
+            "featureDistance": null,
+            "recency": {"basisAt": "2026-06-21T01:00:00Z", "ageSeconds": 5270400, "score": 0.33},
+            "degraded": false,
+            "degradationReasons": [],
+            "citation": {
+              "source": {"sourceType": "MANUAL", "sourceEntityId": "source_historical_4", "sourceRevisionId": null},
+              "label": "Historical policy source 4",
+              "uri": null,
+              "excerpt": "The fourth ranked historical policy.",
+              "occurredAt": "2026-06-21T01:00:00Z",
+              "deleted": false
+            }
+          }
+        ],
+        "nextCursor": "eyJvZmZzZXQiOjR9",
+        "total": 5,
+        "degraded": false,
+        "degradationReasons": [],
+        "executedAt": "2026-08-21T02:00:00Z"
+      }
+    },
+    {
+      "name": "hybrid request explicitly includes non-active lifecycle statuses",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/HybridSearchRequest",
+      "expectedValid": true,
+      "payload": {
+        "query": "historical password policy",
+        "statuses": ["SUPERSEDED", "RETRACTED"],
+        "sourceTypes": [],
+        "nodeTypes": ["DECISION"],
+        "featureId": null,
+        "limit": 2,
+        "cursor": "eyJvZmZzZXQiOjJ9"
+      }
+    },
+    {
+      "name": "hybrid result rejects a missing citation",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/HybridSearchResultItem",
+      "expectedValid": false,
+      "payload": {
+        "rank": 1,
+        "nodeId": "knowledge_password_expiry",
+        "nodeType": "DECISION",
+        "label": "Password reset expiry",
+        "content": "Password reset codes expire after five minutes.",
+        "score": 0.91,
+        "reason": {"summary": "Typed graph and vector match with recency.", "signals": ["TYPED_GRAPH", "VECTOR", "FEATURE_PROXIMITY", "RECENCY"]},
+        "status": "ACTIVE",
+        "source": {
+          "sourceType": "SLACK_MESSAGE_REVISION",
+          "sourceEntityId": "message_password_policy",
+          "sourceRevisionId": "rev_password_policy_2"
+        },
+        "featureDistance": 1,
+        "recency": {"basisAt": "2026-08-21T01:00:00Z", "ageSeconds": 3600, "score": 0.98},
+        "degraded": false,
+        "degradationReasons": []
+      }
+    },
+    {
+      "name": "ontology explorer returns the root with evidence-ready graph collections",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/OntologyExplorerResponse",
+      "expectedValid": true,
+      "semanticRules": ["ONTOLOGY_REFERENTIAL_INTEGRITY"],
+      "payload": {
+        "rootNodeId": "feature_password_reset",
+        "nodes": [
+          {
+            "node": {
+              "id": "feature_password_reset",
+              "nodeType": "FEATURE",
+              "canonicalKey": "feature:password-reset",
+              "label": "Password reset",
+              "content": "Password reset feature.",
+              "status": "ACTIVE",
+              "validFrom": "2026-08-21T00:00:00Z",
+              "validTo": null,
+              "primarySource": {
+                "sourceType": "TEST_CASE_VERSION",
+                "sourceEntityId": "case_password_reset",
+                "sourceRevisionId": "case_version_password_reset_3"
+              },
+              "evidenceIds": ["evidence_feature_password_reset"],
+              "resourceVersion": 1,
+              "createdAt": "2026-08-21T00:00:00Z",
+              "updatedAt": "2026-08-21T00:00:00Z"
+            },
+            "depth": 0
+          }
+        ],
+        "edges": [],
+        "evidence": [
+          {
+            "id": "evidence_feature_password_reset",
+            "subjectType": "NODE",
+            "subjectId": "feature_password_reset",
+            "source": {
+              "sourceType": "TEST_CASE_VERSION",
+              "sourceEntityId": "case_password_reset",
+              "sourceRevisionId": "case_version_password_reset_3"
+            },
+            "revisionOrdinal": 3,
+            "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "citation": {
+              "source": {
+                "sourceType": "TEST_CASE_VERSION",
+                "sourceEntityId": "case_password_reset",
+                "sourceRevisionId": "case_version_password_reset_3"
+              },
+              "label": "Password reset case version 3",
+              "uri": "/test-cases/CASE-000003",
+              "excerpt": "Password reset feature.",
+              "occurredAt": "2026-08-21T00:00:00Z",
+              "deleted": false
+            },
+            "capturedAt": "2026-08-21T00:00:01Z"
+          }
+        ],
+        "truncated": false,
+        "nextCursor": null
+      }
+    },
+    {
+      "name": "test case citation exposes an app URI based on the authoritative case key",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeCitation",
+      "expectedValid": true,
+      "payload": {
+        "source": {
+          "sourceType": "TEST_CASE_VERSION",
+          "sourceEntityId": "source_case_version_3",
+          "sourceRevisionId": "source_revision_case_version_3"
+        },
+        "label": "CASE-000003 version 3",
+        "uri": "/test-cases/CASE-000003",
+        "excerpt": "Password reset is verified.",
+        "occurredAt": "2026-08-21T00:00:00Z",
+        "deleted": false
+      }
+    },
+    {
+      "name": "execution citation exposes cycle case platform attempt and run context",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeCitation",
+      "expectedValid": true,
+      "payload": {
+        "source": {
+          "sourceType": "EXECUTION_ATTEMPT",
+          "sourceEntityId": "source_execution_attempt_2",
+          "sourceRevisionId": null
+        },
+        "label": "CASE-000003 iOS attempt 2",
+        "uri": "/cycles/cycle_00000000000070008000000000000003/execute?caseKey=CASE-000003&platform=IOS&attempt=2&run=1",
+        "excerpt": "The reset flow failed on iOS.",
+        "occurredAt": "2026-08-21T00:05:00Z",
+        "deleted": false
+      }
+    },
+    {
+      "name": "issue citation exposes an app URI based on the public issue key",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeCitation",
+      "expectedValid": true,
+      "payload": {
+        "source": {
+          "sourceType": "ISSUE_SNAPSHOT",
+          "sourceEntityId": "source_issue_snapshot_7",
+          "sourceRevisionId": null
+        },
+        "label": "ISSUE-7 expired link accepted",
+        "uri": "/issues/ISSUE-7",
+        "excerpt": "An expired link was accepted.",
+        "occurredAt": "2026-08-21T00:06:00Z",
+        "deleted": false
+      }
+    },
+    {
+      "name": "unresolved QA citation has an explicit null URI",
+      "schemaRef": "https://qa-tool.local/schemas/sprint-6/knowledge-api.schema.json#/$defs/KnowledgeCitation",
+      "expectedValid": true,
+      "payload": {
+        "source": {
+          "sourceType": "EXECUTION_ATTEMPT",
+          "sourceEntityId": "source_unresolved_attempt",
+          "sourceRevisionId": null
+        },
+        "label": "Unresolved retained execution evidence",
+        "uri": null,
+        "excerpt": "The immutable evidence remains after its navigation context was removed.",
+        "occurredAt": "2026-08-21T00:07:00Z",
+        "deleted": false
+      }
+    }
+  ]
+}

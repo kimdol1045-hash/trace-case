@@ -1,0 +1,64 @@
+{
+  "fixtureId": "slack-missing-01",
+  "synthetic": true,
+  "category": "MISSING",
+  "description": "요청 메뉴가 root와 thread 어디에도 없는 누락 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787202000.000004",
+      "messageRevisionId": "rev_m01_root",
+      "authorId": "U_SYN_007",
+      "body": "개발건: 로그인 오류 문구 개선\n기능 설명: 잘못된 자격 증명 입력 시 오류를 보여준다.\n요청내용: 이메일과 비밀번호 중 어느 값이 틀렸는지는 노출하지 않는다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787202000000004",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787202060.000004",
+        "messageRevisionId": "rev_m01_reply_01",
+        "authorId": "U_SYN_008",
+        "body": "공통 문구는 '로그인 정보를 확인해 주세요'로 사용합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787202060000004",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "로그인 오류 문구 개선",
+      "featureDescription": "잘못된 자격 증명 입력 시 오류를 보여준다.",
+      "requestDetails": "오류 원인을 구분해 노출하지 않고 공통 문구 '로그인 정보를 확인해 주세요'를 사용한다.",
+      "missingFields": ["requestedMenu"],
+      "confidence": 0.92,
+      "sourceMessageRevisions": ["rev_m01_root", "rev_m01_reply_01"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_m01_no_detail",
+        "nodeType": "CONSTRAINT",
+        "content": "이메일과 비밀번호 중 어떤 값이 틀렸는지 노출하지 않는다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_m01_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "보안 관련 노출 제한이 요청내용에 명시되어 있다."
+      },
+      {
+        "knowledgeId": "knowledge_m01_copy",
+        "nodeType": "DECISION",
+        "content": "오류 문구는 '로그인 정보를 확인해 주세요'다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_m01_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "thread에서 사용할 문구를 지정했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_m01_no_detail", "knowledge_m01_copy"],
+      "excludedKnowledgeIds": [],
+      "openQuestions": ["테스트케이스를 저장할 요청 메뉴를 확인해야 한다."]
+    }
+  }
+}

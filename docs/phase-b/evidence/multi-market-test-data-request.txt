@@ -1,0 +1,11 @@
+Phase B UAT testability follow-up
+
+The WORK-6651 shipping recalculation scenario needs at least two market or
+country configurations. The current evidence says only the Japan market was
+available, so the country-dependent recalculation path could not be verified.
+
+Requested test data:
+1. Japan delivery address and shipping policy
+2. A second-country delivery address and shipping policy
+3. An order whose item weight and subtotal make the shipping fee observable
+4. Expected shipping fee for both addresses

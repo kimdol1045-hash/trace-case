@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/generation/slack-reply/1.0.0/schema.json",
+  "title": "Automatic generation Slack reply 1.0.0",
+  "description": "Internal immutable intent, Slack post, and terminal receipt shapes for one Korean reply per eligible automatic generation attempt. PostgreSQL source/lineage/materialization checks remain normative semantic guards.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "SlackTimestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{10,12}\\.[0-9]{6}$"
+    },
+    "ContractVersion": {
+      "const": "automatic-generation-slack-reply/1.0.0"
+    },
+    "Outcome": {
+      "enum": ["SUCCESS_APPLIED", "SUCCESS_SUGGESTIONS", "FAILURE"]
+    },
+    "TerminalStatus": {
+      "enum": ["SUCCEEDED", "FAILED"]
+    },
+    "GenerationErrorCode": {
+      "enum": [
+        "GENERATION_UNSUPPORTED_SCHEMA_VERSION",
+        "GENERATION_AUTH_REJECTED",
+        "GENERATION_TIMEOUT",
+        "GENERATION_TRANSPORT_UNAVAILABLE",
+        "GENERATION_RATE_LIMITED",
+        "GENERATION_PROVIDER_REJECTED",
+        "GENERATION_PROVIDER_ERROR",
+        "GENERATION_INVALID_CONTENT_TYPE",
+        "GENERATION_RESPONSE_TOO_LARGE",
+        "GENERATION_MALFORMED_JSON",
+        "GENERATION_INVALID_RESPONSE"
+      ]
+    },
+    "IncludedLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linkMode", "uiUrl"],
+      "properties": {
+        "linkMode": {"const": "ABSOLUTE_HTTPS"},
+        "uiUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "maxLength": 2048
+        }
+      }
+    },
+    "OmittedLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linkMode", "uiUrl"],
+      "properties": {
+        "linkMode": {"const": "OMITTED"},
+        "uiUrl": {"type": "null"}
+      }
+    },
+    "LinkSnapshot": {
+      "oneOf": [
+        {"$ref": "#/$defs/IncludedLink"},
+        {"$ref": "#/$defs/OmittedLink"}
+      ]
+    },
+    "AppliedSuccessTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateVersion",
+        "locale",
+        "outcome",
+        "createdCount",
+        "reusedCount",
+        "generatedCount",
+        "parentOutcome",
+        "link",
+        "messageText",
+        "messageDigest"
+      ],
+      "properties": {
+        "templateVersion": {"$ref": "#/$defs/ContractVersion"},
+        "locale": {"const": "ko-KR"},
+        "outcome": {"const": "SUCCESS_APPLIED"},
+        "createdCount": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "reusedCount": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "generatedCount": {"type": "integer", "minimum": 1, "maximum": 10000},
+        "parentOutcome": {"enum": ["CREATED", "REUSED"]},
+        "link": {"$ref": "#/$defs/LinkSnapshot"},
+        "messageText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "^✅ 자동 테스트케이스 생성이 완료되었습니다\\.\\n• 새 테스트케이스: [0-9]+건\\n• 기존 테스트케이스 재사용\\(변경 없음\\): [0-9]+건\\n• 상위 일감: (새로 등록|기존 일감 재사용\\(변경 없음\\))(\\n• 결과 보기: <https://[^\\n|>]+\\|QA 도구에서 보기>)?$"
+        },
+        "messageDigest": {"$ref": "#/$defs/Sha256Hex"}
+      }
+    },
+    "SuggestionSuccessTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateVersion",
+        "locale",
+        "outcome",
+        "suggestionCount",
+        "automaticOverwriteCount",
+        "link",
+        "messageText",
+        "messageDigest"
+      ],
+      "properties": {
+        "templateVersion": {"$ref": "#/$defs/ContractVersion"},
+        "locale": {"const": "ko-KR"},
+        "outcome": {"const": "SUCCESS_SUGGESTIONS"},
+        "suggestionCount": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "automaticOverwriteCount": {"const": 0},
+        "link": {"$ref": "#/$defs/LinkSnapshot"},
+        "messageText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "^✅ 자동 테스트케이스 변경 제안이 준비되었습니다\\.\\n• 변경 제안: ([1-9][0-9]*건|0건\\(변경 없음\\))\\n• 자동 덮어쓰기: 0건(\\n• 결과 보기: <https://[^\\n|>]+\\|QA 도구에서 보기>)?$"
+        },
+        "messageDigest": {"$ref": "#/$defs/Sha256Hex"}
+      }
+    },
+    "FailureTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateVersion",
+        "locale",
+        "outcome",
+        "attemptNumber",
+        "errorCode",
+        "errorLabel",
+        "retryable",
+        "link",
+        "messageText",
+        "messageDigest"
+      ],
+      "properties": {
+        "templateVersion": {"$ref": "#/$defs/ContractVersion"},
+        "locale": {"const": "ko-KR"},
+        "outcome": {"const": "FAILURE"},
+        "attemptNumber": {"type": "integer", "minimum": 1, "maximum": 100},
+        "errorCode": {"$ref": "#/$defs/GenerationErrorCode"},
+        "errorLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[가-힣A-Za-z0-9 ·_-]+$"
+        },
+        "retryable": {"type": "boolean"},
+        "link": {"$ref": "#/$defs/LinkSnapshot"},
+        "messageText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "^⚠️ 자동 테스트케이스 생성에 실패했습니다\\.\\n• 생성 시도: [1-9][0-9]*차\\n• 오류 코드: [가-힣A-Za-z0-9 ·_-]+ \\(GENERATION_[A-Z_]+\\)\\n• 재시도 가능: (가능|불가)(\\n• 결과 보기: <https://[^\\n|>]+\\|QA 도구에서 보기>)?$"
+        },
+        "messageDigest": {"$ref": "#/$defs/Sha256Hex"}
+      }
+    },
+    "MessageSnapshot": {
+      "oneOf": [
+        {"$ref": "#/$defs/AppliedSuccessTemplate"},
+        {"$ref": "#/$defs/SuggestionSuccessTemplate"},
+        {"$ref": "#/$defs/FailureTemplate"}
+      ]
+    },
+    "MessageMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_type", "event_payload"],
+      "properties": {
+        "event_type": {"const": "tc_generation_terminal_notification_v1"},
+        "event_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "notification_id",
+            "generation_job_id",
+            "outcome",
+            "contract_version"
+          ],
+          "properties": {
+            "notification_id": {"$ref": "#/$defs/Identifier"},
+            "generation_job_id": {
+              "type": "string",
+              "pattern": "^generation_job_[A-Za-z0-9_-]+$",
+              "maxLength": 128
+            },
+            "outcome": {"$ref": "#/$defs/Outcome"},
+            "contract_version": {"const": "1.0.0"}
+          }
+        }
+      }
+    },
+    "NotificationIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "notificationId",
+        "notificationKey",
+        "workspaceId",
+        "slackWorkItemId",
+        "slackWorkspaceId",
+        "channelId",
+        "rootMessageTs",
+        "threadTs",
+        "rootGenerationJobId",
+        "terminalGenerationJobId",
+        "generationTrigger",
+        "sourceVersion",
+        "attemptNumber",
+        "terminalStatus",
+        "outcome",
+        "deliveryDisposition",
+        "clientMessageId",
+        "metadata",
+        "message"
+      ],
+      "properties": {
+        "contractVersion": {"$ref": "#/$defs/ContractVersion"},
+        "notificationId": {"$ref": "#/$defs/Identifier"},
+        "notificationKey": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 512,
+          "pattern": "^automatic-generation-slack-reply/1\\.0\\.0:[A-Za-z0-9_-]+:(SUCCEEDED|FAILED)$"
+        },
+        "workspaceId": {"$ref": "#/$defs/Identifier"},
+        "slackWorkItemId": {"$ref": "#/$defs/Identifier"},
+        "slackWorkspaceId": {"type": "string", "pattern": "^T[A-Z0-9]+$", "maxLength": 80},
+        "channelId": {"type": "string", "pattern": "^C[A-Z0-9]+$", "maxLength": 80},
+        "rootMessageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "threadTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "rootGenerationJobId": {
+          "type": "string",
+          "pattern": "^generation_job_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "terminalGenerationJobId": {
+          "type": "string",
+          "pattern": "^generation_job_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "generationTrigger": {"const": "AUTOMATIC"},
+        "sourceVersion": {"type": "integer", "minimum": 1},
+        "attemptNumber": {"type": "integer", "minimum": 1},
+        "terminalStatus": {"$ref": "#/$defs/TerminalStatus"},
+        "outcome": {"$ref": "#/$defs/Outcome"},
+        "deliveryDisposition": {
+          "enum": [
+            "POST",
+            "SUPPRESSED_STALE_SOURCE",
+            "SUPPRESSED_SOURCE_UNAVAILABLE",
+            "SUPPRESSED_CONFIGURATION"
+          ]
+        },
+        "clientMessageId": {"type": "string", "format": "uuid"},
+        "metadata": {"$ref": "#/$defs/MessageMetadata"},
+        "message": {"$ref": "#/$defs/MessageSnapshot"}
+      }
+    },
+    "SlackPostMessageRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel",
+        "thread_ts",
+        "text",
+        "client_msg_id",
+        "reply_broadcast",
+        "unfurl_links",
+        "unfurl_media",
+        "metadata"
+      ],
+      "properties": {
+        "channel": {"type": "string", "pattern": "^C[A-Z0-9]+$", "maxLength": 80},
+        "thread_ts": {"$ref": "#/$defs/SlackTimestamp"},
+        "text": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "client_msg_id": {"type": "string", "format": "uuid"},
+        "reply_broadcast": {"const": false},
+        "unfurl_links": {"const": false},
+        "unfurl_media": {"const": false},
+        "metadata": {"$ref": "#/$defs/MessageMetadata"}
+      }
+    },
+    "DeliveredReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "notificationId",
+        "terminalOutcome",
+        "proof",
+        "attemptId",
+        "slackWorkspaceId",
+        "channelId",
+        "rootMessageTs",
+        "messageTs",
+        "clientMessageId",
+        "messageDigest",
+        "recordedAt"
+      ],
+      "properties": {
+        "receiptId": {"$ref": "#/$defs/Identifier"},
+        "notificationId": {"$ref": "#/$defs/Identifier"},
+        "terminalOutcome": {"const": "DELIVERED"},
+        "proof": {"enum": ["POST_ACK", "THREAD_RECONCILIATION"]},
+        "attemptId": {"$ref": "#/$defs/Identifier"},
+        "slackWorkspaceId": {"type": "string", "pattern": "^T[A-Z0-9]+$", "maxLength": 80},
+        "channelId": {"type": "string", "pattern": "^C[A-Z0-9]+$", "maxLength": 80},
+        "rootMessageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "messageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "clientMessageId": {"type": "string", "format": "uuid"},
+        "messageDigest": {"$ref": "#/$defs/Sha256Hex"},
+        "recordedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "LocalTerminalReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "notificationId",
+        "terminalOutcome",
+        "reason",
+        "attemptId",
+        "recordedAt"
+      ],
+      "properties": {
+        "receiptId": {"$ref": "#/$defs/Identifier"},
+        "notificationId": {"$ref": "#/$defs/Identifier"},
+        "terminalOutcome": {"enum": ["SUPPRESSED", "DEAD"]},
+        "reason": {
+          "enum": [
+            "STALE_SOURCE",
+            "SOURCE_UNAVAILABLE",
+            "CONFIGURATION_BLOCKED",
+            "PERMANENT_TRANSPORT_REJECTION",
+            "AMBIGUOUS_UNRESOLVED",
+            "INTEGRITY_CONFLICT"
+          ]
+        },
+        "attemptId": {
+          "oneOf": [
+            {"$ref": "#/$defs/Identifier"},
+            {"type": "null"}
+          ]
+        },
+        "recordedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "NotificationReceipt": {
+      "oneOf": [
+        {"$ref": "#/$defs/DeliveredReceipt"},
+        {"$ref": "#/$defs/LocalTerminalReceipt"}
+      ]
+    }
+  }
+}

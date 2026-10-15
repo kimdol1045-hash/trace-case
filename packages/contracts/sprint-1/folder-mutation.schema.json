@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-1/folder-mutation.schema.json",
+  "title": "Sprint 1 folder mutation API payloads",
+  "description": "Canonical create, rename, subtree move, subtree soft-delete/restore and alias payloads.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "FolderId": {
+      "type": "string",
+      "pattern": "^folder_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "NullableFolderId": {
+      "oneOf": [
+        {"$ref": "#/$defs/FolderId"},
+        {"type": "null"}
+      ]
+    },
+    "AliasId": {
+      "type": "string",
+      "pattern": "^alias_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "AuditId": {
+      "type": "string",
+      "pattern": "^audit_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "DeletionBatchId": {
+      "type": "string",
+      "pattern": "^folder_delete_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "Name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "CreateFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parentId", "name"],
+      "properties": {
+        "parentId": {"$ref": "#/$defs/NullableFolderId"},
+        "name": {"$ref": "#/$defs/Name"},
+        "sortOrder": {"type": "integer", "minimum": 0}
+      }
+    },
+    "RenameFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "name"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "name": {"$ref": "#/$defs/Name"}
+      }
+    },
+    "MoveFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "mode", "targetParentId", "sortOrder"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "mode": {"const": "SUBTREE"},
+        "targetParentId": {"$ref": "#/$defs/NullableFolderId"},
+        "sortOrder": {"type": "integer", "minimum": 0}
+      }
+    },
+    "SoftDeleteFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "mode"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "mode": {"const": "SUBTREE"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      }
+    },
+    "RestoreFolderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion", "deletionBatchId", "mode"],
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "deletionBatchId": {"$ref": "#/$defs/DeletionBatchId"},
+        "mode": {"const": "SUBTREE"},
+        "targetParentId": {"$ref": "#/$defs/NullableFolderId"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"}
+      }
+    },
+    "UpsertFolderAliasRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alias", "folderId"],
+      "properties": {
+        "alias": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "folderId": {"$ref": "#/$defs/FolderId"}
+      }
+    },
+    "FolderAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "alias", "folderId", "active", "createdAt", "updatedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/AliasId"},
+        "alias": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "folderId": {"$ref": "#/$defs/FolderId"},
+        "active": {"type": "boolean"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "FolderMutationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "rootFolderId", "affectedFolderIds", "rootVersion", "auditId"],
+      "properties": {
+        "operation": {"type": "string", "enum": ["CREATE", "RENAME", "MOVE_SUBTREE", "SOFT_DELETE_SUBTREE", "RESTORE_SUBTREE"]},
+        "rootFolderId": {"$ref": "#/$defs/FolderId"},
+        "affectedFolderIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/FolderId"}
+        },
+        "rootVersion": {"type": "integer", "minimum": 1},
+        "auditId": {"$ref": "#/$defs/AuditId"},
+        "deletionBatchId": {"$ref": "#/$defs/DeletionBatchId"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"operation": {"enum": ["SOFT_DELETE_SUBTREE", "RESTORE_SUBTREE"]}}, "required": ["operation"]},
+          "then": {"properties": {"deletionBatchId": {}}, "required": ["deletionBatchId"]},
+          "else": {"properties": {"deletionBatchId": false}}
+        }
+      ]
+    }
+  }
+}

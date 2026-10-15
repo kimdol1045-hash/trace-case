@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-1/workspace.schema.json",
+  "title": "Sprint 1 workspace API payloads",
+  "description": "Canonical workspace settings and transactionally allocated public key payloads. Consumers reference members of $defs.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "WorkspaceId": {
+      "type": "string",
+      "pattern": "^workspace_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "Prefix": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{1,15}$"
+    },
+    "NonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "WorkspaceSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "teamName",
+        "casePrefix",
+        "issuePrefix",
+        "defaultEnvironment",
+        "generationQuietMinutes",
+        "version",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/WorkspaceId"},
+        "teamName": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "casePrefix": {"$ref": "#/$defs/Prefix"},
+        "issuePrefix": {"$ref": "#/$defs/Prefix"},
+        "defaultEnvironment": {"$ref": "#/$defs/NonBlankString"},
+        "generationQuietMinutes": {"type": "integer", "minimum": 0, "maximum": 1440},
+        "version": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "UpdateWorkspaceSettingsRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseVersion"],
+      "minProperties": 2,
+      "properties": {
+        "baseVersion": {"type": "integer", "minimum": 1},
+        "teamName": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "casePrefix": {"$ref": "#/$defs/Prefix"},
+        "issuePrefix": {"$ref": "#/$defs/Prefix"},
+        "defaultEnvironment": {"$ref": "#/$defs/NonBlankString"},
+        "generationQuietMinutes": {"type": "integer", "minimum": 0, "maximum": 1440}
+      }
+    },
+    "AllocatedKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "entityType", "key", "ordinal"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "entityType": {"type": "string", "enum": ["TEST_CASE", "ISSUE"]},
+        "key": {"type": "string", "pattern": "^[A-Z][A-Z0-9]{1,15}-[0-9]{6,}$", "maxLength": 64},
+        "ordinal": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

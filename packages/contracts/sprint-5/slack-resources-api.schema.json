@@ -1,0 +1,815 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-tool.local/schemas/sprint-5/slack-resources-api.schema.json",
+  "title": "Sprint 5 Slack resources and operations API",
+  "description": "Strict channel access, integration status, event ledger, work item, thread, append-only revision, parse, sync, quiet-window and retry/dead job contracts.",
+  "type": "object",
+  "maxProperties": 0,
+  "$defs": {
+    "NonBlankString": {"type": "string", "minLength": 1, "maxLength": 20000, "pattern": "\\S"},
+    "NullableNonBlankString": {
+      "oneOf": [
+        {"$ref": "#/$defs/NonBlankString"},
+        {"type": "null"}
+      ]
+    },
+    "NullableDateTime": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "Cursor": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "\\S"},
+    "NullableCursor": {
+      "oneOf": [
+        {"$ref": "#/$defs/Cursor"},
+        {"type": "null"}
+      ]
+    },
+    "IdempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "WorkspaceId": {"$ref": "slack-event-api.schema.json#/$defs/WorkspaceId"},
+    "ChannelId": {"$ref": "slack-event-api.schema.json#/$defs/ChannelId"},
+    "UserId": {"$ref": "slack-event-api.schema.json#/$defs/UserId"},
+    "AppId": {"$ref": "slack-event-api.schema.json#/$defs/AppId"},
+    "SlackEventId": {"$ref": "slack-event-api.schema.json#/$defs/SlackEventId"},
+    "SlackTimestamp": {"$ref": "slack-event-api.schema.json#/$defs/SlackTimestamp"},
+    "EventLogId": {"$ref": "slack-event-api.schema.json#/$defs/EventLogId"},
+    "SlackEventAckResponse": {"$ref": "slack-event-api.schema.json#/$defs/SlackEventAckResponse"},
+    "WorkItemId": {
+      "type": "string",
+      "pattern": "^slack_work_item_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "ThreadId": {
+      "type": "string",
+      "pattern": "^slack_thread_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "MessageId": {
+      "type": "string",
+      "pattern": "^slack_message_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "MessageRevisionId": {
+      "type": "string",
+      "pattern": "^slack_revision_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "ParseId": {
+      "type": "string",
+      "pattern": "^slack_parse_[A-Za-z0-9_-]+$",
+      "maxLength": 128
+    },
+    "JobId": {"$ref": "slack-event-api.schema.json#/$defs/JobId"},
+    "Sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "SlackIntegrationStatusResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceId",
+        "appId",
+        "connectionStatus",
+        "ingressMode",
+        "callbackState",
+        "installedAt",
+        "lastEventAt",
+        "privateDefaultDeny",
+        "allowlistedPublicChannelCount",
+        "explicitlyAllowedPrivateChannelCount",
+        "resourceVersion",
+        "updatedAt"
+      ],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "appId": {"$ref": "#/$defs/AppId"},
+        "connectionStatus": {"type": "string", "enum": ["CONNECTED", "DEGRADED", "DISCONNECTED", "SETUP_REQUIRED"]},
+        "ingressMode": {"type": "string", "enum": ["HTTP_EVENTS", "SOCKET_MODE"]},
+        "callbackState": {"type": "string", "enum": ["VERIFIED", "PENDING", "FAILED", "NOT_APPLICABLE"]},
+        "installedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "lastEventAt": {"$ref": "#/$defs/NullableDateTime"},
+        "privateDefaultDeny": {"const": true},
+        "allowlistedPublicChannelCount": {"type": "integer", "minimum": 0},
+        "explicitlyAllowedPrivateChannelCount": {"type": "integer", "minimum": 0},
+        "resourceVersion": {"type": "integer", "minimum": 1},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Safe operational status only. Signing secret, bot/app token and authentication headers are never serialized."
+    },
+    "GetSlackIntegrationStatusResponse": {"$ref": "#/$defs/SlackIntegrationStatusResource"},
+    "SlackChannelAccessResource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workspaceId", "channelId", "channelName", "visibility", "collectionAllowed", "policySource", "appMembership", "updatedAt"],
+          "properties": {
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "channelId": {"$ref": "#/$defs/ChannelId"},
+            "channelName": {"$ref": "#/$defs/NullableNonBlankString"},
+            "visibility": {"const": "PUBLIC"},
+            "collectionAllowed": {"const": true},
+            "policySource": {"const": "PUBLIC_ALLOWLIST"},
+            "appMembership": {"const": "JOINED"},
+            "updatedAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workspaceId", "channelId", "channelName", "visibility", "collectionAllowed", "policySource", "appMembership", "updatedAt"],
+          "properties": {
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "channelId": {"$ref": "#/$defs/ChannelId"},
+            "channelName": {"$ref": "#/$defs/NullableNonBlankString"},
+            "visibility": {"const": "PUBLIC"},
+            "collectionAllowed": {"const": false},
+            "policySource": {"const": "PUBLIC_NOT_ALLOWLISTED"},
+            "appMembership": {"type": "string", "enum": ["JOINED", "NOT_JOINED", "UNKNOWN"]},
+            "updatedAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workspaceId", "channelId", "channelName", "visibility", "collectionAllowed", "policySource", "appMembership", "updatedAt"],
+          "properties": {
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "channelId": {"$ref": "#/$defs/ChannelId"},
+            "channelName": {"$ref": "#/$defs/NullableNonBlankString"},
+            "visibility": {"const": "PRIVATE"},
+            "collectionAllowed": {"const": true},
+            "policySource": {"const": "PRIVATE_EXPLICIT_ALLOW"},
+            "appMembership": {"const": "JOINED"},
+            "updatedAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workspaceId", "channelId", "channelName", "visibility", "collectionAllowed", "policySource", "appMembership", "updatedAt"],
+          "properties": {
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "channelId": {"$ref": "#/$defs/ChannelId"},
+            "channelName": {"$ref": "#/$defs/NullableNonBlankString"},
+            "visibility": {"const": "PRIVATE"},
+            "collectionAllowed": {"const": false},
+            "policySource": {"const": "PRIVATE_DEFAULT_DENY"},
+            "appMembership": {"type": "string", "enum": ["JOINED", "NOT_JOINED", "UNKNOWN"]},
+            "updatedAt": {"type": "string", "format": "date-time"}
+          }
+        }
+      ],
+      "description": "Private channels are denied unless explicitly confirmed and the app is joined; public channels also require allowlisting."
+    },
+    "PublicAllowlistChannelInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channelId", "visibility"],
+      "properties": {
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "visibility": {"const": "PUBLIC"}
+      }
+    },
+    "PrivateAllowlistChannelInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channelId", "visibility", "confirmSharedWithWholeTeam"],
+      "properties": {
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "visibility": {"const": "PRIVATE"},
+        "confirmSharedWithWholeTeam": {"const": true}
+      }
+    },
+    "SlackAllowlistChannelInput": {
+      "oneOf": [
+        {"$ref": "#/$defs/PublicAllowlistChannelInput"},
+        {"$ref": "#/$defs/PrivateAllowlistChannelInput"}
+      ]
+    },
+    "SlackAllowlistQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "visibilities", "decisions", "cursor", "limit"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "visibilities": {"type": "array", "uniqueItems": true, "maxItems": 2, "items": {"type": "string", "enum": ["PUBLIC", "PRIVATE"]}},
+        "decisions": {"type": "array", "uniqueItems": true, "maxItems": 2, "items": {"type": "string", "enum": ["ALLOW", "DENY"]}},
+        "cursor": {"$ref": "#/$defs/NullableCursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+      }
+    },
+    "SlackAllowlistPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/SlackChannelAccessResource"}},
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "UpdateSlackAllowlistRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "workspaceId", "expectedVersion", "channels"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "expectedVersion": {"type": "integer", "minimum": 1},
+        "channels": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/SlackAllowlistChannelInput"},
+          "description": "channelId values must be unique; semantic tests make this rule normative. Omitted private channels remain denied."
+        }
+      }
+    },
+    "UpdateSlackAllowlistResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "resourceVersion", "channels", "privateDefaultDeny", "updatedAt"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "resourceVersion": {"type": "integer", "minimum": 2},
+        "channels": {"type": "array", "maxItems": 500, "items": {"$ref": "#/$defs/SlackChannelAccessResource"}},
+        "privateDefaultDeny": {"const": true},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "SlackEventLogResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "eventId",
+        "workspaceId",
+        "channelId",
+        "ingressSource",
+        "payloadSha256",
+        "credentialFieldsRedacted",
+        "normalizedEvent",
+        "deliveryOutcome",
+        "processingState",
+        "duplicateOfEventLogId",
+        "receivedAt",
+        "processedAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/EventLogId"},
+        "eventId": {"$ref": "#/$defs/SlackEventId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "ingressSource": {"type": "string", "enum": ["HTTP_EVENTS", "SOCKET_MODE", "THREAD_RESYNC"]},
+        "payloadSha256": {"$ref": "#/$defs/Sha256"},
+        "credentialFieldsRedacted": {"const": true},
+        "normalizedEvent": {"$ref": "slack-event-api.schema.json#/$defs/NormalizedSlackMessageEvent"},
+        "deliveryOutcome": {"type": "string", "enum": ["ACCEPTED", "DUPLICATE_EVENT_ID", "DUPLICATE_MESSAGE_IDENTITY"]},
+        "processingState": {"type": "string", "enum": ["RECEIVED", "PROCESSED", "FAILED_RETRYABLE", "DEAD"]},
+        "duplicateOfEventLogId": {
+          "oneOf": [
+            {"$ref": "#/$defs/EventLogId"},
+            {"type": "null"}
+          ]
+        },
+        "receivedAt": {"type": "string", "format": "date-time"},
+        "processedAt": {"$ref": "#/$defs/NullableDateTime"}
+      },
+      "description": "The immutable event ledger exposes a digest and credential-redacted normalized data, never the ingress token, signing secret or authorization headers."
+    },
+    "SlackWorkItemResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "workspaceId", "channelId", "rootMessageTs", "threadId", "status", "latestParseId", "createdAt", "updatedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/WorkItemId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "rootMessageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "threadId": {"$ref": "#/$defs/ThreadId"},
+        "status": {"type": "string", "enum": ["ACTIVE", "ROOT_PENDING", "DELETED", "ARCHIVED"]},
+        "latestParseId": {
+          "oneOf": [
+            {"$ref": "#/$defs/ParseId"},
+            {"type": "null"}
+          ]
+        },
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "SlackThreadResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "workItemId", "rootMessageTs", "rootResolved", "messageCount", "latestChangedAt", "lastSyncedAt", "syncCursor", "parseState"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ThreadId"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "rootMessageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "rootResolved": {"type": "boolean"},
+        "messageCount": {"type": "integer", "minimum": 1},
+        "latestChangedAt": {"type": "string", "format": "date-time"},
+        "lastSyncedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "syncCursor": {"$ref": "#/$defs/NullableCursor"},
+        "parseState": {"type": "string", "enum": ["PENDING", "QUIET_WINDOW", "READY", "COMPLETE", "NEEDS_INPUT", "FAILED"]}
+      }
+    },
+    "SlackMessageResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "threadId", "workspaceId", "channelId", "messageTs", "threadTs", "position", "currentRevisionId", "revisionCount", "deleted", "firstObservedAt", "latestChangedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/MessageId"},
+        "threadId": {"$ref": "#/$defs/ThreadId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "messageTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "threadTs": {"$ref": "#/$defs/SlackTimestamp"},
+        "position": {"type": "string", "enum": ["ROOT", "REPLY"]},
+        "currentRevisionId": {"$ref": "#/$defs/MessageRevisionId"},
+        "revisionCount": {"type": "integer", "minimum": 1},
+        "deleted": {"type": "boolean"},
+        "firstObservedAt": {"type": "string", "format": "date-time"},
+        "latestChangedAt": {"type": "string", "format": "date-time"}
+      },
+      "description": "Identity is workspaceId + channelId + messageTs. Root identity additionally has threadTs equal to messageTs."
+    },
+    "SlackMessageRevisionResource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "messageId", "revision", "kind", "body", "authorId", "sourceEventId", "sourceEventTime", "occurredAt", "observedAt", "previousRevisionId"],
+          "properties": {
+            "id": {"$ref": "#/$defs/MessageRevisionId"},
+            "messageId": {"$ref": "#/$defs/MessageId"},
+            "revision": {"type": "integer", "minimum": 1},
+            "kind": {"type": "string", "enum": ["CREATED", "EDITED"]},
+            "body": {"type": "string", "maxLength": 20000},
+            "authorId": {"$ref": "#/$defs/UserId"},
+            "sourceEventId": {"$ref": "#/$defs/SlackEventId"},
+            "sourceEventTime": {"type": "integer", "minimum": 0},
+            "occurredAt": {"type": "string", "format": "date-time"},
+            "observedAt": {"type": "string", "format": "date-time"},
+            "previousRevisionId": {
+              "oneOf": [
+                {"$ref": "#/$defs/MessageRevisionId"},
+                {"type": "null"}
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "messageId", "revision", "kind", "body", "authorId", "sourceEventId", "sourceEventTime", "occurredAt", "observedAt", "previousRevisionId"],
+          "properties": {
+            "id": {"$ref": "#/$defs/MessageRevisionId"},
+            "messageId": {"$ref": "#/$defs/MessageId"},
+            "revision": {"type": "integer", "minimum": 1},
+            "kind": {"const": "DELETED"},
+            "body": {"type": "null"},
+            "authorId": {
+              "oneOf": [
+                {"$ref": "#/$defs/UserId"},
+                {"type": "null"}
+              ]
+            },
+            "sourceEventId": {"$ref": "#/$defs/SlackEventId"},
+            "sourceEventTime": {"type": "integer", "minimum": 0},
+            "occurredAt": {"type": "string", "format": "date-time"},
+            "observedAt": {"type": "string", "format": "date-time"},
+            "previousRevisionId": {"$ref": "#/$defs/MessageRevisionId"}
+          }
+        }
+      ],
+      "description": "Append-only revision. The current view is selected by occurredAt/sourceEventTime, not arrival order; old bodies are never overwritten."
+    },
+    "SlackParseResourceBase": {
+      "type": "object",
+      "required": ["id", "workItemId", "status", "result", "openQuestions", "sourceRevisionIds", "createdAt", "completedAt", "errorCode"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ParseId"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "status": {"type": "string", "enum": ["PENDING", "COMPLETE", "NEEDS_INPUT", "FAILED"]},
+        "result": {
+          "oneOf": [
+            {"$ref": "../slack-work-item-parse-result.schema.json"},
+            {"type": "null"}
+          ]
+        },
+        "openQuestions": {"type": "array", "maxItems": 20, "uniqueItems": true, "items": {"$ref": "#/$defs/NonBlankString"}},
+        "sourceRevisionIds": {"type": "array", "minItems": 1, "maxItems": 500, "uniqueItems": true, "items": {"$ref": "#/$defs/MessageRevisionId"}},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"},
+        "errorCode": {"$ref": "#/$defs/NullableNonBlankString"}
+      }
+    },
+    "SlackParseResource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "unevaluatedProperties": false,
+          "allOf": [
+            {"$ref": "#/$defs/SlackParseResourceBase"},
+            {"type": "object", "properties": {"status": {"const": "PENDING"}, "result": {"type": "null"}, "openQuestions": {"type": "array", "maxItems": 0}, "completedAt": {"type": "null"}, "errorCode": {"type": "null"}}}
+          ]
+        },
+        {
+          "type": "object",
+          "unevaluatedProperties": false,
+          "allOf": [
+            {"$ref": "#/$defs/SlackParseResourceBase"},
+            {"type": "object", "properties": {"status": {"type": "string", "enum": ["COMPLETE", "NEEDS_INPUT"]}, "result": {"$ref": "../slack-work-item-parse-result.schema.json"}, "completedAt": {"type": "string", "format": "date-time"}, "errorCode": {"type": "null"}}}
+          ]
+        },
+        {
+          "type": "object",
+          "unevaluatedProperties": false,
+          "allOf": [
+            {"$ref": "#/$defs/SlackParseResourceBase"},
+            {"type": "object", "properties": {"status": {"const": "FAILED"}, "result": {"type": "null"}, "completedAt": {"type": "string", "format": "date-time"}, "errorCode": {"$ref": "#/$defs/NonBlankString"}}}
+          ]
+        }
+      ],
+      "description": "The four observed fields live in result. A field named in missingFields must be absent and every other observed field must be present, as enforced by the referenced parse-result schema."
+    },
+    "GetSlackWorkItemResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workItem", "thread", "messages", "revisions", "parse"],
+      "properties": {
+        "workItem": {"$ref": "#/$defs/SlackWorkItemResource"},
+        "thread": {"$ref": "#/$defs/SlackThreadResource"},
+        "messages": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/SlackMessageResource"}},
+        "revisions": {"type": "array", "minItems": 1, "maxItems": 2000, "items": {"$ref": "#/$defs/SlackMessageRevisionResource"}},
+        "parse": {
+          "oneOf": [
+            {"$ref": "#/$defs/SlackParseResource"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "description": "Chronological conversation view. messages sort by messageTs; revisions sort by occurredAt then sourceEventTime, independent of delivery order."
+    },
+    "SlackWorkItemListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "channelIds", "statuses", "parseStatuses", "updatedFrom", "updatedTo", "cursor", "limit"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelIds": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/ChannelId"}},
+        "statuses": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["ACTIVE", "ROOT_PENDING", "DELETED", "ARCHIVED"]}},
+        "parseStatuses": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["PENDING", "COMPLETE", "NEEDS_INPUT", "FAILED"]}},
+        "updatedFrom": {"$ref": "#/$defs/NullableDateTime"},
+        "updatedTo": {"$ref": "#/$defs/NullableDateTime"},
+        "cursor": {"$ref": "#/$defs/NullableCursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+      }
+    },
+    "SlackWorkItemPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/SlackWorkItemResource"}},
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "SlackEventLogListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "channelIds", "eventIds", "actions", "deliveryOutcomes", "processingStates", "receivedFrom", "receivedTo", "cursor", "limit"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelIds": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/ChannelId"}},
+        "eventIds": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/SlackEventId"}},
+        "actions": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["ROOT", "REPLY", "EDIT", "DELETE"]}},
+        "deliveryOutcomes": {"type": "array", "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "enum": ["ACCEPTED", "DUPLICATE_EVENT_ID", "DUPLICATE_MESSAGE_IDENTITY"]}},
+        "processingStates": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["RECEIVED", "PROCESSED", "FAILED_RETRYABLE", "DEAD"]}},
+        "receivedFrom": {"$ref": "#/$defs/NullableDateTime"},
+        "receivedTo": {"$ref": "#/$defs/NullableDateTime"},
+        "cursor": {"$ref": "#/$defs/NullableCursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+      },
+      "description": "Cursor is bound to the normalized filter tuple; changing filters requires a fresh null cursor."
+    },
+    "SlackEventLogPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/SlackEventLogResource"}},
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "ThreadSyncRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["idempotencyKey", "workspaceId", "mode", "threadIds", "sinceCursor"],
+          "properties": {
+            "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "mode": {"const": "INCREMENTAL"},
+            "threadIds": {"type": "array", "minItems": 1, "maxItems": 200, "uniqueItems": true, "items": {"$ref": "#/$defs/ThreadId"}},
+            "sinceCursor": {"$ref": "#/$defs/NullableCursor"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["idempotencyKey", "workspaceId", "mode", "lookbackDays"],
+          "properties": {
+            "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+            "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+            "mode": {"const": "RECENT_RESYNC"},
+            "lookbackDays": {"type": "integer", "minimum": 1, "maximum": 90}
+          }
+        }
+      ]
+    },
+    "ThreadSyncResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["syncId", "mode", "threadsScanned", "messagesObserved", "revisionsInserted", "duplicateRevisions", "missingRepliesRecovered", "nextCursor", "startedAt", "completedAt"],
+      "properties": {
+        "syncId": {"type": "string", "pattern": "^slack_sync_[A-Za-z0-9_-]+$", "maxLength": 128},
+        "mode": {"type": "string", "enum": ["INCREMENTAL", "RECENT_RESYNC"]},
+        "threadsScanned": {"type": "integer", "minimum": 0},
+        "messagesObserved": {"type": "integer", "minimum": 0},
+        "revisionsInserted": {"type": "integer", "minimum": 0},
+        "duplicateRevisions": {"type": "integer", "minimum": 0},
+        "missingRepliesRecovered": {"type": "integer", "minimum": 0},
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"},
+        "startedAt": {"type": "string", "format": "date-time"},
+        "completedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "RetryStateResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt", "maxAttempts", "reason", "lastHttpStatus", "retryAfterSeconds", "nextAttemptAt", "lastErrorCode", "lastErrorMessage"],
+      "properties": {
+        "attempt": {"type": "integer", "minimum": 1},
+        "maxAttempts": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "enum": ["RATE_LIMIT", "TRANSIENT_UPSTREAM", "TIMEOUT", "INTERNAL_ERROR"]},
+        "lastHttpStatus": {
+          "oneOf": [
+            {"type": "integer", "minimum": 100, "maximum": 599},
+            {"type": "null"}
+          ]
+        },
+        "retryAfterSeconds": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1, "maximum": 86400},
+            {"type": "null"}
+          ]
+        },
+        "nextAttemptAt": {"$ref": "#/$defs/NullableDateTime"},
+        "lastErrorCode": {"$ref": "#/$defs/NonBlankString"},
+        "lastErrorMessage": {"$ref": "#/$defs/NonBlankString"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "required": ["reason"], "properties": {"reason": {"const": "RATE_LIMIT"}}},
+          "then": {"type": "object", "required": ["lastHttpStatus", "retryAfterSeconds"], "properties": {"lastHttpStatus": {"const": 429}, "retryAfterSeconds": {"type": "integer", "minimum": 1, "maximum": 86400}}}
+        }
+      ]
+    },
+    "JobBase": {
+      "type": "object",
+      "required": ["id", "workspaceId", "channelId", "workItemId", "jobType", "state", "attempt", "maxAttempts", "runAfter", "retry", "createdAt", "updatedAt", "completedAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/JobId"},
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelId": {"$ref": "#/$defs/ChannelId"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "jobType": {"type": "string", "enum": ["QUIET_WINDOW_PARSE", "THREAD_INCREMENTAL_SYNC", "THREAD_RECENT_RESYNC"]},
+        "state": {"type": "string", "enum": ["PENDING", "RUNNING", "RETRY_WAIT", "SUCCEEDED", "DEAD", "CANCELLED"]},
+        "attempt": {"type": "integer", "minimum": 0},
+        "maxAttempts": {"type": "integer", "minimum": 1},
+        "runAfter": {"$ref": "#/$defs/NullableDateTime"},
+        "retry": {
+          "oneOf": [
+            {"$ref": "#/$defs/RetryStateResource"},
+            {"type": "null"}
+          ]
+        },
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "completedAt": {"$ref": "#/$defs/NullableDateTime"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "required": ["state"], "properties": {"state": {"const": "RETRY_WAIT"}}},
+          "then": {"type": "object", "required": ["retry", "runAfter", "completedAt"], "properties": {"retry": {"$ref": "#/$defs/RetryStateResource"}, "runAfter": {"type": "string", "format": "date-time"}, "completedAt": {"type": "null"}}}
+        },
+        {
+          "if": {"type": "object", "required": ["state"], "properties": {"state": {"const": "DEAD"}}},
+          "then": {"type": "object", "required": ["retry", "runAfter", "completedAt"], "properties": {"retry": {"$ref": "#/$defs/RetryStateResource"}, "runAfter": {"type": "null"}, "completedAt": {"type": "string", "format": "date-time"}}}
+        },
+        {
+          "if": {"type": "object", "required": ["state"], "properties": {"state": {"type": "string", "enum": ["PENDING", "RUNNING", "SUCCEEDED", "CANCELLED"]}}},
+          "then": {"type": "object", "required": ["retry"], "properties": {"retry": {"type": "null"}}}
+        }
+      ]
+    },
+    "BackgroundJobResource": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/JobBase"},
+        {"type": "object", "properties": {"jobType": {"type": "string", "enum": ["THREAD_INCREMENTAL_SYNC", "THREAD_RECENT_RESYNC"]}}}
+      ]
+    },
+    "QuietWindowJobResource": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {"$ref": "#/$defs/JobBase"},
+        {
+          "type": "object",
+          "required": ["quietWindowSeconds", "lastThreadChangedAt", "generation", "sourceRevisionId"],
+          "properties": {
+            "jobType": {"const": "QUIET_WINDOW_PARSE"},
+            "quietWindowSeconds": {"type": "integer", "minimum": 60, "maximum": 3600, "default": 600},
+            "lastThreadChangedAt": {"type": "string", "format": "date-time"},
+            "generation": {"type": "integer", "minimum": 1},
+            "sourceRevisionId": {"$ref": "#/$defs/MessageRevisionId"}
+          }
+        }
+      ],
+      "description": "At most one active generation exists per work item. The default quiet window is 600 seconds after the latest thread change; a later revision reschedules instead of duplicating the job."
+    },
+    "SlackJobResource": {
+      "oneOf": [
+        {"$ref": "#/$defs/BackgroundJobResource"},
+        {"$ref": "#/$defs/QuietWindowJobResource"}
+      ]
+    },
+    "UpsertQuietWindowJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "workItemId", "lastThreadChangedAt", "quietWindowSeconds", "sourceRevisionId", "expectedGeneration"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "workItemId": {"$ref": "#/$defs/WorkItemId"},
+        "lastThreadChangedAt": {"type": "string", "format": "date-time"},
+        "quietWindowSeconds": {"type": "integer", "minimum": 60, "maximum": 3600, "default": 600},
+        "sourceRevisionId": {"$ref": "#/$defs/MessageRevisionId"},
+        "expectedGeneration": {"type": "integer", "minimum": 0}
+      }
+    },
+    "UpsertQuietWindowJobResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "job"],
+      "properties": {
+        "outcome": {"type": "string", "enum": ["CREATED", "RESCHEDULED", "UNCHANGED"]},
+        "job": {"$ref": "#/$defs/QuietWindowJobResource"}
+      }
+    },
+    "CancelQuietWindowJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotencyKey", "jobId", "expectedGeneration", "reason"],
+      "properties": {
+        "idempotencyKey": {"$ref": "#/$defs/IdempotencyKey"},
+        "jobId": {"$ref": "#/$defs/JobId"},
+        "expectedGeneration": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "enum": ["NEW_THREAD_ACTIVITY", "WORK_ITEM_DELETED", "MANUAL_CANCEL"]}
+      }
+    },
+    "CancelQuietWindowJobResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cancelled", "job"],
+      "properties": {
+        "cancelled": {"type": "boolean"},
+        "job": {"$ref": "#/$defs/QuietWindowJobResource"}
+      }
+    },
+    "SlackJobListQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "channelIds", "workItemIds", "jobTypes", "states", "failureReasons", "updatedFrom", "updatedTo", "cursor", "limit"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/WorkspaceId"},
+        "channelIds": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/ChannelId"}},
+        "workItemIds": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/WorkItemId"}},
+        "jobTypes": {"type": "array", "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "enum": ["QUIET_WINDOW_PARSE", "THREAD_INCREMENTAL_SYNC", "THREAD_RECENT_RESYNC"]}},
+        "states": {"type": "array", "maxItems": 6, "uniqueItems": true, "items": {"type": "string", "enum": ["PENDING", "RUNNING", "RETRY_WAIT", "SUCCEEDED", "DEAD", "CANCELLED"]}},
+        "failureReasons": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["RATE_LIMIT", "TRANSIENT_UPSTREAM", "TIMEOUT", "INTERNAL_ERROR"]}},
+        "updatedFrom": {"$ref": "#/$defs/NullableDateTime"},
+        "updatedTo": {"$ref": "#/$defs/NullableDateTime"},
+        "cursor": {"$ref": "#/$defs/NullableCursor"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+      },
+      "description": "RETRY_WAIT and DEAD are first-class filterable states. Cursor is bound to the normalized filter tuple."
+    },
+    "SlackJobPageResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "nextCursor"],
+      "properties": {
+        "items": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/SlackJobResource"}},
+        "nextCursor": {"$ref": "#/$defs/NullableCursor"}
+      }
+    },
+    "EventDeliveryReplayProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "deliveries", "eventLogIds", "workItemIds", "jobIds"],
+      "properties": {
+        "eventId": {"$ref": "#/$defs/SlackEventId"},
+        "deliveries": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attempt", "ack"],
+              "properties": {"attempt": {"const": 1}, "ack": {"$ref": "slack-event-api.schema.json#/$defs/AcceptedEventAck"}}
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attempt", "ack"],
+              "properties": {"attempt": {"const": 2}, "ack": {"$ref": "slack-event-api.schema.json#/$defs/DuplicateEventAck"}}
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attempt", "ack"],
+              "properties": {"attempt": {"const": 3}, "ack": {"$ref": "slack-event-api.schema.json#/$defs/DuplicateEventAck"}}
+            }
+          ],
+          "items": false
+        },
+        "eventLogIds": {"type": "array", "minItems": 1, "maxItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/EventLogId"}},
+        "workItemIds": {"type": "array", "minItems": 1, "maxItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/WorkItemId"}},
+        "jobIds": {"type": "array", "minItems": 1, "maxItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/JobId"}}
+      },
+      "description": "Normative three-delivery proof: exactly one event ledger row, work item and job survive identical event_id retries."
+    },
+    "MessageIdentityDedupProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["events", "acks", "revisionIds", "jobIds"],
+      "properties": {
+        "events": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "slack-event-api.schema.json#/$defs/NormalizedSlackMessageEvent"}},
+        "acks": {"type": "array", "minItems": 2, "maxItems": 2, "prefixItems": [{"$ref": "slack-event-api.schema.json#/$defs/AcceptedEventAck"}, {"$ref": "slack-event-api.schema.json#/$defs/DuplicateEventAck"}], "items": false},
+        "revisionIds": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/MessageRevisionId"}},
+        "jobIds": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/JobId"}}
+      },
+      "description": "Different event_id values with the same workspace/channel/message timestamp identity still create one revision and one job."
+    },
+    "ReplyBeforeRootProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arrivalEvents", "workItem", "thread", "messages"],
+      "properties": {
+        "arrivalEvents": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {"$ref": "slack-event-api.schema.json#/$defs/NormalizedReplyMessageEvent"},
+            {"$ref": "slack-event-api.schema.json#/$defs/NormalizedRootMessageEvent"}
+          ],
+          "items": false
+        },
+        "workItem": {"$ref": "#/$defs/SlackWorkItemResource"},
+        "thread": {"$ref": "#/$defs/SlackThreadResource"},
+        "messages": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/SlackMessageResource"}}
+      }
+    },
+    "ReversedMutationOrderProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arrivalEvents", "message", "chronologicalRevisions"],
+      "properties": {
+        "arrivalEvents": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {"$ref": "slack-event-api.schema.json#/$defs/NormalizedDeleteMessageEvent"},
+            {"$ref": "slack-event-api.schema.json#/$defs/NormalizedEditMessageEvent"}
+          ],
+          "items": false
+        },
+        "message": {"$ref": "#/$defs/SlackMessageResource"},
+        "chronologicalRevisions": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/SlackMessageRevisionResource"}}
+      },
+      "description": "DELETE may arrive before EDIT, but revision numbers and current deletion state follow event chronology rather than delivery order."
+    }
+  }
+}

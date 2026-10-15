@@ -1,0 +1,58 @@
+# Replace the request URL with the public exact-path ingress before importing.
+# This default grants public-channel collection and invited-thread replies only. Private
+# channel scopes and events require a later, explicit policy decision and are
+# intentionally absent here.
+_metadata:
+  major_version: 1
+  minor_version: 2
+display_information:
+  name: TC Slack Ingestion
+  description: Collect allowlisted public-channel work items and threads
+  background_color: "#27324A"
+features:
+  bot_user:
+    display_name: TC Ingestion
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - channels:history
+      - chat:write
+metadata_events:
+  tc_generation_terminal_notification_v1:
+    title: TC generation terminal notification
+    description: Correlates one sanitized automatic-generation thread reply
+    type: object
+    additionalProperties: false
+    required:
+      - notification_id
+      - generation_job_id
+      - outcome
+      - contract_version
+    properties:
+      notification_id:
+        type: string
+      generation_job_id:
+        type: string
+      outcome:
+        type: string
+        enum:
+          - SUCCESS_APPLIED
+          - SUCCESS_SUGGESTIONS
+          - FAILURE
+      contract_version:
+        type: string
+        enum:
+          - 1.0.0
+settings:
+  event_subscriptions:
+    request_url: https://replace-me.invalid/integrations/slack/events
+    bot_events:
+      - message.channels
+  interactivity:
+    is_enabled: false
+  org_deploy_enabled: false
+  # HTTP is the import default. For a Socket Mode installation, enable Socket
+  # Mode in Slack App Settings and generate an app-level token with
+  # connections:write; the runtime still selects exactly one receiver.
+  socket_mode_enabled: false

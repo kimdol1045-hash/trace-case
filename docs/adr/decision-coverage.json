@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 2,
+  "source": "../test-management-development-spec.md",
+  "decisions": [
+    {
+      "id": "monorepo-runtime-boundaries",
+      "summary": "Monorepo와 Web/API/Worker/Scheduler runtime 경계",
+      "canonicalAdr": "0001",
+      "specSections": ["3. 시스템 구성", "3.1 실행 컴포넌트", "3.2 권장 저장소 구조", "4. 기술 스택"]
+    },
+    {
+      "id": "postgresql-system-of-record",
+      "summary": "PostgreSQL 16 단일 업무 원장과 관계형 무결성",
+      "canonicalAdr": "0002",
+      "specSections": ["2. 확정 구현 원칙", "6. 데이터베이스 상세 설계", "20. 백업과 복구"]
+    },
+    {
+      "id": "pgvector-placement",
+      "summary": "pgvector를 PostgreSQL에 공동 배치하고 dimension을 version과 고정",
+      "canonicalAdr": "0003",
+      "specSections": ["4. 기술 스택", "6.3 검색 인덱스", "12.4 hybrid retrieval"]
+    },
+    {
+      "id": "postgresql-job-queue",
+      "summary": "PostgreSQL background_jobs와 Redis 제외",
+      "canonicalAdr": "0004",
+      "specSections": ["2. 확정 구현 원칙", "9.2 PostgreSQL 작업 큐"]
+    },
+    {
+      "id": "transactional-outbox",
+      "summary": "업무 원장과 projection event의 transactional outbox",
+      "canonicalAdr": "0005",
+      "specSections": ["9.1 원장 변경과 outbox", "16. 성능과 안정성"]
+    },
+    {
+      "id": "private-network-slack-ingress",
+      "summary": "무로그인 내부망 경계와 Slack HTTP/Socket 단일 ingress mode",
+      "canonicalAdr": "0006",
+      "specSections": ["2. 확정 구현 원칙", "10. Slack 연동 상세", "15. 보안 설계"]
+    },
+    {
+      "id": "r2-direct-private-attachment-storage",
+      "summary": "Cloudflare R2 direct private binary 저장과 local MinIO 호환",
+      "canonicalAdr": "0017",
+      "specSections": ["11. R2 비공개 첨부 구현", "20. 백업과 복구"],
+      "implementationEvidence": [
+        "../../backend/migrations/versions/20260824_0011_object_storage_attachments.py",
+        "../../backend/src/tc_backend/infrastructure/object_storage/adapter.py",
+        "../../apps/api/src/tc_api/routers/object_storage.py",
+        "../../packages/api-client/src/client.ts"
+      ]
+    },
+    {
+      "id": "typed-ontology-ledger",
+      "summary": "PostgreSQL typed ontology를 authoritative knowledge ledger로 사용",
+      "canonicalAdr": "0008",
+      "specSections": ["12. 온톨로지와 LightRAG", "12.2 schema v1", "12.3 projection 파이프라인"]
+    },
+    {
+      "id": "lightrag-derived-index",
+      "summary": "LightRAG를 재생성 가능한 보조 index로 제한하고 fallback 유지",
+      "canonicalAdr": "0009",
+      "specSections": ["12. 온톨로지와 LightRAG", "12.4 hybrid retrieval"]
+    },
+    {
+      "id": "provider-neutral-generation-api",
+      "summary": "수동 생성을 기본으로 하고 provider-neutral Generation API를 후속 연결",
+      "canonicalAdr": "0015",
+      "specSections": ["2. 확정 구현 원칙", "13. 자동 생성 API 연동", "16. 성능과 안정성"]
+    },
+    {
+      "id": "contract-first-json-schema",
+      "summary": "JSON Schema enum/payload 원본과 OpenAPI TypeScript client drift gate",
+      "canonicalAdr": "0011",
+      "specSections": ["3.2 권장 저장소 구조", "8. REST API 구현 규약", "13.2 Generation API 출력 계약", "18. 테스트 전략"]
+    },
+    {
+      "id": "immutable-case-cycle-snapshots",
+      "summary": "불변 case version, cycle pin, append-only execution attempt",
+      "canonicalAdr": "0012",
+      "specSections": ["2. 확정 구현 원칙", "6.2 핵심 테이블과 제약", "7. 상태와 핵심 도메인 규칙"],
+      "contractSchemas": [
+        "../../packages/contracts/sprint-3/cycle-execution-api.schema.json",
+        "../../packages/contracts/sprint-3/error-contract.schema.json"
+      ],
+      "implementationEvidence": [
+        "../../backend/migrations/versions/20260820_0004_case_library_ledger.py",
+        "../../backend/migrations/versions/20260820_0005_cycle_execution_ledger.py",
+        "../../backend/src/tc_backend/db/cycles.py",
+        "../../backend/tests/repository/test_cycles_postgresql.py",
+        "../../apps/api/tests/test_sprint3_cycles_postgresql.py",
+        "../sprint-3/sprint-3-report.md"
+      ]
+    },
+    {
+      "id": "postgresql-adjacency-list-folder-hierarchy",
+      "summary": "PostgreSQL adjacency list 기반 folder tree, move, uniqueness, alias, count, lifecycle과 system folder 보호",
+      "canonicalAdr": "0013",
+      "specSections": [
+        "4. 기술 스택",
+        "6.2 핵심 테이블과 제약",
+        "6.3 검색 인덱스",
+        "8.2 API 묶음",
+        "13.3 수신 검증과 저장",
+        "14.1 UX 공통 규칙",
+        "18.2 출시 차단 회귀 시나리오"
+      ],
+      "contractSchemas": [
+        "../../packages/contracts/sprint-1/folder-tree.schema.json",
+        "../../packages/contracts/sprint-1/folder-mutation.schema.json",
+        "../../packages/contracts/sprint-1/error-contract.schema.json"
+      ],
+      "implementationEvidence": [
+        "../../backend/migrations/versions/20260820_0003_workspace_folders_audit.py",
+        "../../backend/src/tc_backend/db/folders.py",
+        "../../backend/tests/repository/test_workspace_folders_postgresql.py",
+        "../../apps/api/tests/test_sprint1_api_postgresql.py",
+        "../sprint-1/sprint-1-report.md"
+      ]
+    },
+    {
+      "id": "workspace-key-allocation-append-only-audit-transaction",
+      "summary": "workspace-scoped public key counter, aggregate와 append-only audit의 단일 transaction boundary",
+      "canonicalAdr": "0014",
+      "specSections": ["5. 도메인 모듈", "6.1 공통 규칙", "6.2 핵심 테이블과 제약", "8.1 공통 계약", "15. 보안 설계"],
+      "contractSchemas": [
+        "../../packages/contracts/sprint-1/workspace.schema.json",
+        "../../packages/contracts/sprint-1/audit.schema.json",
+        "../../packages/contracts/sprint-1/error-contract.schema.json"
+      ],
+      "implementationEvidence": [
+        "../../backend/migrations/versions/20260820_0003_workspace_folders_audit.py",
+        "../../backend/src/tc_backend/db/workspaces.py",
+        "../../backend/src/tc_backend/db/audit.py",
+        "../../apps/api/src/tc_api/idempotency.py",
+        "../../backend/tests/repository/test_workspace_folders_postgresql.py",
+        "../../apps/api/tests/test_sprint1_api_postgresql.py",
+        "../sprint-1/sprint-1-report.md"
+      ]
+    },
+    {
+      "id": "flat-category-work-items-start-gated-cycles",
+      "summary": "평면 category→work item→case ownership과 work item/label scope의 시작 게이트 cycle",
+      "canonicalAdr": "0016",
+      "specSections": ["1. 개발 목표와 범위", "2. 확정 구현 원칙", "7.2 사이클과 실행", "14. 프론트엔드 구현 범위", "14.1 UX 공통 규칙"],
+      "contractSchemas": [
+        "../../packages/contracts/sprint-3/cycle-execution-api.schema.json",
+        "../../packages/contracts/sprint-3/error-contract.schema.json"
+      ],
+      "implementationEvidence": [
+        "../../backend/migrations/versions/20260820_0005_cycle_execution_ledger.py",
+        "../../backend/src/tc_backend/db/cycles.py",
+        "../../backend/tests/repository/test_cycles_postgresql.py",
+        "../../apps/api/src/tc_api/routers/cycles.py",
+        "../../apps/api/tests/test_sprint3_cycles_postgresql.py",
+        "../../apps/web/src/folder-library-page.tsx",
+        "../../apps/web/src/work-item-detail-page.tsx",
+        "../../apps/web/src/test-case-detail-page.tsx",
+        "../../apps/web/src/cycle-workspace-page.tsx",
+        "../../apps/web/src/workspace-ui.test.tsx",
+        "../../apps/web/src/app.test.tsx",
+        "../sprint-3/sprint-3-report.md"
+      ]
+    }
+  ]
+}

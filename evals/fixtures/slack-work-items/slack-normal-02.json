@@ -1,0 +1,65 @@
+{
+  "fixtureId": "slack-normal-02",
+  "synthetic": true,
+  "category": "NORMAL",
+  "description": "주문 취소 가능 상태를 thread에서 확정한 정상 사례",
+  "source": {
+    "workspaceId": "T_SYNTHETIC",
+    "channelId": "C_SYNTHETIC",
+    "root": {
+      "messageTs": "1787194800.000002",
+      "messageRevisionId": "rev_n02_root",
+      "authorId": "U_SYN_003",
+      "body": "개발건: 주문 취소 조건 정리\n요청 메뉴: 주문 > 취소·환불\n기능 설명: 고객이 주문 상세에서 주문을 취소한다.\n요청내용: 배송 시작 전까지만 취소 버튼을 노출한다.",
+      "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787194800000002",
+      "revision": 1
+    },
+    "thread": [
+      {
+        "messageTs": "1787194860.000002",
+        "messageRevisionId": "rev_n02_reply_01",
+        "authorId": "U_SYN_004",
+        "body": "주문 상태가 결제완료일 때만 취소 가능으로 확정합니다.",
+        "permalink": "https://synthetic.invalid/archives/C_SYNTHETIC/p1787194860000002",
+        "revision": 1
+      }
+    ]
+  },
+  "expected": {
+    "parseResult": {
+      "developmentItem": "주문 취소 조건 정리",
+      "requestedMenu": "주문 > 취소·환불",
+      "featureDescription": "고객이 주문 상세에서 주문을 취소한다.",
+      "requestDetails": "배송 시작 전이며 주문 상태가 결제완료일 때만 취소 버튼을 노출한다.",
+      "missingFields": [],
+      "confidence": 0.97,
+      "sourceMessageRevisions": ["rev_n02_root", "rev_n02_reply_01"]
+    },
+    "knowledgeItems": [
+      {
+        "knowledgeId": "knowledge_n02_visibility",
+        "nodeType": "REQUIREMENT",
+        "content": "배송 시작 전까지만 취소 버튼을 노출한다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_n02_root"],
+        "supersedesKnowledgeIds": [],
+        "reason": "일감의 요청내용에 명시되어 있다."
+      },
+      {
+        "knowledgeId": "knowledge_n02_state",
+        "nodeType": "DECISION",
+        "content": "결제완료 상태의 주문만 취소할 수 있다.",
+        "status": "ACTIVE",
+        "evidenceSourceMessageRevisions": ["rev_n02_reply_01"],
+        "supersedesKnowledgeIds": [],
+        "reason": "thread에서 허용 상태를 확정했다."
+      }
+    ],
+    "generationContext": {
+      "shouldGenerate": true,
+      "activeKnowledgeIds": ["knowledge_n02_visibility", "knowledge_n02_state"],
+      "excludedKnowledgeIds": [],
+      "openQuestions": []
+    }
+  }
+}
