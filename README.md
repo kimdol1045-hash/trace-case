@@ -157,26 +157,30 @@ scripts/               검증, import, 평가, 복구·UAT 도구
 
 다만 이 결과는 운영 배포 완료를 의미하지 않습니다. 실제 Cloudflare R2, Slack workspace, 외부 생성 provider, 배포된 HTTPS origin, 담당 QA의 수동 판정과 production release gate는 아직 별도 검증이 필요합니다. 상세 증거는 [Wave 10 검증 보고서](./docs/phase-f/sprint-f1-wave10-verification.md)와 [독립 재검증 보고서](./docs/phase-f/sprint-f1-wave10-second-independent-verification.md)에 있습니다.
 
-GitHub Actions는 다음 두 job을 실행합니다.
+GitHub Actions는 일반 품질 게이트와 별도의 보안 게이트를 실행합니다.
 
 - `quality`: lint, typecheck, unit test, schema·ADR·runbook·OpenAPI drift, Web build
 - `migration`: PostgreSQL 16 + pgvector migration, repository·동시성 검사
+- `audit`: JavaScript·Python dependency audit, Bandit, 공개 저장소 비밀정보·개인 경로 검사
+- `codeql`: JavaScript/TypeScript와 Python 정적 보안 분석
+- 자동 생성 합성 회귀: 후보 생성과 버전 회귀 계약 검사(운영 품질 인증과는 별개)
 
-브랜치 보호를 적용할 때 두 job을 required status check로 지정해야 합니다.
+`main`은 위 CI·보안·합성 회귀 검사를 required status check로 사용합니다. 저장소 관리자는
+긴급 유지보수를 위해 우회할 수 있으므로 운영 변경은 여전히 pull request 검토를 원칙으로 합니다.
 
 ## 보안 검토 상태
 
-2026-10-15 공개 저장소 전환 시점에 추적 파일과 현재 잠금 버전을 다시 검사했습니다.
+2026-10-16 공개 저장소의 추적 파일, 잠금 버전과 GitHub 보호 설정을 다시 검사했습니다.
 
 | 검사 영역 | 현재 결과 | 남은 주의사항 |
 |---|---|---|
-| 저장소 비밀정보 | 현재 `main` 이력에서 실제 CSV, 사내 URL, 개인 로컬 경로와 확인된 credential을 제거했습니다. 추적 파일의 휴리스틱 탐지 결과는 합성 보안 테스트 문자열, 해시, 로컬 전용 예제 값으로 확인했습니다. | GitHub Secret Scanning과 Push Protection이 아직 꺼져 있습니다. 프로토타입에서 사용한 R2·Slack·모델 credential은 실제 배포 전에 전부 폐기·재발급해야 합니다. |
-| JavaScript 운영 의존성 | `react-router-dom`을 보안 수정 버전 `7.18.4`로 올렸고 `pnpm audit --prod` 결과 알려진 취약점 0건입니다. | Dependabot security update가 아직 꺼져 있으므로 지속적인 자동 갱신은 구성되지 않았습니다. |
-| Python 잠금 의존성 | FastAPI·Starlette·multidict·urllib3·pytest를 수정 버전으로 올렸고 `pip-audit -r backend/requirements.lock` 결과 알려진 취약점 0건입니다. | 새 advisory가 발표될 수 있으므로 CI 정기 검사가 필요합니다. |
+| 저장소 비밀정보 | 현재 `main` 이력에서 실제 CSV, 사내 URL, 개인 로컬 경로와 확인된 credential을 제거했습니다. GitHub Secret Scanning·Push Protection과 경로·형식 제한 저장소 검사가 활성화되어 있습니다. | 프로토타입에서 사용한 R2·Slack·모델 credential은 실제 배포 전에 전부 폐기·재발급해야 합니다. 합성 보안 fixture만 경로와 정확한 값이 일치할 때 허용합니다. |
+| JavaScript 운영 의존성 | `react-router-dom`을 보안 수정 버전 `7.18.4`로 올렸고 `pnpm audit --prod` 결과 알려진 취약점 0건입니다. Dependabot 보안 업데이트와 주간 npm 검사가 활성화되어 있습니다. | 자동 PR도 CI와 호환성 검토를 통과한 뒤 병합해야 합니다. |
+| Python 잠금 의존성 | FastAPI·Starlette·multidict·urllib3·pytest를 수정 버전으로 올렸고 `pip-audit -r backend/requirements.lock` 결과 알려진 취약점 0건입니다. CI와 Dependabot이 정기 검사합니다. | 새 advisory와 Python 잠금 파일 갱신 PR을 계속 검토해야 합니다. |
 | 운영 Python 코드 정적 분석 | API·Worker·공통 backend의 Bandit 검사에서 Medium·High 0건입니다. S3 XML 응답은 `defusedxml`로 변경해 entity expansion을 거부합니다. | `assert`, 고정 allowlist subprocess 같은 Low 휴리스틱 경고는 운영 전 재검토 대상입니다. |
 | 애플리케이션 접근 제어 | 외부 연동은 기본 비활성화이고 Slack 서명 검증, private object storage, 파일 크기·MIME·SHA·악성코드 fail-closed 경계를 구현했습니다. | 앱 로그인·RBAC가 없습니다. 실제 방화벽·VPN·TLS와 최소 공개 Slack ingress 검증 전에는 외부 배포가 안전하지 않습니다. |
 | 컨테이너 공급망 | 주요 개발 인프라 이미지는 버전을 고정했고 일부 검증 harness는 digest 또는 사전 승인 image ID를 요구합니다. | 개발 Compose와 CI의 모든 이미지가 digest로 고정된 것은 아니며 SBOM·컨테이너 CVE 검사가 CI에 없습니다. |
-| GitHub 저장소 보호 | 공개 이력은 민감 원본을 제외한 단일 정리 커밋에서 시작하고 CI 두 개가 통과합니다. | `main` branch protection, required checks, Secret Scanning, Push Protection과 Dependabot security update가 아직 비활성화 상태입니다. |
+| GitHub 저장소 보호 | 공개 이력은 민감 원본을 제외한 단일 정리 커밋에서 시작합니다. `main` 보호, required CI·보안 검사, Secret Scanning, Push Protection, Dependabot 보안 업데이트와 비공개 취약점 신고가 활성화되어 있습니다. | 관리자는 긴급 유지보수 시 보호 규칙을 우회할 수 있습니다. 외부 기여가 시작되면 승인 리뷰·CODEOWNERS·서명 커밋 정책을 추가 검토합니다. |
 
 보안 검사 결과는 해당 날짜의 알려진 advisory와 정적 분석 범위에 대한 결과이며 무결점 또는
 운영 보안 승인을 의미하지 않습니다. 운영 배포 전에는 최소한 다음 검사를 다시 실행해야 합니다.
@@ -185,6 +189,7 @@ GitHub Actions는 다음 두 job을 실행합니다.
 pnpm audit --prod --audit-level low
 pip-audit -r backend/requirements.lock
 bandit -r backend/src apps/api/src apps/worker/src
+pnpm test:security
 pnpm check
 ```
 
@@ -210,7 +215,7 @@ pnpm check
 - [ ] UI와 일반 API를 사내망/VPN으로 제한하고, Slack ingress만 TLS가 적용된 최소 경로로 공개한다.
 - [ ] 앱 자체 인증이 필요한 배포 범위라면 Google Workspace SSO 또는 동등한 인증과 역할 권한을 구현한다.
 - [ ] 프로토타입에서 사용한 R2·Slack·모델 credential을 폐기하고 secret manager에서 최소 권한으로 재발급한다.
-- [ ] GitHub `main` 보호, required CI, Secret Scanning, Push Protection과 Dependabot security update를 활성화한다.
+- [x] GitHub `main` 보호, required CI·보안 검사, Secret Scanning, Push Protection과 Dependabot security update를 활성화한다.
 - [ ] 배포 컨테이너 이미지를 digest로 고정하고 SBOM 생성·이미지 CVE 검사를 CI release gate에 연결한다.
 - [ ] 실제 Cloudflare R2 bucket의 exact HTTPS CORS와 다중 첨부 upload→preview/download→delete를 물리 브라우저에서 검증한다.
 - [ ] 별도 staging에서 PostgreSQL backup/restore, R2 object 복구, migration rollback/roll-forward와 LightRAG reindex/fallback을 시험한다.

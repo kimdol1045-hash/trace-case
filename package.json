@@ -32,6 +32,7 @@
     "test:phase-f": "node scripts/python.mjs -m pytest scripts/phase-f/tests scripts/tests/test_phase_f_load_profile.py -m not\\ postgres && node --test scripts/tests/phase-f-uat-browser-local.test.mjs",
     "test:schema": "node scripts/validate-contracts.mjs",
     "test:adr": "node scripts/validate-adrs.mjs",
+    "test:security": "node --test scripts/tests/scan-public-repository.test.mjs && node scripts/scan-public-repository.mjs",
     "test:operations": "node --test scripts/tests/validate-operations-runbook.test.mjs && node scripts/validate-operations-runbook.mjs",
     "test:screenshots": "node scripts/verify-phase-a-screenshots.mjs",
     "test:migration": "node scripts/python.mjs -m pytest backend/tests/repository -m postgres",
@@ -46,7 +47,7 @@
     "generation:quality:eval": "node scripts/python.mjs scripts/evaluate_automatic_generation_quality.py",
     "generation:version-regression:eval": "node scripts/python.mjs scripts/evaluate_automatic_generation_version_regression.py",
     "generation:quality:verify-artifacts": "node scripts/python.mjs scripts/verify_automatic_generation_quality_artifacts.py",
-    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:schema && pnpm test:adr && pnpm test:operations && pnpm openapi:check"
+    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:schema && pnpm test:adr && pnpm test:security && pnpm test:operations && pnpm openapi:check"
   },
   "devDependencies": {
     "@eslint/js": "9.34.0",
