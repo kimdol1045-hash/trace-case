@@ -44,7 +44,7 @@ jobs:
             --expected-sha256 "$report_digest"
           python -c 'import json; r=json.load(open("artifacts/version-regression.json")); assert r["synthetic"] and not r["approvalEligible"] and r["candidateDisposition"] == "CONTRACT_ONLY"'
       - if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: automatic-generation-version-regression-synthetic
           path: artifacts/
@@ -87,7 +87,7 @@ jobs:
             --validate-report artifacts/version-regression.json \
             --expected-sha256 "$report_digest"
       - if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: automatic-generation-version-regression-operational
           path: artifacts/
