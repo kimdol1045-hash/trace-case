@@ -65,7 +65,7 @@ PostgreSQL이 테스트 자산과 이력의 유일한 원장입니다. LightRAG�
 
 ## 처음 한 번 준비
 
-필수 도구는 Node.js 22+, pnpm 10+, Python 3.12+, Docker입니다.
+필수 도구는 Node.js 22.13+, pnpm 10+, Python 3.12+, Docker입니다.
 
 ```bash
 git clone https://github.com/kimdol1045-hash/trace-case.git
@@ -175,7 +175,7 @@ GitHub Actions는 일반 품질 게이트와 별도의 보안 게이트를 실�
 | 검사 영역 | 현재 결과 | 남은 주의사항 |
 |---|---|---|
 | 저장소 비밀정보 | 현재 `main` 이력에서 실제 CSV, 사내 URL, 개인 로컬 경로와 확인된 credential을 제거했습니다. GitHub Secret Scanning·Push Protection과 경로·형식 제한 저장소 검사가 활성화되어 있습니다. | 프로토타입에서 사용한 R2·Slack·모델 credential은 실제 배포 전에 전부 폐기·재발급해야 합니다. 합성 보안 fixture만 경로와 정확한 값이 일치할 때 허용합니다. |
-| JavaScript 운영 의존성 | `react-router-dom`을 보안 수정 버전 `7.18.4`로 올렸고 `pnpm audit --prod` 결과 알려진 취약점 0건입니다. Dependabot 보안 업데이트와 주간 npm 검사가 활성화되어 있습니다. | 자동 PR도 CI와 호환성 검토를 통과한 뒤 병합해야 합니다. |
+| JavaScript 의존성 | `react-router-dom` 7.18.4, Vite 7.3.7, Vitest 4.1.12, AJV 8.20.0, ESLint 10.12.0 등 보안 수정 버전을 반영했고 운영·개발 의존성 전체 `pnpm audit` 결과 알려진 취약점 0건입니다. Dependabot 보안 업데이트와 주간 npm 검사가 활성화되어 있습니다. | 자동 PR도 CI와 호환성 검토를 통과한 뒤 병합해야 합니다. |
 | Python 잠금 의존성 | FastAPI·Starlette·multidict·urllib3·pytest를 수정 버전으로 올렸고 `pip-audit -r backend/requirements.lock` 결과 알려진 취약점 0건입니다. CI와 Dependabot이 정기 검사합니다. | 새 advisory와 Python 잠금 파일 갱신 PR을 계속 검토해야 합니다. |
 | 운영 Python 코드 정적 분석 | API·Worker·공통 backend의 Bandit 검사에서 Medium·High 0건입니다. S3 XML 응답은 `defusedxml`로 변경해 entity expansion을 거부합니다. | `assert`, 고정 allowlist subprocess 같은 Low 휴리스틱 경고는 운영 전 재검토 대상입니다. |
 | 애플리케이션 접근 제어 | 외부 연동은 기본 비활성화이고 Slack 서명 검증, private object storage, 파일 크기·MIME·SHA·악성코드 fail-closed 경계를 구현했습니다. | 앱 로그인·RBAC가 없습니다. 실제 방화벽·VPN·TLS와 최소 공개 Slack ingress 검증 전에는 외부 배포가 안전하지 않습니다. |
@@ -186,7 +186,7 @@ GitHub Actions는 일반 품질 게이트와 별도의 보안 게이트를 실�
 운영 보안 승인을 의미하지 않습니다. 운영 배포 전에는 최소한 다음 검사를 다시 실행해야 합니다.
 
 ```bash
-pnpm audit --prod --audit-level low
+pnpm audit --audit-level low
 pip-audit -r backend/requirements.lock
 bandit -r backend/src apps/api/src apps/worker/src
 pnpm test:security

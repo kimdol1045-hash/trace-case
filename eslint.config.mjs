@@ -20,7 +20,11 @@ export default tseslint.config(
       },
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // Keep the established Hooks correctness boundary. Plugin 7 also bundles
+      // React Compiler advisory rules into `recommended`; enabling those requires
+      // a separate component-refactoring rollout rather than a security update.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-floating-promises": "error",
       "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }]

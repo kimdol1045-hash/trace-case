@@ -5,11 +5,13 @@
   "description": "Test-case management platform monorepo",
   "packageManager": "pnpm@10.28.2",
   "engines": {
-    "node": ">=22",
+    "node": ">=22.13",
     "pnpm": ">=10"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "scripts": {
     "setup": "pnpm install --frozen-lockfile && node scripts/python.mjs -m pip install -r backend/requirements.lock && node scripts/python.mjs -m pip install --no-deps -e backend -e apps/api -e apps/worker",
@@ -50,16 +52,16 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:schema && pnpm test:adr && pnpm test:security && pnpm test:operations && pnpm openapi:check"
   },
   "devDependencies": {
-    "@eslint/js": "9.34.0",
+    "@eslint/js": "10.0.1",
     "@playwright/test": "1.63.0",
-    "ajv": "8.17.1",
+    "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
-    "eslint": "9.34.0",
-    "eslint-plugin-react-hooks": "5.2.0",
-    "eslint-plugin-react-refresh": "0.4.20",
+    "eslint": "10.12.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
     "globals": "16.3.0",
     "typescript": "5.9.2",
-    "typescript-eslint": "8.41.0",
-    "vitest": "3.2.4"
+    "typescript-eslint": "8.71.2",
+    "vitest": "4.1.12"
   }
 }
