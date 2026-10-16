@@ -12,7 +12,7 @@ dependencies = [
   "asyncpg==0.31.0",
   "defusedxml>=0.7,<1",
   "httpx>=0.28,<1",
-  "lightrag-hku==1.5.6",
+  "lightrag-hku==1.5.7",
   "pgvector>=0.3,<1",
   "psycopg[binary]>=3.2,<4",
   "pydantic>=2.10,<3",
