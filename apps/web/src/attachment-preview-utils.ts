@@ -1,5 +1,7 @@
 type ObjectUrlApi = Pick<typeof URL, "createObjectURL" | "revokeObjectURL">;
 
+const IMAGE_PREVIEW_MIME_TYPES = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
+
 export type LoadAttachmentBlob = (attachmentId: string, signal: AbortSignal) => Promise<Blob>;
 
 export interface ObjectUrlLease {
@@ -8,7 +10,7 @@ export interface ObjectUrlLease {
 }
 
 export function isImageAttachmentMimeType(mimeType: string) {
-  return mimeType.startsWith("image/");
+  return IMAGE_PREVIEW_MIME_TYPES.has(mimeType.trim().toLocaleLowerCase());
 }
 
 export function isTextAttachmentPreview(filename: string, mimeType: string) {

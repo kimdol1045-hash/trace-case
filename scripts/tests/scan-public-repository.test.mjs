@@ -16,11 +16,11 @@ test("rejects personal home paths", () => {
 });
 
 test("allows only the exact synthetic redaction fixture at its declared path", () => {
-  const fixturePath = "apps/worker/tests/test_worker.py";
-  const allowed = ["AKIA", "1234567890ABCDEF"].join("");
-  const unexpected = ["AKIA", "ZZZZZZZZZZZZZZZZ"].join("");
+  const fixturePath = "backend/tests/unit/privacy/test_review_candidates.py";
+  const allowed = ["/Users/", "private/customer.txt"].join("");
+  const unexpected = ["/Users/", "someone/customer.txt"].join("");
   assert.deepEqual(scanTrackedContent(fixturePath, allowed), []);
-  assert.equal(scanTrackedContent(fixturePath, unexpected)[0]?.kind, "AWS_ACCESS_KEY_ID");
+  assert.equal(scanTrackedContent(fixturePath, unexpected)[0]?.kind, "MACOS_HOME_PATH");
 });
 
 test("rejects tracked secret containers and root source exports", () => {

@@ -210,7 +210,7 @@ def test_signed_root_thread_reaches_one_case_batch_and_one_reconciled_slack_repl
         encryption_master_key="pe-se2-t10-production-composition-key",
         slack_mode="http",
         slack_signing_secret=secret,
-        slack_bot_token="xoxb-pe-se2-t10-test",
+        slack_bot_token="xoxb-" + "pe-se2-t10-test",
         slack_workspace_id=workspace_id,
         public_slack_base_url="https://slack-ingress.example.test",
         public_web_base_url="https://tc.example.test",

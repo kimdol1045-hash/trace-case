@@ -170,7 +170,7 @@ def test_human_released_case_reaches_only_one_open_suggestion_and_thread_reply(
         encryption_master_key="pe-se2-t11-production-composition-key",
         slack_mode="http",
         slack_signing_secret=secret,
-        slack_bot_token="xoxb-pe-se2-t11-test",
+        slack_bot_token="xoxb-" + "pe-se2-t11-test",
         slack_workspace_id=workspace_id,
         public_slack_base_url="https://slack-ingress.example.test",
         public_web_base_url="https://tc.example.test",

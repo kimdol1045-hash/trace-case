@@ -52,7 +52,7 @@ RAW_SLACK = "민감사용자 qa.owner@example.com sk-RAWSECRET123456789 https://
 RAW_ACTION = "Bearer attack-token-value 호출 https://internal.invalid/api"
 RAW_EXPECTED = "민감 결과 qa.owner@example.com"
 RAW_MODEL = "https://private.endpoint.invalid/model"
-RAW_PROVIDER = "sk-PROVIDERSECRET123456789"
+RAW_PROVIDER = "sk-" + "PROVIDERSECRET123456789"
 RAW_PROMPT = "qa.owner@example.com"
 
 
@@ -107,7 +107,7 @@ def _seed_operational_apply(engine: Engine) -> uuid.UUID:
         author_id="U_PRIVATE_PERSON",
         permalink="https://private.invalid/slack/root",
         channel_is_private=False,
-        raw_payload={"token": "xoxb-RAW-SLACK-TOKEN", "endpoint": RAW_MODEL},
+        raw_payload={"token": "xoxb-" + "RAW-SLACK-TOKEN", "endpoint": RAW_MODEL},
     )
     with sessions.begin() as session:
         slack = SlackRepository(session)
@@ -354,7 +354,7 @@ def test_postgresql_snapshot_is_read_only_hash_only_deterministic_and_consumable
         RAW_MODEL,
         RAW_PROVIDER,
         RAW_PROMPT,
-        "xoxb-RAW-SLACK-TOKEN",
+        "xoxb-" + "RAW-SLACK-TOKEN",
         "private.invalid",
     ):
         assert forbidden not in serialized

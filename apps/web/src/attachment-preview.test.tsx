@@ -10,6 +10,7 @@ describe("attachment previews", () => {
   it("limits thumbnails to image MIME types", () => {
     expect(isImageAttachmentMimeType("image/png")).toBe(true);
     expect(isImageAttachmentMimeType("image/webp")).toBe(true);
+    expect(isImageAttachmentMimeType("image/svg+xml")).toBe(false);
     expect(isImageAttachmentMimeType("application/pdf")).toBe(false);
   });
 
@@ -135,6 +136,13 @@ describe("attachment previews", () => {
     expect(markup).toContain("login.png 크게 보기");
     expect(markup).toContain('aria-haspopup="dialog"');
     expect(markup).toContain('class="tm-attachment-preview is-ready"');
+  });
+
+  it("rejects non-object URLs before rendering an image sink", () => {
+    const markup = renderToStaticMarkup(<AttachmentImagePreview filename="unsafe.svg" url="javascript:alert(1)" />);
+
+    expect(markup).toContain("미리보기 주소가 올바르지 않습니다");
+    expect(markup).not.toContain("<img");
   });
 
   it("renders an accessible large-image dialog", () => {

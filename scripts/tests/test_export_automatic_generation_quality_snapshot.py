@@ -202,6 +202,7 @@ def test_render_fails_closed_if_any_endpoint_or_secret_is_injected() -> None:
     for injected in (
         "https://private.invalid/model",
         "Bearer leaked-token-value",
+        f"Bearer {' ' * 80}leaked-token-value",
         "qa.owner@example.com",
     ):
         value = _snapshot()

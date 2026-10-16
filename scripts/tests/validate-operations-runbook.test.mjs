@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { validateRunbook } from "../validate-operations-runbook.mjs";
+import { githubSlug, validateRunbook } from "../validate-operations-runbook.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const runbookPath = resolve(root, "deploy/operations/README.md");
@@ -13,6 +13,10 @@ const validMarkdown = await readFile(runbookPath, "utf8");
 async function errorsFor(markdown) {
   return validateRunbook({ markdown, runbookPath, root });
 }
+
+test("normalizes nested heading markup without leaving an executable tag", () => {
+  assert.equal(githubSlug("<<script>alert(1)</script> 안전"), "alert1-안전");
+});
 
 test("authoritative operations runbook satisfies the structural and safety contract", async () => {
   assert.deepEqual(await errorsFor(validMarkdown), []);

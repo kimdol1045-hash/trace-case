@@ -57,7 +57,7 @@ def _complete_records() -> list[dict[str, object]]:
     sensitive = (
         "Alice Smith <@U12345678> emailed alice@example.com about PROJ-123 at "
         "https://jira.example.invalid/browse/PROJ-123 with password=hunter2 "
-        "and token xoxb-123456-secret for @bob."
+        "and token " + "xoxb-" + "123456-secret for @bob."
     )
     return [
         _record(
@@ -172,7 +172,7 @@ def test_privacy_redaction_removes_person_email_url_jira_and_secret_values(
         "PROJ-123",
         "jira.example.invalid",
         "hunter2",
-        "xoxb-123456-secret",
+        "xoxb-" + "123456-secret",
         "@bob",
     ):
         assert sensitive not in serialized

@@ -101,7 +101,8 @@ _KR_MOBILE = re.compile(r"\b01[016789][- ]?\d{3,4}[- ]?\d{4}\b")
 _SECRET = re.compile(
     r"(?i)(?:\b(?:authorization|api[_-]?token|api[_-]?key|client[_-]?secret)\b|"
     r"xox[baprs]-[A-Za-z0-9-]{8,}|sk-[A-Za-z0-9_-]{12,}|"
-    r"(?:bearer|password|secret|api[_-]?key|auth[_-]?token)\s*[:= ]\s*\S+)"
+    r"(?:bearer|password|secret|api[_-]?key|auth[_-]?token)"
+    r"(?:[ \t]*[:=][ \t]*|[ \t]+)\S+)"
 )
 
 

@@ -559,7 +559,7 @@ async function exerciseCycleAndIssue(page, visit, ids, runId, fixturePaths, brow
 
 async function exerciseIssueLifecycle(page, visit, issueSummary, fixturePaths, receipts) {
   await visit("/issues", "Issues");
-  await page.getByRole("row", { name: new RegExp(issueSummary) }).click();
+  await page.getByRole("row").filter({ hasText: issueSummary }).click();
   await expect(page).toHaveURL(/\/issues\/ISSUE-\d+$/);
   await assertStablePage(page, "ISSUE-");
   const issuePath = new URL(page.url()).pathname;
@@ -599,7 +599,7 @@ async function exerciseIssueLifecycle(page, visit, issueSummary, fixturePaths, r
   await deleteDialog.getByRole("button", { name: "삭제", exact: true }).click();
   await expect(page).toHaveURL(/\/issues$/);
   await page.getByRole("tab", { name: "삭제됨" }).click();
-  await page.getByRole("row", { name: new RegExp(`${issueSummary} edited`) }).click();
+  await page.getByRole("row").filter({ hasText: `${issueSummary} edited` }).click();
   await expect(page.getByText("이 이슈는 읽기 전용입니다.")).toBeVisible();
   await expect(page.getByRole("button", { name: "완전 삭제" })).toBeVisible();
   await page.getByRole("button", { name: "완전 삭제", exact: true }).click();

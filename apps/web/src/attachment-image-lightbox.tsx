@@ -2,6 +2,14 @@ import { useEffect, useId, useState } from "react";
 
 import { useAccessibleDialog } from "./dialog-accessibility";
 
+function safeObjectUrl(value: string) {
+  try {
+    return new URL(value).protocol === "blob:" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AttachmentLightboxDialog({
   filename,
   url,
@@ -26,6 +34,8 @@ export function AttachmentLightboxDialog({
   }, [open]);
 
   if (!open) return null;
+  const safeUrl = safeObjectUrl(url);
+  if (safeUrl === null) return null;
 
   return (
     <div
@@ -52,7 +62,7 @@ export function AttachmentLightboxDialog({
           <button autoFocus className="tm-modal-close" type="button" aria-label="이미지 미리보기 닫기" onClick={onClose}>×</button>
         </header>
         <div className="tm-attachment-lightbox__canvas">
-          <img alt={`${filename} 확대 이미지`} src={url} />
+          <img alt={`${filename} 확대 이미지`} src={safeUrl} />
         </div>
       </section>
     </div>
@@ -61,6 +71,11 @@ export function AttachmentLightboxDialog({
 
 export function AttachmentImagePreview({ filename, url }: { filename: string; url: string }) {
   const [open, setOpen] = useState(false);
+  const safeUrl = safeObjectUrl(url);
+
+  if (safeUrl === null) {
+    return <span className="tm-attachment-preview is-error" role="img" aria-label={`${filename} 미리보기 주소가 올바르지 않습니다`}>!</span>;
+  }
 
   return (
     <>
@@ -71,9 +86,9 @@ export function AttachmentImagePreview({ filename, url }: { filename: string; ur
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
-        <img alt={`${filename} 미리보기`} src={url} />
+        <img alt={`${filename} 미리보기`} src={safeUrl} />
       </button>
-      <AttachmentLightboxDialog filename={filename} url={url} open={open} onClose={() => setOpen(false)} />
+      <AttachmentLightboxDialog filename={filename} url={safeUrl} open={open} onClose={() => setOpen(false)} />
     </>
   );
 }

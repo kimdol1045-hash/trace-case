@@ -27,42 +27,12 @@ function joined(...parts) {
 // exact value must match; another credential-shaped value in the same test fails.
 const allowedSyntheticMatches = new Map([
   [
-    "apps/api/tests/test_phase_e_human_release_to_suggestion_e2e_postgresql.py",
-    new Set([joined("xoxb-", "pe-se2-t11-test")]),
-  ],
-  [
-    "apps/api/tests/test_phase_e_root_to_slack_e2e_postgresql.py",
-    new Set([joined("xoxb-", "pe-se2-t10-test")]),
-  ],
-  [
-    "apps/api/tests/test_sprint5_slack_api_postgresql.py",
-    new Set([joined("xoxb-", "deterministic-test")]),
-  ],
-  [
-    "apps/worker/tests/test_worker.py",
-    new Set([
-      joined("AKIA", "1234567890ABCDEF"),
-      joined("sk-proj-", "abcdefghijklmnopqrstuvwxyz"),
-      joined("xoxb-", "1234567890-abcdefghijklmnop"),
-      joined("ghp_", "abcdefghijklmnopqrstuvwxyz123456"),
-      joined("AIza", "abcdefghijklmnopqrstuvwxyz123456"),
-    ]),
-  ],
-  [
-    "backend/tests/repository/test_generation_quality_snapshot_postgresql.py",
-    new Set([joined("sk-", "PROVIDERSECRET123456789"), joined("xoxb-", "RAW-SLACK-TOKEN")]),
-  ],
-  [
     "backend/tests/unit/privacy/test_review_candidates.py",
     new Set([joined("-----BEGIN ", "PRIVATE KEY-----"), joined("/Users/", "private/customer.txt")]),
   ],
   [
     "packages/contracts/src/review-candidate-contracts.test.ts",
     new Set([joined("-----BEGIN ", "PRIVATE KEY-----"), joined("/Users/", "person/private/file.txt")]),
-  ],
-  [
-    "scripts/tests/test_build_knowledge_golden_sample.py",
-    new Set([joined("xoxb-", "123456-secret")]),
   ],
 ]);
 

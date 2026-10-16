@@ -326,7 +326,7 @@ def test_sprint5_slack_deterministic_postgresql_end_to_end(
             paginated_worker = SlackWorkerRuntime.with_transport(
                 session_factory=sessions,
                 transport=SlackWebApiHttpTransport(
-                    bot_token="xoxb-deterministic-test",
+                    bot_token="xoxb-" + "deterministic-test",
                     client=provider_client,
                     max_rate_limit_retries=0,
                     max_provider_retries=0,

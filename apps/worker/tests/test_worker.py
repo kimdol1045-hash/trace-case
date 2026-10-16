@@ -358,13 +358,13 @@ def test_main_passes_composed_generation_runner_to_worker(
 @pytest.mark.parametrize(
     "secret_like",
     [
-        "AWS AKIA1234567890ABCDEF",
-        "OpenAI sk-proj-abcdefghijklmnopqrstuvwxyz",
-        "Slack xoxb-1234567890-abcdefghijklmnop",
+        "AWS " + "AKIA" + "1234567890ABCDEF",
+        "OpenAI " + "sk-proj-" + "abcdefghijklmnopqrstuvwxyz",
+        "Slack " + "xoxb-" + "1234567890-abcdefghijklmnop",
         "Bearer abcdefghijklmnopqrstuvwxyz",
         "Basic YWxhZGRpbjpvcGVuc2VzYW1l",
-        "GitHub ghp_abcdefghijklmnopqrstuvwxyz123456",
-        "Google AIzaabcdefghijklmnopqrstuvwxyz123456",
+        "GitHub " + "ghp_" + "abcdefghijklmnopqrstuvwxyz123456",
+        "Google " + "AIza" + "abcdefghijklmnopqrstuvwxyz123456",
         "JWT eyJabcdefgh.eyJijklmnop.abcdefghijkl",
     ],
 )

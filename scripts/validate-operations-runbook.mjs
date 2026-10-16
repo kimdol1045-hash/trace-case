@@ -85,11 +85,28 @@ const htmlSafetyEntities = Object.freeze({
   tab: "\t",
 });
 
-function githubSlug(heading) {
-  return heading
+function stripHtmlTags(value) {
+  let result = "";
+  let insideTag = false;
+  for (const character of value) {
+    if (character === "<") {
+      insideTag = true;
+    } else if (character === ">") {
+      insideTag = false;
+    } else if (!insideTag) {
+      result += character;
+    }
+  }
+  return result;
+}
+
+export function githubSlug(heading) {
+  const withoutTags = stripHtmlTags(heading
     .toLowerCase()
     .trim()
-    .replace(/<[^>]+>/g, "")
+    .replaceAll("\u0000", "")
+    .split("\n", 1)[0]);
+  return withoutTags
     .replace(/[`*_~]/g, "")
     .replace(/[^\p{Letter}\p{Number}\s_-]/gu, "")
     .replace(/\s/g, "-");
